@@ -1,0 +1,70 @@
+# Salon POS — Hostinger / Apache configuration
+
+Options -Indexes
+DirectoryIndex index.html
+
+# Force HTTPS
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} !=on
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# ---------------------------------------------------------------------
+# Block source code, database scripts and project metadata.
+# Only the built front-end (html, css, js, images, fonts) is public.
+# ---------------------------------------------------------------------
+RedirectMatch 404 (?i)/(supabase|src|node_modules|\.git|\.github)(/|$)
+RedirectMatch 404 (?i)\.(sql|md|log|env|ini|bak|old|orig|map|ts|tsx|scss|sass|less|json|lock|yml|yaml)$
+RedirectMatch 404 (?i)/(package(-lock)?\.json|tailwind\.config\.js|README(\.[a-z]+)?|LICENSE|\.htaccess|\.htpasswd|\.gitignore|robots\.txt\.bak)$
+
+<FilesMatch "(?i)^(\.|.*\.(sql|md|log|env|ini|bak|old|orig|map|ts|tsx|json|lock|yml|yaml|config\.js\.map))$">
+  Require all denied
+</FilesMatch>
+
+<FilesMatch "^(package\.json|package-lock\.json|tailwind\.config\.js|README.*|LICENSE.*|app\.js|i18n\.js)$">
+  Require all denied
+</FilesMatch>
+
+# Security headers
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+  Header always set X-Permitted-Cross-Domain-Policies "none"
+  Header always unset X-Powered-By
+  Header always unset Server
+</IfModule>
+
+# Do not cache runtime configuration
+<Files "config.js">
+  <IfModule mod_headers.c>
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </IfModule>
+</Files>
+
+<FilesMatch "\.(html)$">
+  <IfModule mod_headers.c>
+    Header set Cache-Control "no-cache, must-revalidate"
+  </IfModule>
+</FilesMatch>
+
+# Compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+
+# Long-lived caching for static assets
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 1 day"
+  ExpiresByType application/javascript "access plus 1 day"
+  ExpiresByType image/svg+xml "access plus 30 days"
+  ExpiresByType image/png "access plus 30 days"
+  ExpiresByType image/jpeg "access plus 30 days"
+  ExpiresByType font/woff2 "access plus 365 days"
+</IfModule>

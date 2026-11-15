@@ -1,0 +1,2832 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#db2777" />
+  <!-- The brand name, description and social image are filled from the admin
+       dashboard settings at runtime. These defaults keep the page valid
+       before the settings load and for crawlers that do not run JavaScript. -->
+  <meta id="meta-description" name="description" content="حجز مواعيد أونلاين وعناية وتجميل. احجزي موعدك في أقل من دقيقة." />
+  <meta id="meta-keywords" name="keywords" content="حجز مواعيد, صالون, تجميل, عناية" />
+  <meta id="meta-author" name="author" content="Salon" />
+  <!-- After go-live, replace YOUR-DOMAIN with the real domain and uncomment both tags:
+  <link rel="canonical" href="https://YOUR-DOMAIN/" />
+  <meta property="og:url" content="https://YOUR-DOMAIN/" />
+  -->
+
+  <meta property="og:type" content="website" />
+  <meta id="og-site-name" property="og:site_name" content="Salon" />
+  <meta id="og-title" property="og:title" content="حجز مواعيد أونلاين" />
+  <meta id="og-description" property="og:description" content="احجزي موعدك أونلاين في أقل من دقيقة." />
+  <meta id="og-image" property="og:image" content="img/og-cover.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta id="twitter-title" name="twitter:title" content="حجز مواعيد أونلاين" />
+  <meta id="twitter-description" name="twitter:description" content="احجزي موعدك أونلاين في أقل من دقيقة." />
+  <meta id="twitter-image" name="twitter:image" content="img/og-cover.jpg" />
+
+  <title id="page-title">حجز مواعيد أونلاين</title>
+  <link id="favicon" rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23db2777'/%3E%3Cpath d='M16 5.5l2.2 6.3 6.3 2.2-6.3 2.2L16 22.5l-2.2-6.3L7.5 14l6.3-2.2z' fill='white'/%3E%3C/svg%3E" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/tailwind.css?v=20261116a" />
+
+  <style>
+    :root {
+      --brand: #db2777;
+      --brand-dark: #be185d;
+      --brand-soft: #fce7f3;
+      --line: #f3e3eb;
+    }
+    * { -webkit-tap-highlight-color: transparent; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "Cairo", ui-sans-serif, system-ui, sans-serif;
+      color: #111827;
+      background:
+        radial-gradient(1100px 520px at 100% -10%, rgba(252, 231, 243, .9) 0%, rgba(252, 231, 243, 0) 60%),
+        radial-gradient(900px 480px at -10% 0%, rgba(253, 242, 248, .95) 0%, rgba(253, 242, 248, 0) 55%),
+        #fafafa;
+      background-attachment: fixed;
+    }
+    [x-cloak] { display: none !important; }
+    .num { direction: ltr; unicode-bidi: isolate; font-variant-numeric: tabular-nums; }
+
+    .card {
+      background: #fff;
+      border: 1px solid rgba(244, 114, 182, .18);
+      border-radius: 1.25rem;
+      box-shadow: 0 1px 2px rgba(17, 24, 39, .04), 0 18px 45px -38px rgba(190, 24, 93, .55);
+    }
+    .card-title { font-size: 1rem; font-weight: 800; letter-spacing: -.01em; color: #1f2937; }
+
+    .label {
+      display: flex; align-items: center; gap: .3rem;
+      font-size: .78rem; font-weight: 700; color: #374151; margin-bottom: .4rem;
+    }
+    .input {
+      width: 100%; border-radius: .85rem; border: 1px solid #e5e7eb; background: #fff;
+      padding: .62rem .85rem; font-size: .9rem; color: #111827; line-height: 1.5;
+      transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+    .input::placeholder { color: #b3b8c2; }
+    .input:focus { outline: none; border-color: #f472b6; box-shadow: 0 0 0 4px rgba(244, 114, 182, .16); }
+    .input:disabled { background: #f9fafb; color: #9ca3af; cursor: not-allowed; }
+    textarea.input { min-height: 4.5rem; resize: vertical; }
+    select.input {
+      appearance: none; -webkit-appearance: none; padding-inline-end: 2.4rem;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='m19 9-7 7-7-7'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-size: 1rem; background-position: right .8rem center;
+    }
+    [dir="rtl"] select.input { background-position: left .8rem center; }
+    input[type="date"].input, input[type="datetime-local"].input, input[type="month"].input { min-height: 2.75rem; }
+    input[type="checkbox"] { accent-color: #db2777; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
+      border-radius: .85rem; border: 1px solid transparent; padding: .6rem 1rem;
+      font-size: .875rem; font-weight: 700; line-height: 1.3; white-space: nowrap;
+      cursor: pointer; transition: transform .15s ease, background .15s ease, box-shadow .15s ease, border-color .15s ease, color .15s ease;
+    }
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+    .btn-primary {
+      color: #fff; background: linear-gradient(135deg, #ec4899, #db2777);
+      box-shadow: 0 12px 24px -16px rgba(219, 39, 119, .85);
+    }
+    .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 16px 28px -16px rgba(219, 39, 119, .9); }
+    .btn-soft { background: #fce7f3; color: #be185d; }
+    .btn-soft:hover:not(:disabled) { background: #fbcfe8; }
+    .btn-ghost { background: #fff; color: #374151; border-color: #e5e7eb; }
+    .btn-ghost:hover:not(:disabled) { background: #fdf2f8; border-color: #fbcfe8; color: #be185d; }
+    .btn-danger { background: #fff1f2; color: #be123c; border-color: #fecdd3; }
+    .btn-danger:hover:not(:disabled) { background: #ffe4e6; }
+    .btn-sm { padding: .38rem .65rem; font-size: .76rem; border-radius: .65rem; }
+
+    .icon-btn {
+      display: inline-grid; place-items: center; height: 2rem; width: 2rem;
+      border-radius: .6rem; border: 1px solid transparent; color: #6b7280;
+      background: transparent; transition: background .15s ease, color .15s ease, border-color .15s ease;
+    }
+    .icon-btn:hover { background: #fdf2f8; color: #be185d; border-color: #fbcfe8; }
+    .icon-btn.danger:hover { background: #fff1f2; color: #be123c; border-color: #fecdd3; }
+
+    .nav-btn {
+      display: inline-flex; align-items: center; gap: .4rem; padding: .48rem .78rem;
+      border-radius: .75rem; font-size: .85rem; font-weight: 700; color: #6b7280;
+      transition: background .15s ease, color .15s ease, box-shadow .15s ease;
+      white-space: nowrap;
+    }
+    .nav-btn:hover { background: #fdf2f8; color: #be185d; }
+    .nav-btn-active { background: #fce7f3; color: #be185d; box-shadow: inset 0 0 0 1px #fbcfe8; }
+
+    .lang-btn { padding: .3rem .55rem; border-radius: .55rem; font-size: .72rem; font-weight: 800; color: #9d174d; }
+    .lang-btn-active { background: #fff; color: #be185d; box-shadow: 0 1px 4px rgba(190, 24, 93, .18); }
+
+    .pill {
+      display: inline-flex; align-items: center; justify-content: center; gap: .25rem;
+      padding: .16rem .55rem; border-radius: 999px; font-size: .68rem; font-weight: 800;
+      line-height: 1.5; white-space: nowrap;
+    }
+
+    .table { width: 100%; border-collapse: collapse; font-size: .86rem; }
+    .table th {
+      padding: .7rem 1rem; text-align: start; font-size: .68rem; font-weight: 800;
+      letter-spacing: .05em; text-transform: uppercase; color: #9ca3af;
+      background: #fdf8fa; border-bottom: 1px solid var(--line); white-space: nowrap;
+    }
+    .table td { padding: .8rem 1rem; border-bottom: 1px solid #f8eef3; vertical-align: middle; }
+    .table tbody tr:last-child td { border-bottom: 0; }
+    .table tbody tr:hover { background: #fffbfd; }
+
+    .kpi-icon { display: grid; place-items: center; height: 2.4rem; width: 2.4rem; border-radius: .8rem; }
+
+    .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+
+    .divider { height: 1px; background: var(--line); }
+
+    #print-area { display: none; }
+
+    @media print {
+      @page { size: A4; margin: 14mm; }
+      body { background: #fff !important; }
+      body > *:not(#print-area) { display: none !important; }
+      #print-area { display: block !important; }
+    }
+  </style>
+
+  <script id="ld-json" type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BeautySalon",
+    "name": "Salon",
+    "description": "Salon and beauty services with online booking.",
+    "image": "img/og-cover.jpg",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "",
+      "addressLocality": "",
+      "addressCountry": "BH"
+    },
+    "openingHours": "Mo-Su 10:00-20:00",
+    "priceRange": "BHD",
+    "currenciesAccepted": "BHD"
+  }
+  </script>
+</head>
+
+<body
+  x-data="salonApp"
+  x-init="init()"
+  x-cloak
+  :class="{ 'overflow-hidden': svcModal || stfModal || loginOpen || staffLoginOpen || entryOpen || confirmBox.open }"
+  class="min-h-full antialiased"
+>
+  <!-- ============ ICON SPRITE ============ -->
+  <svg xmlns="http://www.w3.org/2000/svg" class="hidden" aria-hidden="true">
+    <symbol id="i-sparkles" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M9.8 3.6 11 7.2l3.6 1.2L11 9.6 9.8 13.2 8.6 9.6 5 8.4l3.6-1.2 1.2-3.6ZM18 14.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2ZM17.5 3.5l.6 1.9 1.9.6-1.9.6-.6 1.9-.6-1.9-1.9-.6 1.9-.6.6-1.9Z" />
+    </symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5A2.25 2.25 0 0 1 5.25 5.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+    </symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M3 20.25h18M5.25 20.25V12m4.5 8.25V6.75m4.5 13.5v-5.25m4.5 5.25V9.75" />
+    </symbol>
+    <symbol id="i-receipt" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M8.25 3.75h7.5a1.5 1.5 0 0 1 1.5 1.5v15l-2.625-1.5-2.625 1.5-2.625-1.5L6.75 20.25v-15a1.5 1.5 0 0 1 1.5-1.5ZM9.75 8.25h4.5m-4.5 3.75h4.5" />
+    </symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m5.25-6h6.75m-6.75 0a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M6.75 12h.75" />
+    </symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0 0a8.95 8.95 0 0 0 4.5-1.2M12 21a9 9 0 0 1-4.5-1.2M3.6 9h16.8M3.6 15h16.8M12 3c-2.2 2.4-3.3 5.4-3.3 9s1.1 6.6 3.3 9c2.2-2.4 3.3-5.4 3.3-9S14.2 5.4 12 3Z" />
+    </symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+    </symbol>
+    <symbol id="i-user" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.25a7.5 7.5 0 0 1 15 0" />
+    </symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+    </symbol>
+    <symbol id="i-check" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+    </symbol>
+    <symbol id="i-x" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+    </symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.35 9m-4.78 0L9.26 9m9.97-3.21c.34.05.68.11 1.02.17M4.77 5.79c.34-.06.68-.12 1.02-.17m0 0a48.1 48.1 0 0 1 12.42 0m-12.42 0a48.1 48.1 0 0 1-3.48.56m15.9-.56a48.1 48.1 0 0 1 3.48.56M6.16 5.79l.7 11.61A2.25 2.25 0 0 0 9.1 19.5h5.8a2.25 2.25 0 0 0 2.24-2.1l.7-11.61M10 9v9m4-9v9" />
+    </symbol>
+    <symbol id="i-pencil" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="m16.86 4.49 2.65 2.65m-2.65-2.65a1.87 1.87 0 0 0-2.65 0L4.5 14.2V18.9h4.7l9.71-9.71a1.87 1.87 0 0 0 0-2.65Z" />
+    </symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+    </symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+    </symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.28 6.72 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.37c0-.98-.63-1.85-1.56-2.16l-3.3-1.1a2.25 2.25 0 0 0-2.49.73l-.9 1.2a15.1 15.1 0 0 1-6.6-6.6l1.2-.9a2.25 2.25 0 0 0 .72-2.49l-1.1-3.3A2.25 2.25 0 0 0 5.37 2.25H4A2.25 2.25 0 0 0 1.75 4.5" transform="translate(1.25 1.25)" />
+    </symbol>
+    <symbol id="i-card" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9v8.25A2.25 2.25 0 0 0 4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v2.25Zm4.5 6h3" />
+    </symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M2.04 12.32a1.01 1.01 0 0 1 0-.64C3.42 7.51 7.36 4.5 12 4.5s8.58 3.01 9.96 7.18c.07.2.07.44 0 .64C20.58 16.49 16.64 19.5 12 19.5s-8.58-3.01-9.96-7.18ZM15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+    </symbol>
+    <symbol id="i-eye-off" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.58 10.68A2 2 0 0 0 12 14c.55 0 1.05-.22 1.42-.58M6.23 6.23C4.43 7.53 3.1 9.26 2.25 11.68a1.01 1.01 0 0 0 0 .64c1.38 4.17 5.32 7.18 9.96 7.18 2.05 0 3.97-.6 5.56-1.64m1.9-1.9c.8-.83 1.45-1.83 1.9-3a1.01 1.01 0 0 0 0-.64C20.19 8.15 16.25 5.14 11.61 5.14c-.63 0-1.24.06-1.84.17" />
+    </symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9.3 3.38-8.06-14.1a1.5 1.5 0 0 0-2.6 0l-8.06 14.1A1.5 1.5 0 0 0 4.15 18h15.7a1.5 1.5 0 0 0 1.3-2.25ZM12 15.75h.01v.01H12v-.01Z" />
+    </symbol>
+    <symbol id="i-info" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25h.75v5.25m-2.25 0h4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+    </symbol>
+    <symbol id="i-download" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M7.5 12 12 16.5 16.5 12M12 3v13.5" />
+    </symbol>
+    <symbol id="i-print" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.83 7.5 21h9l.78-7.17M6.72 13.83A2.25 2.25 0 0 1 6.75 9h10.5a2.25 2.25 0 0 1 .03 4.83M6.72 13.83h10.56M6.75 9V3h10.5v6M6 9h.01v.01H6V9Z" />
+    </symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M16.02 9.35 21 9m-4.98.35A8.25 8.25 0 1 0 20.1 15M21 4.5V9h-4.5" />
+    </symbol>
+    <symbol id="i-search" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M17.25 10.5a6.75 6.75 0 1 1-13.5 0 6.75 6.75 0 0 1 13.5 0Z" />
+    </symbol>
+    <symbol id="i-whatsapp" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2Zm0 18.15c-1.52 0-3.01-.41-4.3-1.18l-.31-.18-3.12.82.83-3.04-.2-.32a8.19 8.19 0 0 1-1.26-4.36c0-4.54 3.7-8.24 8.24-8.24 4.54 0 8.24 3.7 8.24 8.24 0 4.54-3.7 8.24-8.24 8.24h.12Zm4.52-6.17c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.08.14-1.18-.06-.11-.23-.17-.48-.29Z" />
+    </symbol>
+    <symbol id="i-map-pin" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M12 21s7.5-6 7.5-11.25a7.5 7.5 0 1 0-15 0C4.5 15 12 21 12 21Zm0-8.25a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+    </symbol>
+    <symbol id="i-instagram" viewBox="0 0 24 24">
+      <rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="1.7" />
+      <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.7" />
+      <circle cx="17" cy="7" r="1.2" fill="currentColor" />
+    </symbol>
+    <symbol id="i-tiktok" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M14 3v9.4a3.6 3.6 0 1 1-3.1-3.57M14 3c.42 2.7 2.25 4.55 4.95 4.9" />
+    </symbol>
+    <symbol id="i-snapchat" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M12 3.2c2.6 0 4.2 1.9 4.2 4.4 0 1.1-.15 2.1-.2 2.9.55.2 1.2.3 1.75.15.75-.2 1.15.75.55 1.25-.35.3-1.05.6-1.75.85-.45.16-.35.8.05 1.3.7.85 1.65 1.4 2.7 1.6.7.12.6 1-.1 1.2-.9.25-1.75.3-2.1.6-.2.18-.25.6-.45.9-.25.4-.8.45-1.3.35-.45-.08-1.05-.15-1.7.05-1.05.3-1.55.95-2.65.95s-1.6-.65-2.65-.95c-.65-.2-1.25-.13-1.7-.05-.5.1-1.05.05-1.3-.35-.2-.3-.25-.72-.45-.9-.35-.3-1.2-.35-2.1-.6-.7-.2-.8-1.08-.1-1.2 1.05-.2 2-.75 2.7-1.6.4-.5.5-1.14.05-1.3-.7-.25-1.4-.55-1.75-.85-.6-.5-.2-1.45.55-1.25.55.15 1.2.05 1.75-.15-.05-.8-.2-1.8-.2-2.9 0-2.5 1.6-4.4 4.2-4.4Z" />
+    </symbol>
+    <symbol id="i-facebook" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M14.5 8.5H17V5h-2.5C11.6 5 10 6.6 10 9.5V11H8v3h2v7h3v-7h2.4l.6-3h-3V9.5c0-.7.3-1 1.5-1Z" />
+    </symbol>
+    <symbol id="i-x-social" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M4 4l16 16M20 4 4 20" />
+    </symbol>
+    <symbol id="i-youtube" viewBox="0 0 24 24">
+      <rect x="2.5" y="6" width="19" height="12" rx="4" fill="none" stroke="currentColor" stroke-width="1.7" />
+      <path fill="currentColor" d="m10.5 9.5 4.5 2.5-4.5 2.5z" />
+    </symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.24a2.25 2.25 0 0 1-1.06 1.9l-7.5 4.5a2.25 2.25 0 0 1-2.38 0l-7.5-4.5a2.25 2.25 0 0 1-1.06-1.9v-.24" />
+    </symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 7.5 12 3m0 0L7.5 7.5M12 3v13.5" />
+    </symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.49-2.01-4.5-4.5-4.5-1.64 0-3.06.88-3.84 2.2A4.49 4.49 0 0 0 8.82 3.75C6.33 3.75 4.32 5.76 4.32 8.25c0 5.25 7.68 10.5 7.68 10.5s7.68-5.25 7.68-10.5" />
+    </symbol>
+    <symbol id="i-star" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="m12 3 2.78 5.63 6.22.9-4.5 4.39 1.06 6.2L12 17.2l-5.56 2.92 1.06-6.2L3 9.53l6.22-.9L12 3Z" />
+    </symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M12 3 4.5 6v5.25c0 4.7 3.2 9.08 7.5 10.13 4.3-1.05 7.5-5.43 7.5-10.13V6L12 3Zm-3 8.7 2.1 2.1 4.4-4.4" />
+    </symbol>
+  </svg>
+
+  <!-- ============ PUBLIC LANDING PAGE ============ -->
+  <div x-show="!canAccess" x-cloak class="min-h-screen bg-white">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 border-b border-pink-100/70 bg-white/90 backdrop-blur-xl">
+      <div class="mx-auto flex h-16 max-w-7xl items-center gap-2 px-4 sm:px-6">
+        <a href="#top" class="flex min-w-0 items-center gap-2.5" @click.prevent="scrollToId('top')">
+          <span x-show="!brandLogo" class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-pink-500 to-rose-600 text-white shadow-lg shadow-pink-500/25">
+            <svg class="h-5 w-5"><use href="#i-sparkles" /></svg>
+          </span>
+          <img x-show="brandLogo" :src="brandLogo" :alt="salonName" class="h-10 w-10 shrink-0 rounded-2xl bg-white object-cover ring-1 ring-pink-100" />
+          <span class="min-w-0">
+            <span class="block max-w-[10rem] truncate text-[15px] font-extrabold tracking-tight text-gray-900 sm:max-w-[18rem] sm:text-base" x-text="salonName"></span>
+            <span class="hidden text-[10px] font-bold uppercase tracking-[0.18em] text-pink-500 sm:block" x-text="brandTagline"></span>
+          </span>
+        </a>
+
+        <nav class="mx-auto hidden items-center gap-6 text-sm font-bold text-gray-600 lg:flex" aria-label="Landing">
+          <a href="#services" class="transition hover:text-pink-700" @click.prevent="scrollToId('services')" x-text="t('site_nav_services')"></a>
+          <a href="#about" class="transition hover:text-pink-700" @click.prevent="scrollToId('about')" x-text="t('site_nav_about')"></a>
+          <a href="#booking" class="transition hover:text-pink-700" @click.prevent="scrollToId('booking')" x-text="t('site_nav_booking')"></a>
+          <a href="#contact" class="transition hover:text-pink-700" @click.prevent="scrollToId('contact')" x-text="t('site_nav_contact')"></a>
+        </nav>
+
+        <div class="ms-auto flex items-center gap-1.5 sm:gap-2">
+          <div class="flex items-center gap-0.5 rounded-xl bg-pink-50 p-0.5 ring-1 ring-pink-100" role="group" aria-label="Language">
+            <button type="button" class="lang-btn" :class="{ 'lang-btn-active': lang === 'ar' }" @click="setLang('ar')" aria-label="العربية" title="العربية">ع</button>
+            <button type="button" class="lang-btn" :class="{ 'lang-btn-active': lang === 'en' }" @click="setLang('en')" aria-label="English" title="English">EN</button>
+          </div>
+          <button type="button" class="btn btn-primary btn-sm" @click="entryOpen = true">
+            <svg class="h-4 w-4"><use href="#i-user" /></svg>
+            <span class="hidden sm:inline" x-text="t('entry_button')"></span>
+            <span class="sm:hidden" x-text="t('login')"></span>
+          </button>
+        </div>
+      </div>
+      <nav class="no-scrollbar flex gap-1 overflow-x-auto border-t border-pink-50 px-3 pb-2 lg:hidden" aria-label="Landing mobile">
+        <a href="#services" class="nav-btn" @click.prevent="scrollToId('services')" x-text="t('site_nav_services')"></a>
+        <a href="#about" class="nav-btn" @click.prevent="scrollToId('about')" x-text="t('site_nav_about')"></a>
+        <a href="#booking" class="nav-btn" @click.prevent="scrollToId('booking')" x-text="t('site_nav_booking')"></a>
+        <a href="#contact" class="nav-btn" @click.prevent="scrollToId('contact')" x-text="t('site_nav_contact')"></a>
+      </nav>
+    </header>
+
+    <main>
+      <!-- Hero -->
+      <section id="top" class="relative isolate overflow-hidden bg-gray-950">
+        <img :src="heroImage" :alt="salonName" class="absolute inset-0 -z-20 h-full w-full object-cover" />
+        <div class="absolute inset-0 -z-10 bg-gradient-to-b from-gray-950/80 via-gray-950/55 to-gray-950/90"></div>
+        <div class="mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:py-40">
+          <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.18em] text-pink-100 ring-1 ring-white/20 backdrop-blur">
+            <span class="h-1.5 w-1.5 rounded-full bg-pink-300"></span>
+            <span x-text="t('hero_eyebrow')"></span>
+          </span>
+          <h1 class="mt-6 max-w-3xl text-4xl font-black leading-[1.12] tracking-tight text-white sm:text-5xl lg:text-6xl" x-text="t('hero_title')"></h1>
+          <p class="mt-5 max-w-xl text-base font-medium leading-relaxed text-pink-50/90 sm:text-lg" x-text="t('hero_sub')"></p>
+          <div class="mt-8 flex flex-wrap items-center gap-3">
+            <a href="#booking" class="btn btn-primary px-6 py-3 text-base" @click.prevent="scrollToId('booking')">
+              <svg class="h-5 w-5"><use href="#i-calendar" /></svg>
+              <span x-text="t('hero_cta_book')"></span>
+            </a>
+            <a href="#services" class="btn border border-white/25 bg-white/10 px-6 py-3 text-base text-white backdrop-blur transition hover:bg-white/20" @click.prevent="scrollToId('services')">
+              <span x-text="t('hero_cta_services')"></span>
+            </a>
+          </div>
+          <div class="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-xs font-bold text-white/80">
+            <span class="inline-flex items-center gap-2"><svg class="h-4 w-4 text-pink-300"><use href="#i-star" /></svg><span x-text="t('hero_badge_1')"></span></span>
+            <span class="inline-flex items-center gap-2"><svg class="h-4 w-4 text-pink-300"><use href="#i-heart" /></svg><span x-text="t('hero_badge_2')"></span></span>
+            <span class="inline-flex items-center gap-2"><svg class="h-4 w-4 text-pink-300"><use href="#i-shield" /></svg><span x-text="t('hero_badge_3')"></span></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Services -->
+      <section id="services" class="relative bg-white py-16 sm:py-20">
+        <div class="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-pink-50/60 to-transparent"></div>
+        <div class="relative mx-auto max-w-7xl px-4 sm:px-6">
+          <div class="mx-auto max-w-2xl text-center">
+            <p class="text-[11px] font-black uppercase tracking-[0.28em] text-pink-600" x-text="t('landing_services_eyebrow')"></p>
+            <h2 class="mt-3 text-3xl font-black tracking-tight text-gray-900 sm:text-4xl" x-text="t('landing_services_title')"></h2>
+            <p class="mt-3 text-sm font-medium leading-relaxed text-gray-500 sm:text-base" x-text="t('landing_services_sub')"></p>
+          </div>
+
+          <div x-show="!publicServices.length" class="mt-10 rounded-3xl border border-dashed border-pink-200 bg-pink-50/40 p-10 text-center">
+            <p class="text-sm font-bold text-gray-500" x-text="t('landing_no_services')"></p>
+          </div>
+
+          <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <template x-for="s in publicServices" :key="s.id">
+              <article class="group overflow-hidden rounded-3xl border border-pink-100 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-pink-200/40">
+                <div class="relative h-56 overflow-hidden bg-pink-50">
+                  <img :src="serviceImage(s)" :alt="publicServiceName(s)" loading="lazy" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                  <span class="pill absolute start-3 top-3 bg-white/95 text-pink-700 shadow-sm backdrop-blur" x-text="serviceCategory(s)"></span>
+                </div>
+                <div class="p-5">
+                  <h3 class="truncate text-lg font-extrabold tracking-tight text-gray-900" x-text="publicServiceName(s)"></h3>
+                  <p class="mt-0.5 truncate text-xs font-semibold text-gray-400" x-text="lang === 'ar' ? s.name_en : s.name_ar"></p>
+                  <button type="button" class="btn btn-soft mt-4 w-full" @click="bookService(s)">
+                    <svg class="h-4 w-4"><use href="#i-calendar" /></svg>
+                    <span x-text="t('book_this_service')"></span>
+                  </button>
+                </div>
+              </article>
+            </template>
+          </div>
+        </div>
+      </section>
+
+      <!-- About -->
+      <section id="about" class="bg-gradient-to-b from-pink-50/70 to-white py-16 sm:py-20">
+        <div class="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:gap-16">
+          <div class="relative">
+            <div class="overflow-hidden rounded-[2rem] border border-white bg-white shadow-2xl shadow-pink-200/50">
+              <img :src="aboutImage" :alt="salonName" loading="lazy" class="h-[22rem] w-full object-cover sm:h-[28rem]" />
+            </div>
+            <div class="absolute -bottom-5 start-5 rounded-2xl bg-gray-950 px-5 py-4 text-white shadow-xl sm:start-8">
+              <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-pink-300" x-text="t('contact_hours')"></p>
+              <p class="mt-1 text-sm font-extrabold" x-text="publicInfo.salon_hours || t('hours_daily')"></p>
+            </div>
+          </div>
+          <div>
+            <p class="text-[11px] font-black uppercase tracking-[0.28em] text-pink-600" x-text="t('landing_about_eyebrow')"></p>
+            <h2 class="mt-3 text-3xl font-black tracking-tight text-gray-900 sm:text-4xl" x-text="t('landing_about_title')"></h2>
+            <p class="mt-4 text-sm font-medium leading-relaxed text-gray-500 sm:text-base" x-text="aboutText"></p>
+            <div class="mt-7 grid gap-4 sm:grid-cols-2">
+              <div class="rounded-2xl border border-pink-100 bg-white p-4">
+                <span class="grid h-9 w-9 place-items-center rounded-xl bg-pink-50 text-pink-600"><svg class="h-4 w-4"><use href="#i-shield" /></svg></span>
+                <p class="mt-3 text-sm font-extrabold text-gray-900" x-text="t('feature_1_t')"></p>
+                <p class="mt-1 text-xs font-medium leading-relaxed text-gray-500" x-text="t('feature_1_d')"></p>
+              </div>
+              <div class="rounded-2xl border border-pink-100 bg-white p-4">
+                <span class="grid h-9 w-9 place-items-center rounded-xl bg-pink-50 text-pink-600"><svg class="h-4 w-4"><use href="#i-star" /></svg></span>
+                <p class="mt-3 text-sm font-extrabold text-gray-900" x-text="t('feature_2_t')"></p>
+                <p class="mt-1 text-xs font-medium leading-relaxed text-gray-500" x-text="t('feature_2_d')"></p>
+              </div>
+              <div class="rounded-2xl border border-pink-100 bg-white p-4">
+                <span class="grid h-9 w-9 place-items-center rounded-xl bg-pink-50 text-pink-600"><svg class="h-4 w-4"><use href="#i-heart" /></svg></span>
+                <p class="mt-3 text-sm font-extrabold text-gray-900" x-text="t('feature_3_t')"></p>
+                <p class="mt-1 text-xs font-medium leading-relaxed text-gray-500" x-text="t('feature_3_d')"></p>
+              </div>
+              <div class="rounded-2xl border border-pink-100 bg-white p-4">
+                <span class="grid h-9 w-9 place-items-center rounded-xl bg-pink-50 text-pink-600"><svg class="h-4 w-4"><use href="#i-lock" /></svg></span>
+                <p class="mt-3 text-sm font-extrabold text-gray-900" x-text="t('feature_4_t')"></p>
+                <p class="mt-1 text-xs font-medium leading-relaxed text-gray-500" x-text="t('feature_4_d')"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Gallery -->
+      <section class="bg-white pb-16 sm:pb-20">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6">
+          <div class="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p class="text-[11px] font-black uppercase tracking-[0.28em] text-pink-600" x-text="t('gallery_eyebrow')"></p>
+              <h2 class="mt-2 text-2xl font-black tracking-tight text-gray-900 sm:text-3xl" x-text="t('gallery_title')"></h2>
+            </div>
+            <button type="button" class="text-xs font-extrabold text-pink-700 hover:underline" @click="scrollToId('booking')" x-text="t('hero_cta_book')"></button>
+          </div>
+          <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <template x-for="(img, i) in galleryImages" :key="i">
+              <img :src="img.src" :alt="img.alt" loading="lazy" class="h-40 w-full rounded-2xl object-cover sm:h-56" />
+            </template>
+          </div>
+        </div>
+      </section>
+
+      <!-- Booking -->
+      <section id="booking" class="relative overflow-hidden bg-gray-950 py-16 sm:py-20">
+        <div class="pointer-events-none absolute -top-32 end-0 h-96 w-96 rounded-full bg-pink-600/20 blur-3xl"></div>
+        <div class="pointer-events-none absolute -bottom-40 start-0 h-96 w-96 rounded-full bg-rose-500/10 blur-3xl"></div>
+        <div class="relative mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-5 lg:items-start">
+          <div class="lg:col-span-2 lg:pt-4">
+            <p class="text-[11px] font-black uppercase tracking-[0.28em] text-pink-300" x-text="t('booking_eyebrow')"></p>
+            <h2 class="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl" x-text="t('booking_title')"></h2>
+            <p class="mt-4 max-w-md text-sm font-medium leading-relaxed text-pink-50/75" x-text="t('booking_sub')"></p>
+            <div class="mt-7 space-y-4">
+              <div class="flex items-start gap-3">
+                <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/10 text-xs font-black text-pink-200 ring-1 ring-white/15">1</span>
+                <p class="pt-1 text-sm font-semibold text-white/85" x-text="t('booking_step_1')"></p>
+              </div>
+              <div class="flex items-start gap-3">
+                <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/10 text-xs font-black text-pink-200 ring-1 ring-white/15">2</span>
+                <p class="pt-1 text-sm font-semibold text-white/85" x-text="t('booking_step_2')"></p>
+              </div>
+              <div class="flex items-start gap-3">
+                <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/10 text-xs font-black text-pink-200 ring-1 ring-white/15">3</span>
+                <p class="pt-1 text-sm font-semibold text-white/85" x-text="t('booking_step_3')"></p>
+              </div>
+            </div>
+            <p class="mt-7 rounded-2xl border border-white/10 bg-white/5 p-4 text-xs font-semibold leading-relaxed text-pink-50/70" x-text="t('booking_note')"></p>
+          </div>
+
+          <div class="lg:col-span-3">
+            <div class="card p-5 sm:p-7">
+              <div x-show="!publicDone">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 class="text-lg font-extrabold tracking-tight text-gray-900" x-text="t('booking_form_title')"></h3>
+                    <p class="mt-1 text-xs font-medium text-gray-500" x-text="t('booking_sub')"></p>
+                  </div>
+                  <span class="pill bg-pink-50 text-pink-700" x-text="t('booking_eyebrow')"></span>
+                </div>
+
+                <form class="mt-5 space-y-4" @submit.prevent="submitPublicBooking()">
+                  <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label class="label" for="public_service"><span x-text="t('service')"></span><span class="text-pink-500">*</span></label>
+                      <select id="public_service" class="input" x-model="publicBooking.service_id" required>
+                        <option value="" disabled x-text="t('select_service')"></option>
+                        <template x-for="s in publicServices" :key="s.id">
+                          <option :value="s.id" x-text="publicServiceName(s)"></option>
+                        </template>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="label" for="public_staff"><span x-text="t('staff')"></span><span class="text-pink-500">*</span></label>
+                      <select id="public_staff" class="input" x-model="publicBooking.staff_id" required>
+                        <option value="" disabled x-text="t('select_staff')"></option>
+                        <template x-for="s in publicStaff" :key="s.id">
+                          <option :value="s.id" x-text="s.name"></option>
+                        </template>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label class="label" for="public_name"><span x-text="t('client_name')"></span><span class="text-pink-500">*</span></label>
+                      <input id="public_name" type="text" class="input" x-model="publicBooking.client_name" :placeholder="t('client_name_ph')" autocomplete="name" maxlength="120" required />
+                    </div>
+                    <div>
+                      <label class="label" for="public_phone"><span x-text="t('client_phone')"></span><span class="text-pink-500">*</span></label>
+                      <input id="public_phone" type="tel" inputmode="tel" class="input num" dir="ltr" x-model="publicBooking.client_phone" :placeholder="t('client_phone_ph')" autocomplete="tel" maxlength="20" required />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="label" for="public_date"><span x-text="t('date_time')"></span><span class="text-pink-500">*</span></label>
+                    <input id="public_date" type="datetime-local" class="input num" dir="ltr" :min="publicMinDate" x-model="publicBooking.appointment_date" required />
+                  </div>
+
+                  <div>
+                    <label class="label" for="public_notes" x-text="t('notes')"></label>
+                    <textarea id="public_notes" class="input" rows="2" x-model="publicBooking.notes" :placeholder="t('notes_ph')" maxlength="500"></textarea>
+                  </div>
+
+                  <label class="flex cursor-pointer items-start gap-2.5 rounded-xl border border-pink-100 bg-pink-50/50 px-3 py-2.5 text-xs font-semibold leading-relaxed text-gray-600">
+                    <input type="checkbox" class="mt-0.5 h-4 w-4 rounded border-gray-300" x-model="publicBooking.consent" />
+                    <span>
+                      <span x-text="t('consent_privacy')"></span>
+                      <a href="privacy.html" target="_blank" rel="noopener" class="font-extrabold text-pink-700 underline" x-text="t('privacy_policy')"></a>
+                      <span> · </span>
+                      <a href="usage-policy.html" target="_blank" rel="noopener" class="font-extrabold text-pink-700 underline" x-text="t('usage_policy')"></a>
+                    </span>
+                  </label>
+
+                  <p x-show="publicFormError" class="rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700" x-text="publicFormError"></p>
+                  <p x-show="!configured" class="rounded-xl bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800" x-text="t('setup_banner')"></p>
+
+                  <button type="submit" class="btn btn-primary w-full py-3 text-base" :disabled="publicSubmitting || !configured">
+                    <svg x-show="publicSubmitting" class="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-opacity=".25" stroke-width="3" />
+                      <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+                    </svg>
+                    <svg x-show="!publicSubmitting" class="h-5 w-5"><use href="#i-check" /></svg>
+                    <span x-text="publicSubmitting ? t('saving') : t('confirm_booking')"></span>
+                  </button>
+                </form>
+              </div>
+
+              <div x-show="publicDone" class="py-2 text-center">
+                <span class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
+                  <svg class="h-7 w-7"><use href="#i-check" /></svg>
+                </span>
+                <h3 class="mt-4 text-xl font-black tracking-tight text-gray-900" x-text="t('booking_success_title')"></h3>
+                <p class="mx-auto mt-2 max-w-sm text-sm font-medium leading-relaxed text-gray-500" x-text="publicDone ? t('booking_success_msg').replace('{phone}', publicDone.phone) : ''"></p>
+
+                <div class="mx-auto mt-5 max-w-sm space-y-2.5 rounded-2xl border border-pink-100 bg-pink-50/50 p-4 text-sm">
+                  <div class="flex items-center justify-between gap-3">
+                    <span class="text-xs font-bold text-gray-500" x-text="t('invoice_no')"></span>
+                    <span class="num rounded-lg bg-white px-2 py-0.5 font-black text-pink-700 ring-1 ring-pink-100" dir="ltr" x-text="'#' + (publicDone ? publicDone.invoice : '')"></span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3">
+                    <span class="text-xs font-bold text-gray-500" x-text="t('client_name')"></span>
+                    <span class="truncate font-extrabold text-gray-800" x-text="publicDone ? publicDone.name : ''"></span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3">
+                    <span class="text-xs font-bold text-gray-500" x-text="t('service')"></span>
+                    <span class="truncate font-extrabold text-gray-800" x-text="publicDone ? publicDone.service : ''"></span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3">
+                    <span class="text-xs font-bold text-gray-500" x-text="t('staff')"></span>
+                    <span class="truncate font-extrabold text-gray-800" x-text="publicDone ? publicDone.staff : ''"></span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3">
+                    <span class="text-xs font-bold text-gray-500" x-text="t('date_time')"></span>
+                    <span class="text-end text-xs font-extrabold text-gray-800" x-text="publicDone ? publicDone.when : ''"></span>
+                  </div>
+                </div>
+
+                <div class="mx-auto mt-5 flex max-w-sm flex-col gap-2">
+                  <a x-show="publicInfo.salon_phone" :href="waHref(publicInfo.salon_phone, t('wa_invoice_thanks'))" target="_blank" rel="noopener" class="btn btn-soft">
+                    <svg class="h-4 w-4"><use href="#i-whatsapp" /></svg>
+                    <span x-text="t('contact_whatsapp')"></span>
+                  </a>
+                  <button type="button" class="btn btn-ghost" @click="publicDone = null" x-text="t('booking_another')"></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contact / location -->
+      <section id="contact" class="bg-white py-16 sm:py-20">
+        <div class="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:items-center">
+          <div>
+            <p class="text-[11px] font-black uppercase tracking-[0.28em] text-pink-600" x-text="t('contact_eyebrow')"></p>
+            <h2 class="mt-3 text-3xl font-black tracking-tight text-gray-900 sm:text-4xl" x-text="t('contact_title')"></h2>
+            <div class="mt-7 space-y-4">
+              <div x-show="publicInfo.salon_address" class="flex items-start gap-3 rounded-2xl border border-pink-100 bg-pink-50/30 p-4">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-pink-600 ring-1 ring-pink-100"><svg class="h-5 w-5"><use href="#i-map-pin" /></svg></span>
+                <div>
+                  <p class="text-xs font-bold text-gray-500" x-text="t('contact_address')"></p>
+                  <p class="mt-1 text-sm font-extrabold leading-relaxed text-gray-800" x-text="publicInfo.salon_address"></p>
+                  <a x-show="publicInfo.map_url" :href="publicInfo.map_url" target="_blank" rel="noopener" class="mt-1 inline-flex text-xs font-extrabold text-pink-700 hover:underline" x-text="t('contact_map')"></a>
+                </div>
+              </div>
+              <div x-show="publicInfo.salon_hours" class="flex items-start gap-3 rounded-2xl border border-pink-100 bg-pink-50/30 p-4">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-pink-600 ring-1 ring-pink-100"><svg class="h-5 w-5"><use href="#i-clock" /></svg></span>
+                <div>
+                  <p class="text-xs font-bold text-gray-500" x-text="t('contact_hours')"></p>
+                  <p class="mt-1 text-sm font-extrabold text-gray-800" x-text="t('hours_daily') + ' · ' + publicInfo.salon_hours"></p>
+                </div>
+              </div>
+              <div x-show="publicInfo.salon_phone" class="flex items-start gap-3 rounded-2xl border border-pink-100 bg-pink-50/30 p-4">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-pink-600 ring-1 ring-pink-100"><svg class="h-5 w-5"><use href="#i-phone" /></svg></span>
+                <div>
+                  <p class="text-xs font-bold text-gray-500" x-text="t('contact_phone')"></p>
+                  <a class="num mt-1 block text-sm font-extrabold text-gray-800 hover:text-pink-700" dir="ltr" :href="'tel:' + publicInfo.salon_phone" x-text="publicInfo.salon_phone"></a>
+                  <a :href="waHref(publicInfo.salon_phone, t('wa_contact_message'))" target="_blank" rel="noopener" class="mt-1 inline-flex items-center gap-1 text-xs font-extrabold text-emerald-700 hover:underline">
+                    <svg class="h-3.5 w-3.5"><use href="#i-whatsapp" /></svg>
+                    <span x-text="t('contact_whatsapp')"></span>
+                  </a>
+                </div>
+              </div>
+              <div x-show="publicInfo.salon_email" class="flex items-start gap-3 rounded-2xl border border-pink-100 bg-pink-50/30 p-4">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-pink-600 ring-1 ring-pink-100"><svg class="h-5 w-5"><use href="#i-mail" /></svg></span>
+                <div class="min-w-0">
+                  <p class="text-xs font-bold text-gray-500" x-text="t('contact_email')"></p>
+                  <a class="mt-1 block truncate text-sm font-extrabold text-gray-800 hover:text-pink-700" dir="ltr" :href="'mailto:' + publicInfo.salon_email" x-text="publicInfo.salon_email"></a>
+                </div>
+              </div>
+            </div>
+
+            <div x-show="socialLinks.length" class="mt-6">
+              <p class="text-xs font-bold text-gray-500" x-text="t('follow_us')"></p>
+              <div class="mt-2 flex flex-wrap gap-2">
+                <template x-for="s in socialLinks" :key="s.key">
+                  <a :href="s.url" target="_blank" rel="noopener" :title="s.label" :aria-label="s.label" class="grid h-10 w-10 place-items-center rounded-xl bg-white text-pink-700 ring-1 ring-pink-100 transition hover:bg-pink-50 hover:ring-pink-200">
+                    <svg class="h-5 w-5"><use :href="'#' + s.icon" /></svg>
+                  </a>
+                </template>
+              </div>
+            </div>
+          </div>
+          <div class="overflow-hidden rounded-[2rem] border border-pink-100 bg-pink-50 shadow-xl shadow-pink-200/30">
+            <iframe :src="mapEmbedUrl" title="Salon location" loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="h-[22rem] w-full border-0 sm:h-[28rem]"></iframe>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="border-t border-pink-100 bg-pink-50/50 py-8">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6">
+        <div class="flex flex-col items-center justify-between gap-6 text-center sm:flex-row sm:items-start sm:text-start">
+          <div class="max-w-xs">
+            <div class="flex items-center justify-center gap-2.5 sm:justify-start">
+              <span x-show="!brandLogo" class="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-pink-500 to-rose-600 text-white"><svg class="h-4 w-4"><use href="#i-sparkles" /></svg></span>
+              <img x-show="brandLogo" :src="brandLogo" :alt="salonName" class="h-9 w-9 rounded-xl bg-white object-cover ring-1 ring-pink-100" />
+              <div>
+                <p class="text-sm font-extrabold text-gray-900" x-text="salonName"></p>
+                <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-gray-400" x-text="brandTagline"></p>
+              </div>
+            </div>
+            <p x-show="publicInfo.salon_address" class="mt-3 text-[11px] font-semibold leading-relaxed text-gray-500" x-text="publicInfo.salon_address"></p>
+            <div class="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] font-bold text-gray-500 sm:justify-start">
+              <a x-show="publicInfo.salon_phone" class="num hover:text-pink-700" dir="ltr" :href="'tel:' + publicInfo.salon_phone" x-text="publicInfo.salon_phone"></a>
+              <a x-show="publicInfo.salon_email" class="hover:text-pink-700" dir="ltr" :href="'mailto:' + publicInfo.salon_email" x-text="publicInfo.salon_email"></a>
+            </div>
+            <div x-show="socialLinks.length" class="mt-3 flex flex-wrap items-center justify-center gap-1.5 sm:justify-start">
+              <template x-for="s in socialLinks" :key="s.key">
+                <a :href="s.url" target="_blank" rel="noopener" :title="s.label" :aria-label="s.label" class="grid h-8 w-8 place-items-center rounded-lg bg-white text-pink-700 ring-1 ring-pink-100 transition hover:bg-pink-50">
+                  <svg class="h-4 w-4"><use :href="'#' + s.icon" /></svg>
+                </a>
+              </template>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] font-bold text-gray-500 sm:max-w-xs sm:justify-end">
+            <a href="privacy.html" class="hover:text-pink-700" x-text="t('privacy_policy')"></a>
+            <a href="terms.html" class="hover:text-pink-700" x-text="t('terms_of_use')"></a>
+            <a href="usage-policy.html" class="hover:text-pink-700" x-text="t('usage_policy')"></a>
+            <button type="button" class="hover:text-pink-700" @click="scrollToId('top')" x-text="t('back_to_top')"></button>
+          </div>
+        </div>
+        <p class="mt-6 border-t border-pink-100 pt-4 text-center text-[10px] font-medium text-gray-400">© <span x-text="new Date().getFullYear()"></span> <span x-text="salonName"></span> · <span x-text="t('footer_rights')"></span></p>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ============ ENTRY CHOOSER ============ -->
+  <div x-show="entryOpen" x-transition.opacity class="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" @click.self="entryOpen = false" @keydown.escape.window="entryOpen = false">
+    <div class="card w-full max-w-sm p-6" role="dialog" aria-modal="true" aria-labelledby="entry-title">
+      <div class="flex items-start justify-between">
+        <div class="flex items-center gap-2.5">
+          <span class="grid h-9 w-9 place-items-center rounded-xl bg-pink-50 text-pink-600 ring-1 ring-pink-100"><svg class="h-4 w-4"><use href="#i-lock" /></svg></span>
+          <h2 id="entry-title" class="text-base font-extrabold text-gray-900" x-text="t('entry_title')"></h2>
+        </div>
+        <button type="button" class="icon-btn" @click="entryOpen = false" :aria-label="t('close')"><svg class="h-4 w-4"><use href="#i-x" /></svg></button>
+      </div>
+      <p class="mt-3 text-xs font-medium leading-relaxed text-gray-500" x-text="t('entry_hint')"></p>
+      <div class="mt-4 space-y-2.5">
+        <button type="button" class="flex w-full items-center gap-3 rounded-2xl border border-pink-100 bg-pink-50/50 p-3.5 text-start transition hover:border-pink-200 hover:bg-pink-50" @click="entryOpen = false; openStaffLogin()">
+          <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-pink-600 ring-1 ring-pink-100"><svg class="h-5 w-5"><use href="#i-user" /></svg></span>
+          <span class="min-w-0">
+            <span class="block text-sm font-extrabold text-gray-900" x-text="t('entry_staff')"></span>
+            <span class="mt-0.5 block text-[11px] font-medium leading-relaxed text-gray-500" x-text="t('entry_staff_hint')"></span>
+          </span>
+        </button>
+        <button type="button" class="flex w-full items-center gap-3 rounded-2xl border border-pink-100 bg-white p-3.5 text-start transition hover:border-pink-200 hover:bg-pink-50/50" @click="entryOpen = false; loginOpen = true">
+          <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-pink-50 text-pink-600 ring-1 ring-pink-100"><svg class="h-5 w-5"><use href="#i-lock" /></svg></span>
+          <span class="min-w-0">
+            <span class="block text-sm font-extrabold text-gray-900" x-text="t('entry_admin')"></span>
+            <span class="mt-0.5 block text-[11px] font-medium leading-relaxed text-gray-500" x-text="t('entry_admin_hint')"></span>
+          </span>
+        </button>
+      </div>
+      <p class="mt-4 text-center text-[10px] font-medium leading-relaxed text-gray-400" x-text="t('gate_footer')"></p>
+    </div>
+  </div>
+
+  <!-- Loading splash until the session check completes -->
+  <div x-show="!authChecked" x-cloak class="fixed inset-0 z-[70] flex items-center justify-center bg-white">
+    <svg class="h-8 w-8 animate-spin text-pink-600" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-opacity=".2" stroke-width="3" />
+      <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+    </svg>
+  </div>
+
+  <div x-show="canAccess" x-cloak class="flex min-h-screen flex-col">
+    <!-- ============ HEADER ============ -->
+    <header class="sticky top-0 z-40 border-b border-pink-100/80 bg-white/85 backdrop-blur-xl">
+      <div class="mx-auto max-w-7xl px-3 sm:px-6">
+        <div class="flex h-16 items-center gap-2 sm:gap-3">
+          <button type="button" class="flex min-w-0 items-center gap-2.5 text-start" @click="switchTab('pos')">
+            <span x-show="!brandLogo" class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-pink-500 to-rose-600 text-white shadow-lg shadow-pink-500/25">
+              <svg class="h-5 w-5"><use href="#i-sparkles" /></svg>
+            </span>
+            <img x-show="brandLogo" :src="brandLogo" :alt="salonName" class="h-10 w-10 shrink-0 rounded-2xl bg-white object-cover ring-1 ring-pink-100" />
+            <span class="min-w-0">
+              <span class="block max-w-[9.5rem] truncate text-[15px] font-extrabold tracking-tight text-gray-900 sm:max-w-[18rem] sm:text-base" x-text="salonName"></span>
+              <span class="hidden truncate text-[11px] font-medium text-gray-500 sm:block" x-text="t('app_subtitle')"></span>
+            </span>
+          </button>
+
+          <!-- Desktop nav -->
+          <nav class="mx-auto hidden items-center gap-1 lg:flex" aria-label="Main">
+            <button type="button" class="nav-btn" :class="{ 'nav-btn-active': tab === 'pos' }" @click="switchTab('pos')">
+              <svg class="h-[18px] w-[18px]"><use href="#i-calendar" /></svg>
+              <span x-text="t('nav_pos')"></span>
+            </button>
+            <button type="button" class="nav-btn" :class="{ 'nav-btn-active': tab === 'mybookings' }" x-show="staffSession && !user" @click="switchTab('mybookings')">
+              <svg class="h-[18px] w-[18px]"><use href="#i-calendar" /></svg>
+              <span x-text="t('nav_mybookings')"></span>
+            </button>
+            <button type="button" class="nav-btn" :class="{ 'nav-btn-active': tab === 'expenses' }" x-show="user || staffSession" @click="switchTab('expenses')">
+              <svg class="h-[18px] w-[18px]"><use href="#i-receipt" /></svg>
+              <span x-text="t('nav_expenses')"></span>
+            </button>
+            <button type="button" class="nav-btn" :class="{ 'nav-btn-active': tab === 'reports' }" x-show="user" @click="switchTab('reports')">
+              <svg class="h-[18px] w-[18px]"><use href="#i-chart" /></svg>
+              <span x-text="t('nav_reports')"></span>
+            </button>
+            <button type="button" class="nav-btn" :class="{ 'nav-btn-active': tab === 'vat' }" x-show="user" @click="switchTab('vat')">
+              <svg class="h-[18px] w-[18px]"><use href="#i-receipt" /></svg>
+              <span x-text="t('nav_vat')"></span>
+            </button>
+            <button type="button" class="nav-btn" :class="{ 'nav-btn-active': tab === 'admin' }" x-show="user" @click="switchTab('admin')">
+              <svg class="h-[18px] w-[18px]"><use href="#i-settings" /></svg>
+              <span x-text="t('nav_admin')"></span>
+            </button>
+          </nav>
+
+          <div class="ms-auto flex items-center gap-1.5 sm:gap-2">
+            <!-- Language switcher -->
+            <div class="flex items-center gap-0.5 rounded-xl bg-pink-50 p-0.5 ring-1 ring-pink-100" role="group" :aria-label="t('nav_pos')">
+              <button type="button" class="lang-btn" :class="{ 'lang-btn-active': lang === 'ar' }" @click="setLang('ar')" aria-label="العربية" title="العربية">ع</button>
+              <button type="button" class="lang-btn" :class="{ 'lang-btn-active': lang === 'en' }" @click="setLang('en')" aria-label="English" title="English">EN</button>
+            </div>
+
+            <template x-if="!user">
+              <div class="flex items-center gap-1">
+                <button type="button" class="btn btn-ghost btn-sm" x-show="!staffSession" @click="openStaffLogin()">
+                  <svg class="h-4 w-4"><use href="#i-user" /></svg>
+                  <span class="hidden sm:inline" x-text="t('staff_login_btn')"></span>
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" @click="loginOpen = true">
+                  <svg class="h-4 w-4"><use href="#i-lock" /></svg>
+                  <span class="hidden sm:inline" x-text="t('login')"></span>
+                </button>
+              </div>
+            </template>
+
+            <template x-if="user">
+              <div class="flex items-center gap-1">
+                <span class="hidden max-w-[10rem] truncate rounded-lg bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700 xl:block" :title="user.email" x-text="user.email"></span>
+                <button type="button" class="icon-btn" @click="signOut()" :title="t('logout')" :aria-label="t('logout')">
+                  <svg class="h-[18px] w-[18px]"><use href="#i-logout" /></svg>
+                </button>
+              </div>
+            </template>
+
+            <template x-if="!user && staffSession">
+              <div class="flex items-center gap-1">
+                <span class="max-w-[8rem] truncate rounded-lg bg-pink-50 px-2 py-1 text-[11px] font-bold text-pink-700" x-text="staffSession.name"></span>
+                <button type="button" class="icon-btn" @click="staffSignOut()" :title="t('logout')" :aria-label="t('logout')">
+                  <svg class="h-[18px] w-[18px]"><use href="#i-logout" /></svg>
+                </button>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- Mobile nav -->
+        <nav class="no-scrollbar -mx-1 flex items-center gap-1 overflow-x-auto pb-2 lg:hidden" aria-label="Main mobile">
+          <button type="button" class="nav-btn" :class="{ 'nav-btn-active': tab === 'pos' }" @click="switchTab('pos')">
+            <svg class="h-4 w-4"><use href="#i-calendar" /></svg>
+            <span x-text="t('nav_pos')"></span>
+          </button>
+          <button type="button" class="nav-btn" :class="{ 'nav-btn-active': tab === 'mybookings' }" x-show="staffSession && !user" @click="switchTab('mybookings')">
+            <svg class="h-4 w-4"><use href="#i-calendar" /></svg>
+            <span x-text="t('nav_mybookings')"></span>
+          </button>
+          <button type="button" class="nav-btn" :class="{ 'nav-btn-active': tab === 'expenses' }" x-show="user || staffSession" @click="switchTab('expenses')">
+            <svg class="h-4 w-4"><use href="#i-receipt" /></svg>
+            <span x-text="t('nav_expenses')"></span>
+          </button>
+          <button type="button" class="nav-btn" :class="{ 'nav-btn-active': tab === 'reports' }" x-show="user" @click="switchTab('reports')">
+            <svg class="h-4 w-4"><use href="#i-chart" /></svg>
+            <span x-text="t('nav_reports')"></span>
+          </button>
+          <button type="button" class="nav-btn" :class="{ 'nav-btn-active': tab === 'vat' }" x-show="user" @click="switchTab('vat')">
+            <svg class="h-4 w-4"><use href="#i-receipt" /></svg>
+            <span x-text="t('nav_vat')"></span>
+          </button>
+          <button type="button" class="nav-btn" :class="{ 'nav-btn-active': tab === 'admin' }" x-show="user" @click="switchTab('admin')">
+            <svg class="h-4 w-4"><use href="#i-settings" /></svg>
+            <span x-text="t('nav_admin')"></span>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- ============ MAIN ============ -->
+    <main class="mx-auto w-full max-w-7xl flex-1 px-3 py-5 sm:px-6 sm:py-8">
+
+      <!-- Setup required -->
+      <div x-show="!configured" class="mb-5 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-900" role="alert">
+        <svg class="mt-0.5 h-5 w-5 shrink-0"><use href="#i-alert" /></svg>
+        <p class="text-sm font-semibold leading-relaxed" x-text="t('setup_banner')"></p>
+      </div>
+
+      <!-- ================= POS ================= -->
+      <section x-show="tab === 'pos'" x-transition.opacity.duration.150ms>
+        <div class="grid gap-5 lg:grid-cols-3 lg:gap-6">
+          <div class="card p-5 sm:p-7 lg:col-span-2">
+            <div class="flex items-start gap-3">
+              <span class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-pink-50 text-pink-600 ring-1 ring-pink-100">
+                <svg class="h-5 w-5"><use href="#i-calendar" /></svg>
+              </span>
+              <div>
+                <h2 class="text-lg font-extrabold tracking-tight text-gray-900" x-text="t('new_booking')"></h2>
+                <p class="mt-0.5 text-xs font-medium leading-relaxed text-gray-500" x-text="t('new_booking_hint')"></p>
+              </div>
+            </div>
+
+            <form class="mt-6 space-y-5" @submit.prevent="submitBooking()">
+              <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label class="label" for="client_name">
+                    <span x-text="t('client_name')"></span><span class="text-pink-500">*</span>
+                  </label>
+                  <input id="client_name" type="text" class="input" x-model="pos.client_name" :placeholder="t('client_name_ph')" autocomplete="name" maxlength="120" required />
+                </div>
+                <div>
+                  <label class="label" for="client_phone">
+                    <span x-text="t('client_phone')"></span><span class="text-pink-500">*</span>
+                  </label>
+                  <input id="client_phone" type="tel" inputmode="tel" class="input num" dir="ltr" x-model="pos.client_phone" :placeholder="t('client_phone_ph')" autocomplete="tel" maxlength="20" required />
+                </div>
+              </div>
+
+              <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label class="label" for="service_id">
+                    <span x-text="t('service')"></span><span class="text-pink-500">*</span>
+                  </label>
+                  <select id="service_id" class="input" x-model="pos.service_id" required>
+                    <option value="" disabled x-text="t('select_service')"></option>
+                    <template x-for="s in activeServices" :key="s.id">
+                      <option :value="s.id" x-text="serviceOptionLabel(s)"></option>
+                    </template>
+                  </select>
+                </div>
+                <div>
+                  <label class="label" for="staff_id">
+                    <span x-text="t('staff')"></span><span class="text-pink-500">*</span>
+                  </label>
+                  <select id="staff_id" class="input" x-model="pos.staff_id" required>
+                    <option value="" disabled x-text="t('select_staff')"></option>
+                    <template x-for="s in activeStaff" :key="s.id">
+                      <option :value="s.id" x-text="staffOptionLabel(s)"></option>
+                    </template>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label class="label" for="appointment_date">
+                    <span x-text="t('date_time')"></span><span class="text-pink-500">*</span>
+                  </label>
+                  <input id="appointment_date" type="datetime-local" class="input num" dir="ltr" x-model="pos.appointment_date" required />
+                </div>
+                <div>
+                  <label class="label" for="payment_proof" x-text="t('payment_reference')"></label>
+                  <input id="payment_proof" type="text" class="input num" dir="ltr" x-model="pos.payment_proof" :placeholder="t('payment_ph')" maxlength="120" />
+                  <p class="mt-1.5 text-[11px] leading-relaxed text-gray-400" x-text="t('payment_hint')"></p>
+                </div>
+              </div>
+
+              <div>
+                <label class="label" for="notes" x-text="t('notes')"></label>
+                <input id="notes" type="text" class="input" x-model="pos.notes" :placeholder="t('notes_ph')" maxlength="500" />
+              </div>
+
+              <!-- Live totals -->
+              <div class="rounded-2xl border border-pink-100 bg-gradient-to-br from-pink-50/90 via-white to-white p-4 sm:p-5">
+                <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm sm:grid-cols-4">
+                  <div>
+                    <p class="text-[11px] font-bold text-gray-500" x-text="t('service')"></p>
+                    <p class="mt-0.5 truncate font-extrabold text-gray-800" x-text="selectedService ? svcName(selectedService) : '—'"></p>
+                  </div>
+                  <div>
+                    <p class="text-[11px] font-bold text-gray-500" x-text="t('staff')"></p>
+                    <p class="mt-0.5 truncate font-extrabold text-gray-800" x-text="selectedStaff ? selectedStaff.name : '—'"></p>
+                  </div>
+                  <div x-show="user">
+                    <p class="text-[11px] font-bold text-gray-500" x-text="t('commission_rate')"></p>
+                    <p class="mt-0.5 font-extrabold text-gray-800 num" x-text="selectedStaff ? selectedStaff.commission_rate + '%' : '—'"></p>
+                  </div>
+                  <div x-show="user">
+                    <p class="text-[11px] font-bold text-gray-500" x-text="t('staff_commission')"></p>
+                    <p class="mt-0.5 font-extrabold text-pink-700 num" x-text="fmtBHD(posCommission)"></p>
+                  </div>
+                </div>
+
+                <div class="mt-4 flex items-end justify-between gap-3 border-t border-pink-100 pt-4">
+                  <div>
+                    <p class="text-xs font-bold text-gray-500" x-text="t('total_price')"></p>
+                    <p class="text-[11px] font-medium text-gray-400" x-show="selectedService" x-text="(settings.vat_inclusive !== 'false' ? t('vat_included') : t('vat_excluded')) + ' · ' + (settings.vat_inclusive !== 'false' ? t('vat_collected') : t('vat_to_add')) + ': ' + fmtBHD(posVat)"></p>
+                  </div>
+                  <p class="num text-2xl font-extrabold tracking-tight text-pink-700 sm:text-3xl" x-text="fmtBHD(posTotal)"></p>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary w-full py-3 text-base" :disabled="submitting || !configured">
+                <svg x-show="submitting" class="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-opacity=".25" stroke-width="3" />
+                  <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+                </svg>
+                <svg x-show="!submitting" class="h-5 w-5"><use href="#i-check" /></svg>
+                <span x-text="submitting ? t('saving') : t('confirm_booking')"></span>
+              </button>
+              <p class="-mt-1 text-center text-[11px] font-medium text-gray-400" x-show="user" x-text="t('commission_note')"></p>
+            </form>
+          </div>
+
+          <!-- Sidebar -->
+          <aside class="space-y-5 lg:sticky lg:top-24 lg:self-start">
+            <!-- Success card -->
+            <template x-if="lastBooking">
+            <div class="card overflow-hidden">
+              <div class="flex items-start gap-3 border-b border-emerald-100 bg-emerald-50 p-4">
+                <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-emerald-600 text-white">
+                  <svg class="h-5 w-5"><use href="#i-check" /></svg>
+                </span>
+                <div>
+                  <p class="text-sm font-extrabold text-emerald-800" x-text="t('booking_created')"></p>
+                  <p class="mt-0.5 text-[11px] font-medium leading-relaxed text-emerald-700" x-text="t('booking_created_msg')"></p>
+                </div>
+              </div>
+              <div class="space-y-2.5 p-4 text-sm">
+                <div class="flex items-center justify-between gap-3">
+                  <span class="text-xs font-semibold text-gray-500" x-text="t('invoice_no')"></span>
+                  <span class="num rounded-lg bg-pink-50 px-2 py-0.5 font-extrabold text-pink-700" dir="ltr" x-text="lastBooking.invoice || '—'"></span>
+                </div>
+                <div class="flex items-center justify-between gap-3">
+                  <span class="text-xs font-semibold text-gray-500" x-text="t('client_name')"></span>
+                  <span class="truncate font-bold text-gray-800" x-text="lastBooking.name"></span>
+                </div>
+                <div class="flex items-center justify-between gap-3">
+                  <span class="text-xs font-semibold text-gray-500" x-text="t('service')"></span>
+                  <span class="truncate font-bold text-gray-800" x-text="lastBooking.service"></span>
+                </div>
+                <div class="flex items-center justify-between gap-3">
+                  <span class="text-xs font-semibold text-gray-500" x-text="t('staff')"></span>
+                  <span class="truncate font-bold text-gray-800" x-text="lastBooking.staff"></span>
+                </div>
+                <div class="flex items-center justify-between gap-3">
+                  <span class="text-xs font-semibold text-gray-500" x-text="t('date_time')"></span>
+                  <span class="text-end text-xs font-bold text-gray-800" x-text="lastBooking.when"></span>
+                </div>
+                <div class="flex items-center justify-between gap-3 border-t border-pink-100 pt-2.5">
+                  <span class="text-xs font-semibold text-gray-500" x-text="t('subtotal_before_vat')"></span>
+                  <span class="num font-bold text-gray-600" x-text="fmtBHD(lastBooking.net)"></span>
+                </div>
+                <div class="flex items-center justify-between gap-3">
+                  <span class="text-xs font-semibold text-gray-500" x-text="t('vat_amount')"></span>
+                  <span class="num font-bold text-gray-600" x-text="fmtBHD(lastBooking.vat)"></span>
+                </div>
+                <div class="flex items-center justify-between gap-3">
+                  <span class="text-xs font-extrabold text-gray-700" x-text="t('total_price')"></span>
+                  <span class="num font-extrabold text-pink-700" x-text="fmtBHD(lastBooking.total)"></span>
+                </div>
+                <p class="text-[10px] font-semibold text-gray-400" x-show="lastBooking.vatNumber" x-text="t('vat_reg_no') + ': ' + lastBooking.vatNumber"></p>
+              </div>
+              <div class="flex flex-wrap gap-2 px-4 pb-4">
+                <a x-show="lastBooking.invoiceText" :href="invoiceLink()" target="_blank" rel="noopener" class="btn btn-primary flex-1 btn-sm">
+                  <svg class="h-4 w-4"><use href="#i-whatsapp" /></svg>
+                  <span x-text="t('send_invoice_client')"></span>
+                </a>
+                <a x-show="waNumber()" :href="waLink()" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">
+                  <svg class="h-4 w-4"><use href="#i-whatsapp" /></svg>
+                  <span x-text="t('send_wa_admin')"></span>
+                </a>
+                <button type="button" class="btn btn-ghost btn-sm" @click="lastBooking = null" x-text="t('close')"></button>
+              </div>
+            </div>
+            </template>
+
+            <!-- Info card -->
+            <div class="card p-5">
+              <div class="flex items-center gap-2">
+                <span class="grid h-8 w-8 place-items-center rounded-xl bg-pink-50 text-pink-600">
+                  <svg class="h-4 w-4"><use href="#i-info" /></svg>
+                </span>
+                <h3 class="card-title" x-text="t('app_subtitle')"></h3>
+              </div>
+              <p class="mt-3 text-xs font-medium leading-relaxed text-gray-500" x-text="settings.vat_inclusive !== 'false' ? t('vat_note_incl') : t('vat_note_excl')"></p>
+              <p class="mt-2 text-xs font-medium leading-relaxed text-gray-400" x-text="t('footer_note')"></p>
+              <a x-show="waNumber()" :href="'https://wa.me/' + waNumber()" target="_blank" rel="noopener" class="mt-4 flex items-center justify-center gap-2 rounded-xl bg-emerald-50 px-3 py-2 text-xs font-extrabold text-emerald-700 transition hover:bg-emerald-100">
+                <svg class="h-4 w-4"><use href="#i-whatsapp" /></svg>
+                <span class="num" x-text="'+' + waNumber()"></span>
+              </a>
+            </div>
+
+            <!-- Today's appointments (admin) -->
+            <div x-show="user" class="card overflow-hidden">
+              <div class="flex items-center justify-between gap-3 border-b border-pink-100 p-4">
+                <div class="flex items-center gap-2">
+                  <span class="grid h-8 w-8 place-items-center rounded-xl bg-pink-50 text-pink-600">
+                    <svg class="h-4 w-4"><use href="#i-clock" /></svg>
+                  </span>
+                  <h3 class="card-title" x-text="t('today_appointments')"></h3>
+                </div>
+                <button type="button" class="icon-btn" @click="loadToday()" :title="t('refresh')" :aria-label="t('refresh')">
+                  <svg class="h-4 w-4" :class="{ 'animate-spin': todayLoading }"><use href="#i-refresh" /></svg>
+                </button>
+              </div>
+              <div class="max-h-[26rem] overflow-y-auto p-3">
+                <p x-show="todayLoading" class="p-3 text-center text-xs font-semibold text-gray-400" x-text="t('loading')"></p>
+                <p x-show="!todayLoading && !todaysAppts.length" class="p-4 text-center text-xs font-semibold text-gray-400" x-text="t('no_appointments')"></p>
+                <template x-for="a in todaysAppts" :key="a.id">
+                  <div class="mb-2 rounded-xl border border-pink-100/80 bg-white p-3 transition hover:bg-pink-50/40">
+                    <div class="flex items-start justify-between gap-2">
+                      <div class="min-w-0">
+                        <div class="flex items-center gap-1.5">
+                          <p class="truncate text-sm font-extrabold text-gray-800" x-text="a.client_name"></p>
+                          <span class="num shrink-0 rounded-md bg-pink-50 px-1.5 py-0.5 text-[10px] font-extrabold text-pink-700" dir="ltr" x-text="'#' + (a.invoice_no || '—')"></span>
+                        </div>
+                        <p class="truncate text-[11px] font-medium text-gray-500" x-text="rowServiceName(a) + ' · ' + (a.staff ? a.staff.name : '—')"></p>
+                        <p class="num mt-0.5 text-[11px] font-bold text-pink-600" x-text="fmtTime(a.appointment_date)"></p>
+                      </div>
+                      <div class="flex shrink-0 flex-col items-end gap-1">
+                        <span class="num text-xs font-extrabold text-gray-800" x-text="fmtBHD(a.total_price)"></span>
+                        <span class="pill" :class="apptStatusClass(a.status)" x-text="apptStatusLabel(a.status)"></span>
+                      </div>
+                    </div>
+                    <div class="mt-2 flex items-center justify-end gap-1 border-t border-pink-50 pt-2">
+                      <a :href="'https://wa.me/' + (a.client_phone || '').replace(/\D/g, '')" target="_blank" rel="noopener" class="icon-btn text-emerald-600" :title="t('send_wa')">
+                        <svg class="h-4 w-4"><use href="#i-whatsapp" /></svg>
+                      </a>
+                      <button type="button" x-show="a.status !== 'completed'" class="icon-btn text-emerald-600" @click="updateStatus(a, 'completed')" :title="t('mark_completed')">
+                        <svg class="h-4 w-4"><use href="#i-check" /></svg>
+                      </button>
+                      <button type="button" x-show="a.status !== 'cancelled'" class="icon-btn danger" @click="updateStatus(a, 'cancelled')" :title="t('mark_cancelled')">
+                        <svg class="h-4 w-4"><use href="#i-x" /></svg>
+                      </button>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ================= STAFF: MY BOOKINGS ================= -->
+      <section x-show="tab === 'mybookings'" x-transition.opacity.duration.150ms>
+        <div x-show="!staffSession" class="card mx-auto max-w-xl p-8 text-center">
+          <span class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-pink-50 text-pink-600 ring-1 ring-pink-100">
+            <svg class="h-7 w-7"><use href="#i-user" /></svg>
+          </span>
+          <h2 class="mt-4 text-lg font-extrabold text-gray-900" x-text="t('staff_access_required')"></h2>
+          <p class="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-gray-500" x-text="t('staff_login_hint')"></p>
+          <button type="button" class="btn btn-primary mt-5" @click="openStaffLogin()">
+            <svg class="h-4 w-4"><use href="#i-user" /></svg>
+            <span x-text="t('staff_login_btn')"></span>
+          </button>
+        </div>
+
+        <div x-show="staffSession" class="space-y-4">
+          <div class="card flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5">
+            <div class="flex items-center gap-3">
+              <span class="grid h-10 w-10 place-items-center rounded-2xl bg-pink-50 text-pink-600 ring-1 ring-pink-100">
+                <svg class="h-5 w-5"><use href="#i-user" /></svg>
+              </span>
+              <div>
+                <h2 class="text-base font-extrabold text-gray-900" x-text="t('my_bookings_title')"></h2>
+                <p class="text-xs font-semibold text-gray-500" x-text="staffSession ? staffSession.name : ''"></p>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" class="btn btn-ghost btn-sm" @click="loadStaffBookings()" :disabled="staffBookingsLoading">
+                <svg class="h-4 w-4" :class="{ 'animate-spin': staffBookingsLoading }"><use href="#i-refresh" /></svg>
+                <span x-text="t('refresh')"></span>
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm" @click="staffSignOut()">
+                <svg class="h-4 w-4"><use href="#i-logout" /></svg>
+                <span x-text="t('logout')"></span>
+              </button>
+            </div>
+          </div>
+
+          <p x-show="staffBookingsLoading" class="card p-8 text-center text-sm font-semibold text-gray-400" x-text="t('loading')"></p>
+          <p x-show="!staffBookingsLoading && !staffBookings.length" class="card p-10 text-center text-sm font-semibold text-gray-400" x-text="t('no_my_bookings')"></p>
+
+          <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <template x-for="a in staffBookings" :key="a.id">
+              <div class="card p-4">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="min-w-0">
+                    <p class="truncate text-sm font-extrabold text-gray-800" x-text="a.client_name"></p>
+                    <p class="num truncate text-[11px] font-semibold text-gray-500" dir="ltr" x-text="a.client_phone"></p>
+                  </div>
+                  <div class="flex shrink-0 flex-col items-end gap-1">
+                    <span class="pill" :class="apptStatusClass(a.status)" x-text="apptStatusLabel(a.status)"></span>
+                    <span class="num rounded-md bg-pink-50 px-1.5 py-0.5 text-[10px] font-extrabold text-pink-700" dir="ltr" x-text="'#' + (a.invoice_no || '—')"></span>
+                  </div>
+                </div>
+                <p class="mt-2 truncate text-xs font-bold text-pink-700" x-text="staffServiceName(a)"></p>
+                <p class="num mt-1 text-[11px] font-semibold text-gray-500" x-text="fmtDateTime(a.appointment_date)"></p>
+                <div class="mt-2 flex items-center justify-between border-t border-pink-50 pt-2">
+                  <span class="num text-sm font-extrabold text-gray-800" x-text="fmtBHD(a.total_price)"></span>
+                  <div class="flex items-center gap-1">
+                    <button type="button" class="icon-btn text-pink-700" @click="openInvoice(a)" :title="t('send_invoice')">
+                      <svg class="h-4 w-4"><use href="#i-receipt" /></svg>
+                    </button>
+                    <button type="button" x-show="a.status !== 'completed'" class="icon-btn text-emerald-600" @click="setStaffBookingStatus(a, 'completed')" :title="t('mark_completed')">
+                      <svg class="h-4 w-4"><use href="#i-check" /></svg>
+                    </button>
+                    <button type="button" x-show="a.status !== 'cancelled'" class="icon-btn danger" @click="setStaffBookingStatus(a, 'cancelled')" :title="t('mark_cancelled')">
+                      <svg class="h-4 w-4"><use href="#i-x" /></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= ADMIN ================= -->
+      <section x-show="tab === 'admin'" x-transition.opacity.duration.150ms>
+        <!-- Gate -->
+        <div x-show="!user" class="card mx-auto max-w-xl p-8 text-center">
+          <span class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-pink-50 text-pink-600 ring-1 ring-pink-100">
+            <svg class="h-7 w-7"><use href="#i-lock" /></svg>
+          </span>
+          <h2 class="mt-4 text-lg font-extrabold text-gray-900" x-text="t('access_denied')"></h2>
+          <p class="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-gray-500" x-text="t('login_hint')"></p>
+          <button type="button" class="btn btn-primary mt-5" @click="loginOpen = true">
+            <svg class="h-4 w-4"><use href="#i-lock" /></svg>
+            <span x-text="t('login_to_continue')"></span>
+          </button>
+        </div>
+
+        <div x-show="user" class="space-y-5">
+          <!-- Sub navigation -->
+          <div class="no-scrollbar flex gap-1.5 overflow-x-auto rounded-2xl border border-pink-100 bg-white/80 p-1.5 backdrop-blur">
+            <button type="button" class="nav-btn" :class="{ 'nav-btn-active': adminTab === 'services' }" @click="adminTab = 'services'">
+              <svg class="h-4 w-4"><use href="#i-sparkles" /></svg>
+              <span x-text="t('admin_services')"></span>
+              <span class="num rounded-full bg-white/70 px-1.5 text-[10px] font-extrabold text-pink-600" x-text="services.length"></span>
+            </button>
+            <button type="button" class="nav-btn" :class="{ 'nav-btn-active': adminTab === 'staff' }" @click="adminTab = 'staff'">
+              <svg class="h-4 w-4"><use href="#i-user" /></svg>
+              <span x-text="t('admin_staff')"></span>
+              <span class="num rounded-full bg-white/70 px-1.5 text-[10px] font-extrabold text-pink-600" x-text="staff.length"></span>
+            </button>
+            <button type="button" class="nav-btn" :class="{ 'nav-btn-active': adminTab === 'appointments' }" @click="adminTab = 'appointments'; !appts.length && loadAppts()">
+              <svg class="h-4 w-4"><use href="#i-calendar" /></svg>
+              <span x-text="t('admin_appointments')"></span>
+              <span class="num rounded-full bg-white/70 px-1.5 text-[10px] font-extrabold text-pink-600" x-text="appts.length"></span>
+            </button>
+            <button type="button" class="nav-btn" :class="{ 'nav-btn-active': adminTab === 'settings' }" @click="adminTab = 'settings'; loadWaLog(); loadSheetLog()">
+              <svg class="h-4 w-4"><use href="#i-settings" /></svg>
+              <span x-text="t('admin_settings')"></span>
+            </button>
+            <button type="button" class="nav-btn" :class="{ 'nav-btn-active': adminTab === 'pages' }" @click="adminTab = 'pages'">
+              <svg class="h-4 w-4"><use href="#i-pencil" /></svg>
+              <span x-text="t('admin_pages')"></span>
+            </button>
+          </div>
+
+          <!-- Services -->
+          <div x-show="adminTab === 'services'" class="card overflow-hidden">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-pink-100 p-4 sm:p-5">
+              <div>
+                <h2 class="text-base font-extrabold text-gray-900" x-text="t('admin_services')"></h2>
+                <p class="mt-0.5 text-xs font-medium text-gray-500" x-text="t('new_booking_hint')"></p>
+              </div>
+              <button type="button" class="btn btn-primary btn-sm" @click="openSvcModal()">
+                <svg class="h-4 w-4"><use href="#i-plus" /></svg>
+                <span x-text="t('add_service')"></span>
+              </button>
+            </div>
+
+            <div x-show="!services.length" class="p-10 text-center">
+              <p class="text-sm font-semibold text-gray-400" x-text="t('no_services')"></p>
+            </div>
+
+            <div class="hidden overflow-x-auto md:block">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th x-text="t('service')"></th>
+                    <th x-text="t('price')"></th>
+                    <th x-text="t('filter_status')"></th>
+                    <th class="text-end" x-text="t('actions')"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template x-for="s in services" :key="s.id">
+                    <tr>
+                      <td>
+                        <p class="font-extrabold text-gray-800" x-text="s.name_en"></p>
+                        <p class="text-xs font-medium text-gray-500" x-text="s.name_ar"></p>
+                      </td>
+                      <td class="num font-extrabold text-gray-900" x-text="fmtBHD(s.price)"></td>
+                      <td>
+                        <span class="pill" :class="s.is_active !== false ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'" x-text="s.is_active !== false ? t('active') : t('inactive')"></span>
+                      </td>
+                      <td>
+                        <div class="flex items-center justify-end gap-1">
+                          <button type="button" class="icon-btn" @click="toggleSvc(s)" :title="s.is_active !== false ? t('hide') : t('show')">
+                            <svg class="h-4 w-4"><use :href="s.is_active !== false ? '#i-eye-off' : '#i-eye'" /></svg>
+                          </button>
+                          <button type="button" class="icon-btn" @click="openSvcModal(s)" :title="t('edit')">
+                            <svg class="h-4 w-4"><use href="#i-pencil" /></svg>
+                          </button>
+                          <button type="button" class="icon-btn danger" @click="deleteSvc(s)" :title="t('delete')">
+                            <svg class="h-4 w-4"><use href="#i-trash" /></svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Mobile cards -->
+            <div class="divide-y divide-pink-50 md:hidden">
+              <template x-for="s in services" :key="'m-' + s.id">
+                <div class="p-4">
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                      <p class="truncate font-extrabold text-gray-800" x-text="s.name_en"></p>
+                      <p class="truncate text-xs font-medium text-gray-500" x-text="s.name_ar"></p>
+                    </div>
+                    <span class="pill" :class="s.is_active !== false ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'" x-text="s.is_active !== false ? t('active') : t('inactive')"></span>
+                  </div>
+                  <div class="mt-2 flex items-center justify-between">
+                    <div class="flex items-center gap-3 text-xs font-bold text-gray-600">
+                      <span class="num" x-text="fmtBHD(s.price)"></span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                      <button type="button" class="icon-btn" @click="toggleSvc(s)" :title="s.is_active !== false ? t('hide') : t('show')">
+                        <svg class="h-4 w-4"><use :href="s.is_active !== false ? '#i-eye-off' : '#i-eye'" /></svg>
+                      </button>
+                      <button type="button" class="icon-btn" @click="openSvcModal(s)" :title="t('edit')">
+                        <svg class="h-4 w-4"><use href="#i-pencil" /></svg>
+                      </button>
+                      <button type="button" class="icon-btn danger" @click="deleteSvc(s)" :title="t('delete')">
+                        <svg class="h-4 w-4"><use href="#i-trash" /></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Staff -->
+          <div x-show="adminTab === 'staff'" class="card overflow-hidden">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-pink-100 p-4 sm:p-5">
+              <div>
+                <h2 class="text-base font-extrabold text-gray-900" x-text="t('admin_staff')"></h2>
+                <p class="mt-0.5 text-xs font-medium text-gray-500" x-text="t('commission_note')"></p>
+              </div>
+              <button type="button" class="btn btn-primary btn-sm" @click="openStfModal()">
+                <svg class="h-4 w-4"><use href="#i-plus" /></svg>
+                <span x-text="t('add_staff')"></span>
+              </button>
+            </div>
+
+            <div x-show="!staff.length" class="p-10 text-center">
+              <p class="text-sm font-semibold text-gray-400" x-text="t('no_staff')"></p>
+            </div>
+
+            <div class="hidden overflow-x-auto md:block">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th x-text="t('staff_name')"></th>
+                    <th x-text="t('phone')"></th>
+                    <th x-text="t('staff_account')"></th>
+                    <th x-text="t('commission_rate')"></th>
+                    <th x-text="t('filter_status')"></th>
+                    <th class="text-end" x-text="t('actions')"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template x-for="s in staff" :key="s.id">
+                    <tr>
+                      <td class="font-extrabold text-gray-800" x-text="s.name"></td>
+                      <td class="num text-gray-600" dir="ltr" x-text="s.phone || '—'"></td>
+                      <td>
+                        <div class="flex items-center gap-1.5">
+                          <span class="num text-xs font-bold text-gray-600" dir="ltr" x-text="s.username ? '@' + s.username : '—'"></span>
+                          <span class="pill" :class="s.login_enabled ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'" x-text="s.login_enabled ? t('staff_login_on') : t('staff_login_off')"></span>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="flex items-center gap-2">
+                          <span class="num font-extrabold text-pink-700" x-text="s.commission_rate + '%'"></span>
+                          <div class="h-1.5 w-16 overflow-hidden rounded-full bg-pink-100">
+                            <div class="h-full rounded-full bg-pink-500" :style="'width:' + Math.min(100, Number(s.commission_rate) || 0) + '%'"></div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="pill" :class="s.is_active !== false ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'" x-text="s.is_active !== false ? t('active') : t('inactive')"></span>
+                      </td>
+                      <td>
+                        <div class="flex items-center justify-end gap-1">
+                          <button type="button" class="icon-btn" @click="toggleStf(s)" :title="s.is_active !== false ? t('hide') : t('show')">
+                            <svg class="h-4 w-4"><use :href="s.is_active !== false ? '#i-eye-off' : '#i-eye'" /></svg>
+                          </button>
+                          <button type="button" class="icon-btn" @click="openStfModal(s)" :title="t('edit')">
+                            <svg class="h-4 w-4"><use href="#i-pencil" /></svg>
+                          </button>
+                          <button type="button" class="icon-btn danger" @click="deleteStf(s)" :title="t('delete')">
+                            <svg class="h-4 w-4"><use href="#i-trash" /></svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="divide-y divide-pink-50 md:hidden">
+              <template x-for="s in staff" :key="'m-' + s.id">
+                <div class="p-4">
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                      <p class="truncate font-extrabold text-gray-800" x-text="s.name"></p>
+                      <p class="num truncate text-xs font-medium text-gray-500" dir="ltr" x-text="s.phone || '—'"></p>
+                      <p class="num truncate text-[11px] font-bold text-gray-400" dir="ltr" x-text="s.username ? '@' + s.username + ' · ' + (s.login_enabled ? t('staff_login_on') : t('staff_login_off')) : t('staff_login_off')"></p>
+                    </div>
+                    <span class="pill" :class="s.is_active !== false ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'" x-text="s.is_active !== false ? t('active') : t('inactive')"></span>
+                  </div>
+                  <div class="mt-2 flex items-center justify-between">
+                    <span class="num text-xs font-extrabold text-pink-700" x-text="t('commission_rate') + ': ' + s.commission_rate + '%'"></span>
+                    <div class="flex items-center gap-1">
+                      <button type="button" class="icon-btn" @click="toggleStf(s)" :title="s.is_active !== false ? t('hide') : t('show')">
+                        <svg class="h-4 w-4"><use :href="s.is_active !== false ? '#i-eye-off' : '#i-eye'" /></svg>
+                      </button>
+                      <button type="button" class="icon-btn" @click="openStfModal(s)" :title="t('edit')">
+                        <svg class="h-4 w-4"><use href="#i-pencil" /></svg>
+                      </button>
+                      <button type="button" class="icon-btn danger" @click="deleteStf(s)" :title="t('delete')">
+                        <svg class="h-4 w-4"><use href="#i-trash" /></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Appointments -->
+          <div x-show="adminTab === 'appointments'" class="space-y-4">
+            <div class="card p-4 sm:p-5">
+              <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                <div>
+                  <label class="label" for="appt_status" x-text="t('filter_status')"></label>
+                  <select id="appt_status" class="input" x-model="apptFilter.status" @change="loadAppts()">
+                    <option value="all" x-text="t('all')"></option>
+                    <option value="pending" x-text="t('status_pending')"></option>
+                    <option value="completed" x-text="t('status_completed')"></option>
+                    <option value="cancelled" x-text="t('status_cancelled')"></option>
+                  </select>
+                </div>
+                <div>
+                  <label class="label" for="appt_from" x-text="t('from_date')"></label>
+                  <input id="appt_from" type="date" class="input num" dir="ltr" x-model="apptFilter.from" />
+                </div>
+                <div>
+                  <label class="label" for="appt_to" x-text="t('to_date')"></label>
+                  <input id="appt_to" type="date" class="input num" dir="ltr" x-model="apptFilter.to" />
+                </div>
+                <div class="lg:col-span-2">
+                  <label class="label" for="appt_search" x-text="t('search')"></label>
+                  <div class="relative">
+                    <svg class="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"><use href="#i-search" /></svg>
+                    <input id="appt_search" type="search" class="input ps-9" x-model="apptSearch" :placeholder="t('search')" />
+                  </div>
+                </div>
+              </div>
+              <div class="mt-3 flex flex-wrap justify-end gap-2">
+                <button type="button" class="btn btn-primary btn-sm" @click="loadAppts()" :disabled="apptsLoading">
+                  <svg class="h-4 w-4" :class="{ 'animate-spin': apptsLoading }"><use href="#i-refresh" /></svg>
+                  <span x-text="t('apply_filter')"></span>
+                </button>
+                <button type="button" class="btn btn-ghost btn-sm" @click="clearApptFilter()" x-text="t('clear_filter')"></button>
+              </div>
+            </div>
+
+            <div class="card overflow-hidden">
+              <div class="flex items-center justify-between border-b border-pink-100 p-4">
+                <h2 class="text-base font-extrabold text-gray-900" x-text="t('admin_appointments')"></h2>
+                <span class="num rounded-full bg-pink-50 px-2.5 py-1 text-xs font-extrabold text-pink-700" x-text="filteredAppts.length"></span>
+              </div>
+
+              <p x-show="apptsLoading" class="p-8 text-center text-sm font-semibold text-gray-400" x-text="t('loading')"></p>
+              <p x-show="!apptsLoading && !filteredAppts.length" class="p-10 text-center text-sm font-semibold text-gray-400" x-text="t('no_appointments')"></p>
+
+              <div x-show="!apptsLoading && filteredAppts.length" class="overflow-x-auto">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th x-text="t('col_invoice')"></th>
+                      <th x-text="t('col_client')"></th>
+                      <th x-text="t('col_service')"></th>
+                      <th x-text="t('col_staff')"></th>
+                      <th x-text="t('col_date')"></th>
+                      <th x-text="t('col_total')"></th>
+                      <th x-text="t('col_commission')"></th>
+                      <th x-text="t('col_status')"></th>
+                      <th class="text-end" x-text="t('actions')"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template x-for="a in filteredAppts" :key="a.id">
+                      <tr>
+                        <td>
+                          <span class="num whitespace-nowrap font-extrabold text-pink-700" dir="ltr" x-text="'#' + (a.invoice_no || '—')"></span>
+                        </td>
+                        <td>
+                          <p class="font-extrabold text-gray-800" x-text="a.client_name"></p>
+                          <a class="num text-[11px] font-semibold text-pink-600 hover:underline" dir="ltr" :href="'tel:' + a.client_phone" x-text="a.client_phone"></a>
+                        </td>
+                        <td class="text-gray-700" x-text="rowServiceName(a)"></td>
+                        <td class="text-gray-700" x-text="a.staff ? a.staff.name : '—'"></td>
+                        <td class="whitespace-nowrap">
+                          <p class="num text-xs font-bold text-gray-700" x-text="fmtDate(a.appointment_date)"></p>
+                          <p class="num text-[11px] font-semibold text-pink-600" x-text="fmtTime(a.appointment_date)"></p>
+                        </td>
+                        <td class="num font-extrabold text-gray-900" x-text="fmtBHD(a.total_price)"></td>
+                        <td class="num font-bold text-pink-700" x-text="fmtBHD(a.commission_amount)"></td>
+                        <td>
+                          <select class="rounded-lg border border-gray-200 bg-white px-1.5 py-1 text-[11px] font-bold text-gray-700" :class="a.status === 'completed' ? 'text-emerald-700' : (a.status === 'pending' ? 'text-amber-700' : 'text-gray-500')" :value="a.status" @change="updateStatus(a, $event.target.value)">
+                            <option value="pending" x-text="t('status_pending')"></option>
+                            <option value="completed" x-text="t('status_completed')"></option>
+                            <option value="cancelled" x-text="t('status_cancelled')"></option>
+                          </select>
+                        </td>
+                        <td>
+                          <div class="flex items-center justify-end gap-1">
+                            <button type="button" class="icon-btn text-pink-700" @click="openInvoice(a)" :title="t('send_invoice')">
+                              <svg class="h-4 w-4"><use href="#i-receipt" /></svg>
+                            </button>
+                            <a :href="'https://wa.me/' + (a.client_phone || '').replace(/\D/g, '')" target="_blank" rel="noopener" class="icon-btn text-emerald-600" :title="t('send_wa')">
+                              <svg class="h-4 w-4"><use href="#i-whatsapp" /></svg>
+                            </a>
+                            <button type="button" class="icon-btn danger" @click="deleteAppt(a)" :title="t('delete')">
+                              <svg class="h-4 w-4"><use href="#i-trash" /></svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Settings -->
+          <div x-show="adminTab === 'settings'" class="space-y-4">
+            <div class="grid gap-4 lg:grid-cols-2">
+              <div class="card p-5">
+                <div class="flex items-center gap-2">
+                  <span class="grid h-8 w-8 place-items-center rounded-xl bg-pink-50 text-pink-600"><svg class="h-4 w-4"><use href="#i-sparkles" /></svg></span>
+                  <h2 class="card-title" x-text="t('settings_general')"></h2>
+                </div>
+                <div class="mt-4">
+                  <label class="label" for="salon_name" x-text="t('salon_name')"></label>
+                  <input id="salon_name" type="text" class="input" x-model="settings.salon_name" maxlength="120" />
+                </div>
+              </div>
+
+              <div class="card p-5">
+                <div class="flex items-center gap-2">
+                  <span class="grid h-8 w-8 place-items-center rounded-xl bg-pink-50 text-pink-600"><svg class="h-4 w-4"><use href="#i-map-pin" /></svg></span>
+                  <h2 class="card-title" x-text="t('settings_contact')"></h2>
+                </div>
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label class="label" for="salon_phone" x-text="t('salon_phone')"></label>
+                    <input id="salon_phone" type="tel" inputmode="tel" class="input num" dir="ltr" x-model="settings.salon_phone" placeholder="+973 XXXX XXXX" maxlength="24" />
+                  </div>
+                  <div>
+                    <label class="label" for="salon_hours" x-text="t('salon_hours')"></label>
+                    <input id="salon_hours" type="text" class="input num" dir="ltr" x-model="settings.salon_hours" placeholder="10:00 AM – 8:00 PM" maxlength="60" />
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="label" for="salon_address" x-text="t('salon_address')"></label>
+                    <input id="salon_address" type="text" class="input" x-model="settings.salon_address" maxlength="240" />
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="label" for="map_url" x-text="t('map_url')"></label>
+                    <input id="map_url" type="url" class="input num" dir="ltr" x-model="settings.map_url" placeholder="https://maps.app.goo.gl/..." />
+                  </div>
+                  <p class="sm:col-span-2 rounded-xl bg-pink-50/60 px-3 py-2 text-[11px] font-semibold leading-relaxed text-pink-800" x-text="t('salon_phone_hint')"></p>
+                </div>
+              </div>
+
+              <div class="card p-5 lg:col-span-2">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-2">
+                    <span class="grid h-8 w-8 place-items-center rounded-xl bg-pink-50 text-pink-600"><svg class="h-4 w-4"><use href="#i-sparkles" /></svg></span>
+                    <h2 class="card-title" x-text="t('settings_brand')"></h2>
+                  </div>
+                  <span class="pill bg-pink-50 text-pink-700" x-text="t('settings_brand_hint')"></span>
+                </div>
+
+                <div class="mt-4 flex flex-wrap items-center gap-4">
+                  <span x-show="!settings.logo_url" class="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-pink-500 to-rose-600 text-white">
+                    <svg class="h-7 w-7"><use href="#i-sparkles" /></svg>
+                  </span>
+                  <img x-show="settings.logo_url" :src="settings.logo_url" alt="Logo" class="h-16 w-16 shrink-0 rounded-2xl bg-white object-contain p-1 ring-1 ring-pink-100" />
+                  <div class="min-w-0 flex-1">
+                    <label class="label" for="logo_url" x-text="t('logo_url')"></label>
+                    <input id="logo_url" type="url" class="input num" dir="ltr" x-model="settings.logo_url" placeholder="https://..." maxlength="500" />
+                  </div>
+                </div>
+                <div class="mt-3 flex flex-wrap items-center gap-2">
+                  <label class="btn btn-soft btn-sm cursor-pointer">
+                    <svg class="h-4 w-4"><use href="#i-upload" /></svg>
+                    <span x-text="logoUploading ? t('uploading') : t('upload_image')"></span>
+                    <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" class="hidden" @change="uploadBrandImage($event, 'logo_url')" :disabled="logoUploading" />
+                  </label>
+                  <button type="button" class="text-[11px] font-bold text-rose-600 hover:underline" x-show="settings.logo_url" @click="settings.logo_url = ''" x-text="t('remove_logo')"></button>
+                  <p class="text-[11px] font-medium leading-relaxed text-gray-400" x-text="t('logo_hint')"></p>
+                </div>
+
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label class="label" for="brand_tagline_ar" x-text="t('brand_tagline_ar')"></label>
+                    <input id="brand_tagline_ar" type="text" class="input" x-model="settings.brand_tagline_ar" maxlength="80" />
+                  </div>
+                  <div>
+                    <label class="label" for="brand_tagline_en" x-text="t('brand_tagline_en')"></label>
+                    <input id="brand_tagline_en" type="text" class="input num" dir="ltr" x-model="settings.brand_tagline_en" maxlength="80" />
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="label" for="about_text_ar" x-text="t('about_text_ar')"></label>
+                    <textarea id="about_text_ar" rows="3" class="input" x-model="settings.about_text_ar" maxlength="1200" :placeholder="t('about_text_placeholder')"></textarea>
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="label" for="about_text_en" x-text="t('about_text_en')"></label>
+                    <textarea id="about_text_en" rows="3" class="input num" dir="ltr" x-model="settings.about_text_en" maxlength="1200" :placeholder="t('about_text_placeholder')"></textarea>
+                  </div>
+                </div>
+
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label class="label" for="hero_image_url" x-text="t('hero_image_url')"></label>
+                    <div class="flex gap-2">
+                      <input id="hero_image_url" type="url" class="input num" dir="ltr" x-model="settings.hero_image_url" placeholder="https://..." maxlength="500" />
+                      <label class="btn btn-ghost btn-sm shrink-0 cursor-pointer" :title="t('upload_image')">
+                        <svg class="h-4 w-4"><use href="#i-upload" /></svg>
+                        <input type="file" accept="image/png,image/jpeg,image/webp" class="hidden" @change="uploadBrandImage($event, 'hero_image_url')" :disabled="logoUploading" />
+                      </label>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="label" for="about_image_url" x-text="t('about_image_url')"></label>
+                    <div class="flex gap-2">
+                      <input id="about_image_url" type="url" class="input num" dir="ltr" x-model="settings.about_image_url" placeholder="https://..." maxlength="500" />
+                      <label class="btn btn-ghost btn-sm shrink-0 cursor-pointer" :title="t('upload_image')">
+                        <svg class="h-4 w-4"><use href="#i-upload" /></svg>
+                        <input type="file" accept="image/png,image/jpeg,image/webp" class="hidden" @change="uploadBrandImage($event, 'about_image_url')" :disabled="logoUploading" />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card p-5">
+                <div class="flex items-center gap-2">
+                  <span class="grid h-8 w-8 place-items-center rounded-xl bg-pink-50 text-pink-600"><svg class="h-4 w-4"><use href="#i-globe" /></svg></span>
+                  <h2 class="card-title" x-text="t('settings_social')"></h2>
+                </div>
+                <p class="mt-1 text-[11px] font-medium leading-relaxed text-gray-400" x-text="t('social_hint')"></p>
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label class="label" for="social_instagram" x-text="t('social_instagram')"></label>
+                    <input id="social_instagram" type="text" class="input num" dir="ltr" x-model="settings.social_instagram" placeholder="https://instagram.com/..." maxlength="300" />
+                  </div>
+                  <div>
+                    <label class="label" for="social_tiktok" x-text="t('social_tiktok')"></label>
+                    <input id="social_tiktok" type="text" class="input num" dir="ltr" x-model="settings.social_tiktok" placeholder="https://tiktok.com/@..." maxlength="300" />
+                  </div>
+                  <div>
+                    <label class="label" for="social_snapchat" x-text="t('social_snapchat')"></label>
+                    <input id="social_snapchat" type="text" class="input num" dir="ltr" x-model="settings.social_snapchat" placeholder="https://snapchat.com/add/..." maxlength="300" />
+                  </div>
+                  <div>
+                    <label class="label" for="social_facebook" x-text="t('social_facebook')"></label>
+                    <input id="social_facebook" type="text" class="input num" dir="ltr" x-model="settings.social_facebook" placeholder="https://facebook.com/..." maxlength="300" />
+                  </div>
+                  <div>
+                    <label class="label" for="social_x" x-text="t('social_x')"></label>
+                    <input id="social_x" type="text" class="input num" dir="ltr" x-model="settings.social_x" placeholder="https://x.com/..." maxlength="300" />
+                  </div>
+                  <div>
+                    <label class="label" for="social_youtube" x-text="t('social_youtube')"></label>
+                    <input id="social_youtube" type="text" class="input num" dir="ltr" x-model="settings.social_youtube" placeholder="https://youtube.com/@..." maxlength="300" />
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="label" for="social_whatsapp" x-text="t('social_whatsapp')"></label>
+                    <input id="social_whatsapp" type="text" class="input num" dir="ltr" x-model="settings.social_whatsapp" placeholder="97333123456" maxlength="300" />
+                    <p class="mt-1.5 text-[11px] leading-relaxed text-gray-400" x-text="t('social_whatsapp_hint')"></p>
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="label" for="salon_email" x-text="t('salon_email')"></label>
+                    <input id="salon_email" type="email" class="input num" dir="ltr" x-model="settings.salon_email" placeholder="hello@example.com" maxlength="160" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="card p-5">
+                <div class="flex items-center gap-2">
+                  <span class="grid h-8 w-8 place-items-center rounded-xl bg-pink-50 text-pink-600"><svg class="h-4 w-4"><use href="#i-search" /></svg></span>
+                  <h2 class="card-title" x-text="t('settings_seo')"></h2>
+                </div>
+                <p class="mt-1 text-[11px] font-medium leading-relaxed text-gray-400" x-text="t('seo_hint')"></p>
+                <div class="mt-4 space-y-4">
+                  <div>
+                    <label class="label" for="seo_title_ar" x-text="t('seo_title_ar')"></label>
+                    <input id="seo_title_ar" type="text" class="input" x-model="settings.seo_title_ar" maxlength="120" :placeholder="t('seo_title_placeholder')" />
+                  </div>
+                  <div>
+                    <label class="label" for="seo_title_en" x-text="t('seo_title_en')"></label>
+                    <input id="seo_title_en" type="text" class="input num" dir="ltr" x-model="settings.seo_title_en" maxlength="120" :placeholder="t('seo_title_placeholder')" />
+                  </div>
+                  <div>
+                    <label class="label" for="seo_description_ar" x-text="t('seo_description_ar')"></label>
+                    <textarea id="seo_description_ar" rows="2" class="input" x-model="settings.seo_description_ar" maxlength="320"></textarea>
+                  </div>
+                  <div>
+                    <label class="label" for="seo_description_en" x-text="t('seo_description_en')"></label>
+                    <textarea id="seo_description_en" rows="2" class="input num" dir="ltr" x-model="settings.seo_description_en" maxlength="320"></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card p-5">
+                <div class="flex items-center gap-2">
+                  <span class="grid h-8 w-8 place-items-center rounded-xl bg-emerald-50 text-emerald-600"><svg class="h-4 w-4"><use href="#i-receipt" /></svg></span>
+                  <h2 class="card-title" x-text="t('settings_vat')"></h2>
+                </div>
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label class="label" for="vat_rate" x-text="t('vat_rate')"></label>
+                    <input id="vat_rate" type="number" min="0" max="100" step="0.1" class="input num" dir="ltr" x-model="settings.vat_rate" />
+                  </div>
+                  <div class="flex items-end pb-1">
+                    <label class="flex cursor-pointer items-start gap-2.5 text-sm font-semibold text-gray-700">
+                      <input type="checkbox" class="mt-1 h-4 w-4 rounded border-gray-300" :checked="settings.vat_inclusive !== 'false'" @change="settings.vat_inclusive = $event.target.checked ? 'true' : 'false'" />
+                      <span>
+                        <span class="block" x-text="t('vat_inclusive')"></span>
+                        <span class="mt-0.5 block text-[11px] font-medium leading-relaxed text-gray-400" x-text="t('vat_inclusive_hint')"></span>
+                      </span>
+                    </label>
+                  </div>
+                </div>
+                <div class="mt-4">
+                  <label class="label" for="vat_number" x-text="t('vat_reg_no')"></label>
+                  <input id="vat_number" type="text" class="input num" dir="ltr" x-model="settings.vat_number" placeholder="BH123456789" maxlength="40" />
+                  <p class="mt-1.5 text-[11px] leading-relaxed text-gray-400" x-text="t('vat_reg_no_hint')"></p>
+                </div>
+              </div>
+
+              <div class="card p-5">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="flex items-center gap-2">
+                    <span class="grid h-8 w-8 place-items-center rounded-xl bg-pink-50 text-pink-600"><svg class="h-4 w-4"><use href="#i-lock" /></svg></span>
+                    <h2 class="card-title" x-text="t('settings_staff_access')"></h2>
+                  </div>
+                  <span class="pill" :class="staffCodeSet ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'" x-text="staffCodeSet ? t('staff_code_status_set') : t('staff_code_status_unset')"></span>
+                </div>
+                <div class="mt-4">
+                  <label class="label" for="staff_app_code_input" x-text="t('staff_app_code')"></label>
+                  <div class="flex gap-2">
+                    <input id="staff_app_code_input" type="text" class="input num" dir="ltr" x-model="newStaffCode" maxlength="32" autocomplete="new-password" placeholder="••••••" />
+                    <button type="button" class="btn btn-primary btn-sm shrink-0" @click="saveStaffCode()" :disabled="staffCodeSaving">
+                      <span x-text="staffCodeSaving ? t('saving') : t('save_code')"></span>
+                    </button>
+                  </div>
+                  <p class="mt-1.5 text-[11px] leading-relaxed text-gray-400" x-text="t('staff_app_code_hint')"></p>
+                  <button type="button" class="mt-2 text-[11px] font-bold text-rose-600 hover:underline" x-show="staffCodeSet" @click="clearStaffCode()" x-text="t('clear_code')"></button>
+                </div>
+              </div>
+
+              <div class="card p-5 lg:col-span-2">
+                <div class="flex items-center gap-2">
+                  <span class="grid h-8 w-8 place-items-center rounded-xl bg-emerald-50 text-emerald-600"><svg class="h-4 w-4"><use href="#i-whatsapp" /></svg></span>
+                  <h2 class="card-title" x-text="t('settings_whatsapp')"></h2>
+                </div>
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div class="sm:col-span-2">
+                    <label class="label" for="admin_whatsapp" x-text="t('admin_whatsapp')"></label>
+                    <input id="admin_whatsapp" type="tel" inputmode="tel" class="input num" dir="ltr" x-model="settings.admin_whatsapp" placeholder="97333123456" maxlength="20" />
+                    <p class="mt-1.5 text-[11px] leading-relaxed text-gray-400" x-text="t('admin_whatsapp_hint')"></p>
+                  </div>
+                  <div>
+                    <label class="label" for="evolution_api_url" x-text="t('evolution_url')"></label>
+                    <input id="evolution_api_url" type="url" class="input num" dir="ltr" x-model="settings.evolution_api_url" placeholder="https://evolution.example.com" />
+                  </div>
+                  <div>
+                    <label class="label" for="evolution_instance" x-text="t('evolution_instance')"></label>
+                    <input id="evolution_instance" type="text" class="input num" dir="ltr" x-model="settings.evolution_instance" placeholder="salon" />
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="label" for="evolution_api_key" x-text="t('evolution_key')"></label>
+                    <div class="relative">
+                      <input id="evolution_api_key" :type="showKey ? 'text' : 'password'" class="input pe-11" dir="ltr" x-model="settings.evolution_api_key" autocomplete="new-password" />
+                      <button type="button" class="icon-btn absolute end-1.5 top-1/2 -translate-y-1/2" @click="showKey = !showKey" :title="showKey ? t('hide') : t('show')">
+                        <svg class="h-4 w-4"><use :href="showKey ? '#i-eye-off' : '#i-eye'" /></svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="sm:col-span-2 rounded-xl border border-emerald-100 bg-emerald-50/70 p-3">
+                    <p class="flex items-start gap-2 text-[11px] font-semibold leading-relaxed text-emerald-800">
+                      <svg class="mt-0.5 h-4 w-4 shrink-0"><use href="#i-info" /></svg>
+                      <span x-text="t('evolution_hint')"></span>
+                    </p>
+                  </div>
+
+                  <div class="sm:col-span-2 rounded-xl border border-pink-100 bg-pink-50/40 p-3">
+                    <p class="text-xs font-extrabold text-gray-700" x-text="t('wa_test')"></p>
+                    <p class="mt-1 text-[11px] leading-relaxed text-gray-500" x-text="t('wa_test_hint')"></p>
+                    <div class="mt-2 flex gap-2">
+                      <input type="tel" inputmode="tel" class="input num" dir="ltr" x-model="waTestPhone" placeholder="97333123456" maxlength="20" />
+                      <button type="button" class="btn btn-primary btn-sm shrink-0" @click="testWhatsapp()" :disabled="waTesting">
+                        <span x-text="waTesting ? t('saving') : t('wa_test_send')"></span>
+                      </button>
+                    </div>
+
+                    <div class="mt-3" x-show="waLog.length">
+                      <div class="flex items-center justify-between">
+                        <p class="text-[11px] font-extrabold text-gray-600" x-text="t('wa_log')"></p>
+                        <button type="button" class="text-[11px] font-bold text-pink-700 hover:underline" @click="loadWaLog()" x-text="t('refresh')"></button>
+                      </div>
+                      <div class="mt-1 space-y-1.5">
+                        <template x-for="(row, i) in waLog.slice(0, 6)" :key="i">
+                          <div class="rounded-lg bg-white px-2 py-1.5">
+                            <div class="flex items-center justify-between gap-2">
+                              <span class="num truncate text-[10px] font-semibold text-gray-500" dir="ltr" x-text="waKindLabel(row.recipient) + ' · +' + row.phone"></span>
+                              <span class="pill shrink-0" :class="waLogClass(row)" x-text="waLogLabel(row) + (row.status_code ? ' ' + row.status_code : '')"></span>
+                            </div>
+                            <p class="mt-1 break-words text-[10px] leading-relaxed text-amber-700" x-show="waSkipped(row)" x-text="row.message"></p>
+                            <p class="mt-1 break-words text-[10px] leading-relaxed text-rose-600" x-show="row.error_message" x-text="row.error_message"></p>
+                            <p class="mt-1 break-words text-[10px] leading-relaxed text-amber-700" x-show="!row.error_message && row.response && row.status_code && (row.status_code < 200 || row.status_code >= 300)" x-text="row.response"></p>
+                          </div>
+                        </template>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Google Sheets -->
+              <div class="card p-5 lg:col-span-2">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div class="flex items-center gap-2">
+                    <span class="grid h-8 w-8 place-items-center rounded-xl bg-emerald-50 text-emerald-600"><svg class="h-4 w-4"><use href="#i-download" /></svg></span>
+                    <h2 class="card-title" x-text="t('settings_sheets')"></h2>
+                  </div>
+                  <span class="pill" :class="String(settings.google_sheet_url || '').trim() ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'" x-text="String(settings.google_sheet_url || '').trim() ? t('sheet_status_ok') : t('sheet_skipped')"></span>
+                </div>
+
+                <div class="mt-4">
+                  <label class="label" for="google_sheet_url" x-text="t('sheet_url')"></label>
+                  <input id="google_sheet_url" type="url" class="input num" dir="ltr" x-model="settings.google_sheet_url" placeholder="https://script.google.com/macros/s/.../exec" />
+                  <p class="mt-1.5 text-[11px] leading-relaxed text-gray-400" x-text="t('sheet_url_hint')"></p>
+                </div>
+
+                <div class="mt-3 flex flex-wrap gap-2">
+                  <button type="button" class="btn btn-primary btn-sm" @click="testSheet()" :disabled="sheetTesting">
+                    <svg class="h-4 w-4" :class="{ 'animate-spin': sheetTesting }"><use :href="sheetTesting ? '#i-refresh' : '#i-check'" /></svg>
+                    <span x-text="sheetTesting ? t('sheet_testing') : t('sheet_test')"></span>
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-sm" @click="syncAllToSheet()" :disabled="sheetSyncing">
+                    <svg class="h-4 w-4" :class="{ 'animate-spin': sheetSyncing }"><use href="#i-refresh" /></svg>
+                    <span x-text="sheetSyncing ? t('sheet_syncing') : t('sheet_sync_all')"></span>
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-sm" @click="loadSheetLog()" :disabled="sheetLogLoading">
+                    <svg class="h-4 w-4"><use href="#i-refresh" /></svg>
+                    <span x-text="t('refresh')"></span>
+                  </button>
+                </div>
+
+                <div class="mt-4 rounded-xl border border-pink-100 bg-pink-50/40 p-3">
+                  <p class="text-xs font-extrabold text-gray-700" x-text="t('sheet_howto')"></p>
+                  <ol class="mt-2 space-y-1.5 text-[11px] font-medium leading-relaxed text-gray-600">
+                    <li class="flex gap-2"><span class="font-black text-pink-600">1.</span><span x-text="t('sheet_step_1')"></span></li>
+                    <li class="flex gap-2"><span class="font-black text-pink-600">2.</span><span x-text="t('sheet_step_2')"></span></li>
+                    <li class="flex gap-2"><span class="font-black text-pink-600">3.</span><span x-text="t('sheet_step_3')"></span></li>
+                    <li class="flex gap-2"><span class="font-black text-pink-600">4.</span><span x-text="t('sheet_step_4')"></span></li>
+                  </ol>
+                  <div class="mt-2.5 flex flex-wrap items-center gap-2">
+                    <button type="button" class="btn btn-soft btn-sm" @click="copySheetScript()">
+                      <svg class="h-4 w-4"><use href="#i-download" /></svg>
+                      <span x-text="t('sheet_copy_script')"></span>
+                    </button>
+                    <p class="text-[10px] font-medium leading-relaxed text-gray-400" x-text="t('sheet_script_hint')"></p>
+                  </div>
+                </div>
+
+                <div class="mt-4">
+                  <p class="text-[11px] font-extrabold text-gray-600" x-text="t('sheet_log')"></p>
+                  <p x-show="!sheetLog.length" class="mt-1 text-[11px] font-medium text-gray-400" x-text="t('sheet_no_log')"></p>
+                  <div class="mt-1.5 max-h-56 space-y-1.5 overflow-y-auto" x-show="sheetLog.length">
+                    <template x-for="row in sheetLog" :key="row.id">
+                      <div class="rounded-lg bg-white px-2 py-1.5 ring-1 ring-gray-100">
+                        <div class="flex items-center justify-between gap-2">
+                          <span class="truncate text-[10px] font-semibold text-gray-500" x-text="sheetKindLabel(row.kind) + (row.appointment_id ? ' · #' + String(row.appointment_id).slice(0, 8) : '')"></span>
+                          <span class="pill shrink-0" :class="sheetLogClass(row)" x-text="sheetLogLabel(row) + (row.status_code ? ' ' + row.status_code : '')"></span>
+                        </div>
+                        <p class="mt-1 break-words text-[10px] leading-relaxed text-amber-700" x-show="sheetSkipped(row)" x-text="row.message"></p>
+                        <p class="mt-1 break-words text-[10px] leading-relaxed text-rose-600" x-show="!sheetSkipped(row) && row.status_code && (row.status_code < 200 || row.status_code >= 300)" x-text="row.response"></p>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end">
+              <button type="button" class="btn btn-primary" @click="saveSettings()" :disabled="settingsSaving">
+                <svg class="h-4 w-4" :class="{ 'animate-spin': settingsSaving }"><use :href="settingsSaving ? '#i-refresh' : '#i-check'" /></svg>
+                <span x-text="settingsSaving ? t('saving') : t('save')"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Legal pages editor -->
+          <div x-show="adminTab === 'pages'" class="space-y-4">
+            <div class="card p-5">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="grid h-8 w-8 place-items-center rounded-xl bg-pink-50 text-pink-600"><svg class="h-4 w-4"><use href="#i-pencil" /></svg></span>
+                  <h2 class="card-title" x-text="t('settings_pages')"></h2>
+                </div>
+                <span class="pill bg-pink-50 text-pink-700" x-text="t('pages_badge')"></span>
+              </div>
+              <p class="mt-2 text-[11px] font-medium leading-relaxed text-gray-500" x-text="t('pages_hint')"></p>
+              <p class="mt-1 text-[11px] font-medium leading-relaxed text-gray-400" x-text="t('pages_placeholders_hint')"></p>
+
+              <div class="no-scrollbar mt-4 flex gap-1.5 overflow-x-auto rounded-2xl border border-pink-100 bg-white/80 p-1.5">
+                <button type="button" class="nav-btn" :class="{ 'nav-btn-active': pageTab === 'privacy' }" @click="pageTab = 'privacy'" x-text="t('page_privacy')"></button>
+                <button type="button" class="nav-btn" :class="{ 'nav-btn-active': pageTab === 'terms' }" @click="pageTab = 'terms'" x-text="t('page_terms')"></button>
+                <button type="button" class="nav-btn" :class="{ 'nav-btn-active': pageTab === 'usage' }" @click="pageTab = 'usage'" x-text="t('page_usage')"></button>
+              </div>
+
+              <template x-for="pg in pageDefs" :key="pg.slug">
+                <div x-show="pageTab === pg.slug" class="mt-4 space-y-4">
+                  <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label class="label" :for="'legal_' + pg.slug + '_title_ar'" x-text="t('page_title_ar')"></label>
+                      <input :id="'legal_' + pg.slug + '_title_ar'" type="text" class="input" maxlength="120" x-model="settings['legal_' + pg.slug + '_title_ar']" />
+                    </div>
+                    <div>
+                      <label class="label" :for="'legal_' + pg.slug + '_title_en'" x-text="t('page_title_en')"></label>
+                      <input :id="'legal_' + pg.slug + '_title_en'" type="text" class="input num" dir="ltr" maxlength="120" x-model="settings['legal_' + pg.slug + '_title_en']" />
+                    </div>
+                    <div>
+                      <label class="label" :for="'legal_' + pg.slug + '_intro_ar'" x-text="t('page_intro_ar')"></label>
+                      <input :id="'legal_' + pg.slug + '_intro_ar'" type="text" class="input" maxlength="240" x-model="settings['legal_' + pg.slug + '_intro_ar']" />
+                    </div>
+                    <div>
+                      <label class="label" :for="'legal_' + pg.slug + '_intro_en'" x-text="t('page_intro_en')"></label>
+                      <input :id="'legal_' + pg.slug + '_intro_en'" type="text" class="input num" dir="ltr" maxlength="240" x-model="settings['legal_' + pg.slug + '_intro_en']" />
+                    </div>
+                  </div>
+
+                  <div class="rounded-xl border border-pink-100 bg-pink-50/40 p-3">
+                    <p class="flex items-center justify-between gap-2 text-[11px] font-extrabold text-gray-700">
+                      <span x-text="t('page_body_hint')"></span>
+                      <a :href="pg.file" target="_blank" rel="noopener" class="text-pink-700 hover:underline" x-text="t('page_preview')"></a>
+                    </p>
+                  </div>
+
+                  <div>
+                    <label class="label" :for="'legal_' + pg.slug + '_body_ar'" x-text="t('page_body_ar')"></label>
+                    <textarea :id="'legal_' + pg.slug + '_body_ar'" rows="16" dir="auto" class="input font-mono text-[12px] leading-relaxed" x-model="settings['legal_' + pg.slug + '_body_ar']"></textarea>
+                  </div>
+                  <div>
+                    <label class="label" :for="'legal_' + pg.slug + '_body_en'" x-text="t('page_body_en')"></label>
+                    <textarea :id="'legal_' + pg.slug + '_body_en'" rows="16" dir="ltr" class="input font-mono text-[12px] leading-relaxed" x-model="settings['legal_' + pg.slug + '_body_en']"></textarea>
+                  </div>
+                </div>
+              </template>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <p class="text-[11px] font-medium text-gray-400" x-text="t('page_saved_hint')"></p>
+              <button type="button" class="btn btn-primary" @click="savePages()" :disabled="pagesSaving">
+                <svg class="h-4 w-4" :class="{ 'animate-spin': pagesSaving }"><use :href="pagesSaving ? '#i-refresh' : '#i-check'" /></svg>
+                <span x-text="pagesSaving ? t('saving') : t('save_pages')"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= EXPENSES ================= -->
+      <section x-show="tab === 'expenses'" x-transition.opacity.duration.150ms>
+        <div x-show="!user && !staffSession" class="card mx-auto max-w-xl p-8 text-center">
+          <span class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-pink-50 text-pink-600 ring-1 ring-pink-100">
+            <svg class="h-7 w-7"><use href="#i-lock" /></svg>
+          </span>
+          <h2 class="mt-4 text-lg font-extrabold text-gray-900" x-text="t('access_denied')"></h2>
+          <p class="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-gray-500" x-text="t('login_hint')"></p>
+        </div>
+
+        <div x-show="user || staffSession" class="space-y-5">
+          <div class="card flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5">
+            <div class="flex items-center gap-3">
+              <span class="grid h-10 w-10 place-items-center rounded-2xl bg-pink-50 text-pink-600 ring-1 ring-pink-100">
+                <svg class="h-5 w-5"><use href="#i-receipt" /></svg>
+              </span>
+              <div>
+                <h2 class="text-base font-extrabold text-gray-900" x-text="t('expenses_title')"></h2>
+                <p class="text-xs font-semibold text-gray-500" x-text="user ? t('expenses_sub') : t('expenses_staff_hint')"></p>
+              </div>
+            </div>
+            <button type="button" class="btn btn-ghost btn-sm" x-show="user" @click="loadExpenses()" :disabled="expensesLoading">
+              <svg class="h-4 w-4" :class="{ 'animate-spin': expensesLoading }"><use href="#i-refresh" /></svg>
+              <span x-text="t('refresh')"></span>
+            </button>
+          </div>
+
+          <div x-show="user" class="grid grid-cols-3 gap-3 sm:gap-4">
+            <div class="card p-4">
+              <div class="flex items-center justify-between">
+                <p class="text-[11px] font-bold text-gray-500" x-text="t('expenses_total')"></p>
+                <span class="kpi-icon bg-rose-50 text-rose-600"><svg class="h-4 w-4"><use href="#i-receipt" /></svg></span>
+              </div>
+              <p class="num mt-2 text-lg font-extrabold tracking-tight text-gray-900 sm:text-xl" x-text="fmtBHD(expenseTotals.total)"></p>
+              <p class="mt-1 text-[11px] font-bold text-gray-500" x-text="t('vat_input') + ': ' + fmtBHD(expenseTotals.vat)"></p>
+            </div>
+            <div class="card p-4">
+              <div class="flex items-center justify-between">
+                <p class="text-[11px] font-bold text-gray-500" x-text="t('expenses_cash_total')"></p>
+                <span class="kpi-icon bg-emerald-50 text-emerald-600"><svg class="h-4 w-4"><use href="#i-receipt" /></svg></span>
+              </div>
+              <p class="num mt-2 text-lg font-extrabold tracking-tight text-gray-900 sm:text-xl" x-text="fmtBHD(expenseTotals.cash)"></p>
+            </div>
+            <div class="card p-4">
+              <div class="flex items-center justify-between">
+                <p class="text-[11px] font-bold text-gray-500" x-text="t('expenses_benefitpay_total')"></p>
+                <span class="kpi-icon bg-blue-50 text-blue-600"><svg class="h-4 w-4"><use href="#i-card" /></svg></span>
+              </div>
+              <p class="num mt-2 text-lg font-extrabold tracking-tight text-gray-900 sm:text-xl" x-text="fmtBHD(expenseTotals.benefitpay)"></p>
+            </div>
+          </div>
+
+          <div class="grid gap-5 lg:grid-cols-3">
+            <div class="card p-5" :class="user ? '' : 'lg:col-span-3'">
+              <h2 class="card-title" x-text="t('expense_form_title')"></h2>
+              <form class="mt-4 space-y-3" @submit.prevent="saveExpense()">
+                <div>
+                  <label class="label" for="expense_title" x-text="t('expense_title')"></label>
+                  <input id="expense_title" type="text" class="input" maxlength="160" :placeholder="t('expense_title_ph')" x-model="expenseForm.title" />
+                </div>
+                <div class="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <label class="label" for="expense_amount" x-text="t('expense_amount')"></label>
+                    <input id="expense_amount" type="number" class="input num" dir="ltr" min="0.001" step="0.001" placeholder="0.000" x-model="expenseForm.amount" />
+                  </div>
+                  <div>
+                    <label class="label" for="expense_method" x-text="t('expense_method')"></label>
+                    <select id="expense_method" class="input" x-model="expenseForm.method">
+                      <option value="cash" x-text="t('expense_cash')"></option>
+                      <option value="benefitpay" x-text="t('expense_benefitpay')"></option>
+                    </select>
+                  </div>
+                </div>
+                <div class="rounded-xl border border-dashed border-pink-200 bg-pink-50/40 p-3">
+                  <p class="text-[11px] font-extrabold text-gray-600" x-text="t('expense_tax_section')"></p>
+                  <p class="mt-0.5 text-[11px] font-medium text-gray-500" x-text="t('expense_tax_hint')"></p>
+                  <div class="mt-3 space-y-3">
+                    <div>
+                      <label class="label" for="expense_vendor_name" x-text="t('expense_vendor')"></label>
+                      <input id="expense_vendor_name" type="text" class="input" maxlength="160" :placeholder="t('expense_vendor_ph')" x-model="expenseForm.vendor_name" />
+                    </div>
+                    <div class="grid gap-3 sm:grid-cols-2">
+                      <div>
+                        <label class="label" for="expense_vendor_vat" x-text="t('expense_vendor_vat')"></label>
+                        <input id="expense_vendor_vat" type="text" class="input num" dir="ltr" maxlength="40" placeholder="BH123456789" x-model="expenseForm.vendor_vat_no" />
+                      </div>
+                      <div>
+                        <label class="label" for="expense_invoice_no" x-text="t('expense_invoice_no')"></label>
+                        <input id="expense_invoice_no" type="text" class="input num" dir="ltr" maxlength="60" :placeholder="t('expense_invoice_ph')" x-model="expenseForm.invoice_no" />
+                      </div>
+                    </div>
+                    <div>
+                      <label class="label" for="expense_vat_amount" x-text="t('expense_vat_amount')"></label>
+                      <div class="flex gap-2">
+                        <input id="expense_vat_amount" type="number" class="input num" dir="ltr" min="0" step="0.001" placeholder="0.000" x-model="expenseForm.vat_amount" />
+                        <button type="button" class="btn btn-soft btn-sm shrink-0" @click="calcExpenseVat()" x-text="t('expense_calc_vat')"></button>
+                      </div>
+                      <p class="mt-1 text-[11px] font-bold text-gray-500" x-text="t('expense_net') + ': ' + fmtBHD(expenseNet)"></p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label class="label" for="expense_date" x-text="t('expense_date')"></label>
+                  <input id="expense_date" type="date" class="input num" dir="ltr" x-model="expenseForm.spent_at" />
+                </div>
+                <div>
+                  <label class="label" for="expense_notes" x-text="t('expense_notes')"></label>
+                  <textarea id="expense_notes" class="input" rows="2" maxlength="500" :placeholder="t('expense_notes_ph')" x-model="expenseForm.notes"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-full" :disabled="expenseSaving">
+                  <svg class="h-4 w-4" :class="{ 'animate-spin': expenseSaving }"><use :href="expenseSaving ? '#i-refresh' : '#i-plus'" /></svg>
+                  <span x-text="t('expense_add')"></span>
+                </button>
+              </form>
+            </div>
+
+            <div x-show="user" class="card overflow-hidden lg:col-span-2">
+              <div class="flex flex-wrap items-end justify-between gap-3 border-b border-pink-100 p-4 sm:p-5">
+                <h2 class="card-title" x-text="t('expenses_title')"></h2>
+                <div x-show="user" class="flex flex-wrap items-end gap-2">
+                  <div>
+                    <label class="label" for="expense_filter_from" x-text="t('from_date')"></label>
+                    <input id="expense_filter_from" type="date" class="input num" dir="ltr" x-model="expenseFilter.from" @change="loadExpenses()" />
+                  </div>
+                  <div>
+                    <label class="label" for="expense_filter_to" x-text="t('to_date')"></label>
+                    <input id="expense_filter_to" type="date" class="input num" dir="ltr" x-model="expenseFilter.to" @change="loadExpenses()" />
+                  </div>
+                </div>
+              </div>
+
+              <p x-show="expensesLoading" class="p-8 text-center text-sm font-semibold text-gray-400" x-text="t('loading')"></p>
+              <p x-show="!expensesLoading && !expenses.length" class="p-10 text-center text-sm font-semibold text-gray-400" x-text="t('expenses_empty')"></p>
+
+              <div x-show="!expensesLoading && expenses.length" class="overflow-x-auto">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th x-text="t('col_expense_title')"></th>
+                      <th x-text="t('expense_method')"></th>
+                      <th x-text="t('col_expense_date')"></th>
+                      <th x-text="t('col_expense_by')"></th>
+                      <th class="text-end" x-text="t('col_expense_amount')"></th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template x-for="e in expenses" :key="e.id">
+                      <tr>
+                        <td>
+                          <p class="font-extrabold text-gray-800" x-text="e.title"></p>
+                          <p x-show="e.vendor_name" class="mt-0.5 text-[11px] font-semibold text-gray-500" x-text="e.vendor_name"></p>
+                          <p x-show="e.invoice_no" class="num text-[10px] font-semibold text-gray-400" dir="ltr" x-text="t('expense_invoice_short') + ': ' + e.invoice_no"></p>
+                          <p x-show="e.notes" class="mt-0.5 max-w-[16rem] truncate text-[11px] font-medium text-gray-500" :title="e.notes" x-text="e.notes"></p>
+                          <p x-show="Number(e.vat_amount) > 0 && e.vendor_vat_no" class="num text-[10px] font-semibold text-gray-400" dir="ltr" x-text="'VAT ' + e.vendor_vat_no"></p>
+                        </td>
+                        <td>
+                          <span class="pill" :class="e.method === 'benefitpay' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'" x-text="expenseMethodLabel(e.method)"></span>
+                        </td>
+                        <td class="num whitespace-nowrap text-gray-600" x-text="fmtDate(e.spent_at)"></td>
+                        <td class="text-[11px] font-bold text-gray-600" x-text="expenseAddedBy(e)"></td>
+                        <td class="num whitespace-nowrap text-end font-extrabold text-gray-900">
+                          <span x-text="fmtBHD(e.amount)"></span>
+                          <span x-show="Number(e.vat_amount) > 0" class="mt-0.5 block text-[10px] font-bold text-gray-400" x-text="t('expense_vat_short') + ' ' + fmtBHD(e.vat_amount)"></span>
+                        </td>
+                        <td class="text-end">
+                          <button type="button" class="icon-btn danger" @click="deleteExpense(e)" :title="t('expense_delete')" :aria-label="t('expense_delete')">
+                            <svg class="h-4 w-4"><use href="#i-trash" /></svg>
+                          </button>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= REPORTS ================= -->
+      <section x-show="tab === 'reports'" x-transition.opacity.duration.150ms>
+        <div x-show="!user" class="card mx-auto max-w-xl p-8 text-center">
+          <span class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-pink-50 text-pink-600 ring-1 ring-pink-100">
+            <svg class="h-7 w-7"><use href="#i-lock" /></svg>
+          </span>
+          <h2 class="mt-4 text-lg font-extrabold text-gray-900" x-text="t('access_denied')"></h2>
+          <p class="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-gray-500" x-text="t('login_hint')"></p>
+          <button type="button" class="btn btn-primary mt-5" @click="loginOpen = true">
+            <svg class="h-4 w-4"><use href="#i-lock" /></svg>
+            <span x-text="t('login_to_continue')"></span>
+          </button>
+        </div>
+
+        <div x-show="user" class="space-y-5">
+          <div class="card p-4 sm:p-5">
+            <div class="flex flex-wrap items-end gap-3">
+              <div class="min-w-[8.5rem] flex-1">
+                <label class="label" for="report_from" x-text="t('from_date')"></label>
+                <input id="report_from" type="date" class="input num" dir="ltr" x-model="report.from" />
+              </div>
+              <div class="min-w-[8.5rem] flex-1">
+                <label class="label" for="report_to" x-text="t('to_date')"></label>
+                <input id="report_to" type="date" class="input num" dir="ltr" x-model="report.to" />
+              </div>
+              <div class="min-w-[7rem]">
+                <label class="label" for="report_interval" x-text="t('interval')"></label>
+                <select id="report_interval" class="input" x-model="report.interval" @change="buildReport(); $nextTick(() => renderCharts())">
+                  <option value="daily" x-text="t('daily')"></option>
+                  <option value="monthly" x-text="t('monthly')"></option>
+                </select>
+              </div>
+              <button type="button" class="btn btn-primary" @click="runReport()" :disabled="reportLoading">
+                <svg class="h-4 w-4" :class="{ 'animate-spin': reportLoading }"><use :href="reportLoading ? '#i-refresh' : '#i-chart'" /></svg>
+                <span x-text="t('run_report')"></span>
+              </button>
+            </div>
+            <div class="mt-3 flex flex-wrap gap-1.5">
+              <button type="button" class="btn btn-soft btn-sm" @click="setQuick('today')" x-text="t('quick_today')"></button>
+              <button type="button" class="btn btn-soft btn-sm" @click="setQuick('month')" x-text="t('quick_month')"></button>
+              <button type="button" class="btn btn-soft btn-sm" @click="setQuick('lastMonth')" x-text="t('quick_last_month')"></button>
+              <button type="button" class="btn btn-soft btn-sm" @click="setQuick('year')" x-text="t('quick_year')"></button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
+            <div class="card p-4">
+              <div class="flex items-center justify-between">
+                <p class="text-[11px] font-bold text-gray-500" x-text="t('kpi_completed')"></p>
+                <span class="kpi-icon bg-emerald-50 text-emerald-600"><svg class="h-4 w-4"><use href="#i-check" /></svg></span>
+              </div>
+              <p class="num mt-2 text-2xl font-extrabold tracking-tight text-gray-900" x-text="reportData ? reportData.count : '—'"></p>
+            </div>
+            <div class="card p-4">
+              <div class="flex items-center justify-between">
+                <p class="text-[11px] font-bold text-gray-500" x-text="t('kpi_bookings')"></p>
+                <span class="kpi-icon bg-pink-50 text-pink-600"><svg class="h-4 w-4"><use href="#i-calendar" /></svg></span>
+              </div>
+              <p class="num mt-2 text-2xl font-extrabold tracking-tight text-gray-900" x-text="reportData ? reportData.bookings : '—'"></p>
+            </div>
+            <div class="card p-4">
+              <div class="flex items-center justify-between">
+                <p class="text-[11px] font-bold text-gray-500" x-text="t('kpi_revenue')"></p>
+                <span class="kpi-icon bg-rose-50 text-rose-600"><svg class="h-4 w-4"><use href="#i-receipt" /></svg></span>
+              </div>
+              <p class="num mt-2 text-xl font-extrabold tracking-tight text-gray-900" x-text="reportData ? fmtBHD(reportData.revenue) : '—'"></p>
+            </div>
+            <div class="card p-4">
+              <div class="flex items-center justify-between">
+                <p class="text-[11px] font-bold text-gray-500" x-text="t('kpi_commission')"></p>
+                <span class="kpi-icon bg-purple-50 text-purple-600"><svg class="h-4 w-4"><use href="#i-user" /></svg></span>
+              </div>
+              <p class="num mt-2 text-xl font-extrabold tracking-tight text-gray-900" x-text="reportData ? fmtBHD(reportData.commission) : '—'"></p>
+            </div>
+            <div class="card col-span-2 p-4 lg:col-span-1">
+              <div class="flex items-center justify-between">
+                <p class="text-[11px] font-bold text-gray-500" x-text="t('kpi_avg')"></p>
+                <span class="kpi-icon bg-amber-50 text-amber-600"><svg class="h-4 w-4"><use href="#i-chart" /></svg></span>
+              </div>
+              <p class="num mt-2 text-xl font-extrabold tracking-tight text-gray-900" x-text="reportData ? fmtBHD(reportData.avg) : '—'"></p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
+            <div class="card p-4 lg:col-span-2">
+              <div class="flex items-center justify-between">
+                <p class="text-[11px] font-bold text-gray-500" x-text="t('kpi_expenses')"></p>
+                <span class="kpi-icon bg-rose-50 text-rose-600"><svg class="h-4 w-4"><use href="#i-receipt" /></svg></span>
+              </div>
+              <p class="num mt-2 text-xl font-extrabold tracking-tight text-gray-900" x-text="reportData ? fmtBHD(reportData.expenseTotal) : '—'"></p>
+              <div class="mt-2 flex flex-wrap gap-2 text-[11px] font-bold text-gray-500">
+                <span x-text="t('expenses_cash_total') + ': ' + (reportData ? fmtBHD(reportData.expenseCash) : '—')"></span>
+                <span class="text-pink-300">•</span>
+                <span x-text="t('expenses_benefitpay_total') + ': ' + (reportData ? fmtBHD(reportData.expenseBenefitpay) : '—')"></span>
+                <span class="text-pink-300">•</span>
+                <span class="text-pink-700" x-text="t('vat_input') + ': ' + (reportData ? fmtBHD(reportData.expenseVat) : '—')"></span>
+              </div>
+            </div>
+            <div class="card p-4 lg:col-span-3">
+              <div class="flex items-center justify-between">
+                <p class="text-[11px] font-bold text-gray-500" x-text="t('kpi_profit')"></p>
+                <span class="kpi-icon bg-emerald-50 text-emerald-600"><svg class="h-4 w-4"><use href="#i-check" /></svg></span>
+              </div>
+              <p class="num mt-2 text-xl font-extrabold tracking-tight sm:text-2xl" :class="reportData && reportData.profit < 0 ? 'text-rose-600' : 'text-emerald-700'" x-text="reportData ? fmtBHD(reportData.profit) : '—'"></p>
+              <p class="mt-1 text-[11px] font-semibold text-gray-500" x-text="t('report_expenses_sub')"></p>
+            </div>
+          </div>
+
+          <p x-show="reportData && !reportData.bookings && !reportData.expenseCount" class="card p-10 text-center text-sm font-semibold text-gray-400" x-text="t('no_data')"></p>
+
+          <div x-show="reportData && (reportData.bookings || reportData.expenseCount)" class="space-y-5">
+            <div class="card p-5 sm:p-6">
+              <div class="flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <h2 class="card-title" x-text="t('chart_finance')"></h2>
+                  <p class="mt-0.5 text-[11px] font-semibold text-gray-500" x-text="t('chart_finance_sub')"></p>
+                </div>
+                <span class="pill" :class="reportData && reportData.profit < 0 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'" x-text="t('kpi_profit') + ': ' + (reportData ? fmtBHD(reportData.profit) : '—')"></span>
+              </div>
+              <div class="relative mx-auto mt-4 h-64 w-full max-w-sm sm:h-72">
+                <canvas id="financeChart"></canvas>
+              </div>
+              <div class="mt-4 grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
+                <div class="rounded-xl bg-pink-50 p-2.5">
+                  <span class="mx-auto mb-1 block h-2 w-2 rounded-full bg-pink-600"></span>
+                  <p class="text-[11px] font-bold text-gray-500" x-text="t('chart_sales')"></p>
+                  <p class="num text-sm font-extrabold text-gray-900" x-text="reportData ? fmtBHD(reportData.revenue) : '—'"></p>
+                </div>
+                <div class="rounded-xl bg-amber-50 p-2.5">
+                  <span class="mx-auto mb-1 block h-2 w-2 rounded-full bg-amber-500"></span>
+                  <p class="text-[11px] font-bold text-gray-500" x-text="t('kpi_expenses')"></p>
+                  <p class="num text-sm font-extrabold text-gray-900" x-text="reportData ? fmtBHD(reportData.expenseTotal) : '—'"></p>
+                </div>
+                <div class="rounded-xl bg-purple-50 p-2.5">
+                  <span class="mx-auto mb-1 block h-2 w-2 rounded-full bg-purple-500"></span>
+                  <p class="text-[11px] font-bold text-gray-500" x-text="t('kpi_commission')"></p>
+                  <p class="num text-sm font-extrabold text-gray-900" x-text="reportData ? fmtBHD(reportData.commission) : '—'"></p>
+                </div>
+                <div class="rounded-xl bg-emerald-50 p-2.5">
+                  <span class="mx-auto mb-1 block h-2 w-2 rounded-full" :class="reportData && reportData.profit < 0 ? 'bg-rose-600' : 'bg-emerald-600'"></span>
+                  <p class="text-[11px] font-bold text-gray-500" x-text="reportData && reportData.profit < 0 ? t('chart_loss') : t('kpi_profit')"></p>
+                  <p class="num text-sm font-extrabold" :class="reportData && reportData.profit < 0 ? 'text-rose-600' : 'text-emerald-700'" x-text="reportData ? fmtBHD(reportData.profit) : '—'"></p>
+                </div>
+              </div>
+            </div>
+
+            <div x-show="reportData && reportData.bookings" class="grid gap-5 lg:grid-cols-5">
+              <div class="card p-5 lg:col-span-3">
+                <h2 class="card-title" x-text="t('chart_revenue')"></h2>
+                <div class="relative mt-4 h-64 sm:h-72">
+                  <canvas id="revenueChart"></canvas>
+                </div>
+              </div>
+              <div class="card p-5 lg:col-span-2">
+                <h2 class="card-title" x-text="t('chart_services')"></h2>
+                <div class="relative mt-4 h-64 sm:h-72">
+                  <canvas id="serviceChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <div x-show="reportData && reportData.bookings" class="card p-5">
+              <h2 class="card-title" x-text="t('chart_staff')"></h2>
+              <div class="relative mt-4 h-64 sm:h-72">
+                <canvas id="staffChart"></canvas>
+              </div>
+            </div>
+
+            <div x-show="reportData && reportData.bookings" class="card overflow-hidden">
+              <div class="border-b border-pink-100 p-4 sm:p-5">
+                <h2 class="card-title" x-text="t('staff_performance')"></h2>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th x-text="t('col_staff')"></th>
+                      <th x-text="t('col_count')"></th>
+                      <th x-text="t('col_revenue')"></th>
+                      <th x-text="t('col_commission')"></th>
+                      <th x-text="t('revenue_share')"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template x-for="(s, idx) in (reportData ? reportData.staff : [])" :key="s.name + '-' + idx">
+                      <tr>
+                        <td class="font-extrabold text-gray-800" x-text="s.name"></td>
+                        <td class="num text-gray-700" x-text="s.count"></td>
+                        <td class="num font-extrabold text-gray-900" x-text="fmtBHD(s.revenue)"></td>
+                        <td class="num font-bold text-pink-700" x-text="fmtBHD(s.commission)"></td>
+                        <td>
+                          <div class="flex items-center gap-2">
+                            <div class="h-1.5 w-20 overflow-hidden rounded-full bg-pink-50">
+                              <div class="h-full rounded-full bg-pink-500" :style="'width:' + (reportData && reportData.revenue ? (s.revenue / reportData.revenue * 100) : 0) + '%'"></div>
+                            </div>
+                            <span class="num text-[11px] font-bold text-gray-500" x-text="(reportData && reportData.revenue ? (s.revenue / reportData.revenue * 100) : 0).toFixed(1) + '%'"></span>
+                          </div>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card overflow-hidden">
+              <div class="flex flex-wrap items-center justify-between gap-2 border-b border-pink-100 p-4 sm:p-5">
+                <div>
+                  <h2 class="card-title" x-text="t('report_expenses_title')"></h2>
+                  <p class="mt-0.5 text-[11px] font-semibold text-gray-500" x-text="t('expenses_total') + ': ' + (reportData ? fmtBHD(reportData.expenseTotal) : '—')"></p>
+                </div>
+                <span class="pill bg-rose-100 text-rose-700" x-text="(reportData ? reportData.expenseCount : 0) + ' ' + t('expenses_count')"></span>
+              </div>
+              <p x-show="reportData && !reportData.expenseCount" class="p-8 text-center text-sm font-semibold text-gray-400" x-text="t('report_no_expenses')"></p>
+              <div x-show="reportData && reportData.expenseCount" class="overflow-x-auto">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th x-text="t('col_expense_title')"></th>
+                      <th x-text="t('col_expense_method')"></th>
+                      <th x-text="t('col_expense_date')"></th>
+                      <th x-text="t('col_expense_by')"></th>
+                      <th class="text-end" x-text="t('col_expense_amount')"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template x-for="e in (reportData ? reportData.expenses : [])" :key="e.id">
+                      <tr>
+                        <td>
+                          <p class="font-extrabold text-gray-800" x-text="e.title"></p>
+                          <p x-show="e.vendor_name" class="mt-0.5 text-[11px] font-semibold text-gray-500" x-text="e.vendor_name"></p>
+                          <p x-show="e.invoice_no" class="num text-[10px] font-semibold text-gray-400" dir="ltr" x-text="t('expense_invoice_short') + ': ' + e.invoice_no"></p>
+                        </td>
+                        <td>
+                          <span class="pill" :class="e.method === 'benefitpay' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'" x-text="expenseMethodLabel(e.method)"></span>
+                        </td>
+                        <td class="num whitespace-nowrap text-gray-600" x-text="fmtDate(e.spent_at)"></td>
+                        <td class="text-[11px] font-bold text-gray-600" x-text="expenseAddedBy(e)"></td>
+                        <td class="num whitespace-nowrap text-end font-extrabold text-gray-900">
+                          <span x-text="fmtBHD(e.amount)"></span>
+                          <span x-show="Number(e.vat_amount) > 0" class="mt-0.5 block text-[10px] font-bold text-gray-400" x-text="t('expense_vat_short') + ' ' + fmtBHD(e.vat_amount)"></span>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= VAT ================= -->
+      <section x-show="tab === 'vat'" x-transition.opacity.duration.150ms>
+        <div x-show="!user" class="card mx-auto max-w-xl p-8 text-center">
+          <span class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-pink-50 text-pink-600 ring-1 ring-pink-100">
+            <svg class="h-7 w-7"><use href="#i-lock" /></svg>
+          </span>
+          <h2 class="mt-4 text-lg font-extrabold text-gray-900" x-text="t('access_denied')"></h2>
+          <p class="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-gray-500" x-text="t('login_hint')"></p>
+          <button type="button" class="btn btn-primary mt-5" @click="loginOpen = true">
+            <svg class="h-4 w-4"><use href="#i-lock" /></svg>
+            <span x-text="t('login_to_continue')"></span>
+          </button>
+        </div>
+
+        <div x-show="user" class="space-y-5">
+          <div class="card p-5 sm:p-6">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 class="text-lg font-extrabold tracking-tight text-gray-900" x-text="t('vat_title')"></h2>
+                <p class="mt-0.5 text-xs font-medium text-gray-500" x-text="t('vat_subtitle')"></p>
+              </div>
+              <span class="pill bg-emerald-100 text-emerald-700" x-text="'VAT ' + (settings.vat_rate || '10') + '%'"></span>
+            </div>
+
+            <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <label class="label" for="vat_month" x-text="t('vat_period')"></label>
+                <input id="vat_month" type="month" class="input num" dir="ltr" x-model="vatMonth" @change="applyVatMonth()" />
+              </div>
+              <div>
+                <label class="label" for="vat_from" x-text="t('from_date')"></label>
+                <input id="vat_from" type="date" class="input num" dir="ltr" x-model="vat.from" />
+              </div>
+              <div>
+                <label class="label" for="vat_to" x-text="t('to_date')"></label>
+                <input id="vat_to" type="date" class="input num" dir="ltr" x-model="vat.to" />
+              </div>
+              <div>
+                <label class="label" for="vat_basis" x-text="t('vat_basis')"></label>
+                <select id="vat_basis" class="input" x-model="vat.basis">
+                  <option value="completed" x-text="t('basis_completed')"></option>
+                  <option value="all" x-text="t('basis_all')"></option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mt-4 flex flex-wrap justify-end gap-2">
+              <button type="button" class="btn btn-ghost btn-sm" @click="exportVatCsv()" :disabled="!vatResult">
+                <svg class="h-4 w-4"><use href="#i-download" /></svg>
+                <span x-text="t('export_csv')"></span>
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm" @click="printVat()" :disabled="!vatResult">
+                <svg class="h-4 w-4"><use href="#i-print" /></svg>
+                <span x-text="t('print_report')"></span>
+              </button>
+              <button type="button" class="btn btn-primary btn-sm" @click="runVat()" :disabled="vatLoading">
+                <svg class="h-4 w-4" :class="{ 'animate-spin': vatLoading }"><use :href="vatLoading ? '#i-refresh' : '#i-receipt'" /></svg>
+                <span x-text="t('run_report')"></span>
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+            <div class="card p-4">
+              <p class="text-[11px] font-bold text-gray-500" x-text="t('gross_sales')"></p>
+              <p class="num mt-2 text-xl font-extrabold text-gray-900" x-text="vatResult ? fmtBHD(vatResult.gross) : '—'"></p>
+            </div>
+            <div class="card p-4">
+              <p class="text-[11px] font-bold text-gray-500" x-text="t('net_taxable')"></p>
+              <p class="num mt-2 text-xl font-extrabold text-gray-900" x-text="vatResult ? fmtBHD(vatResult.net) : '—'"></p>
+            </div>
+            <div class="card border-pink-200 bg-gradient-to-br from-pink-50 to-white p-4">
+              <p class="text-[11px] font-bold text-pink-700" x-text="t('vat_collected')"></p>
+              <p class="num mt-2 text-xl font-extrabold text-pink-700" x-text="vatResult ? fmtBHD(vatResult.vat) : '—'"></p>
+            </div>
+            <div class="card p-4">
+              <p class="text-[11px] font-bold text-amber-700" x-text="t('vat_input')"></p>
+              <p class="num mt-2 text-xl font-extrabold text-amber-700" x-text="vatResult ? fmtBHD(vatResult.inputVat) : '—'"></p>
+            </div>
+            <div class="card border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-4">
+              <p class="text-[11px] font-bold text-emerald-700" x-text="t('vat_net_due')"></p>
+              <p class="num mt-2 text-xl font-extrabold" :class="vatResult && vatResult.netDue < 0 ? 'text-amber-700' : 'text-emerald-700'" x-text="vatResult ? fmtBHD(vatResult.netDue) : '—'"></p>
+            </div>
+            <div class="card p-4">
+              <p class="text-[11px] font-bold text-gray-500" x-text="t('vat_count')"></p>
+              <p class="num mt-2 text-xl font-extrabold text-gray-900" x-text="vatResult ? vatResult.count : '—'"></p>
+            </div>
+          </div>
+
+          <div class="card overflow-hidden">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-pink-100 p-4 sm:p-5">
+              <h2 class="card-title" x-text="t('monthly_breakdown')"></h2>
+              <p class="num text-xs font-bold text-gray-500" x-show="vatResult" x-text="vat.from + ' → ' + vat.to"></p>
+            </div>
+            <p x-show="vatLoading" class="p-8 text-center text-sm font-semibold text-gray-400" x-text="t('loading')"></p>
+            <p x-show="!vatLoading && vatResult && !vatResult.months.length" class="p-10 text-center text-sm font-semibold text-gray-400" x-text="t('no_data')"></p>
+            <div x-show="!vatLoading && vatResult && vatResult.months.length" class="overflow-x-auto">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th x-text="t('col_month')"></th>
+                    <th x-text="t('gross_sales')"></th>
+                    <th x-text="t('net_taxable')"></th>
+                    <th x-text="t('vat_collected')"></th>
+                    <th x-text="t('vat_input')"></th>
+                    <th x-text="t('vat_net_due')"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template x-for="m in (vatResult ? vatResult.months : [])" :key="m.ym">
+                    <tr>
+                      <td class="font-extrabold text-gray-800" x-text="fmtMonth(m.ym)"></td>
+                      <td class="num text-gray-800" x-text="fmtBHD(m.gross)"></td>
+                      <td class="num text-gray-800" x-text="fmtBHD(m.net)"></td>
+                      <td class="num font-extrabold text-pink-700" x-text="fmtBHD(m.vat)"></td>
+                      <td class="num font-extrabold text-amber-700" x-text="fmtBHD(m.input || 0)"></td>
+                      <td class="num font-extrabold text-emerald-700" x-text="fmtBHD(m.vat - (m.input || 0))"></td>
+                    </tr>
+                  </template>
+                  <tr class="bg-pink-50/60 font-extrabold">
+                    <td class="text-pink-800" x-text="t('total_row')"></td>
+                    <td class="num text-pink-800" x-text="vatResult ? fmtBHD(vatResult.gross) : '—'"></td>
+                    <td class="num text-pink-800" x-text="vatResult ? fmtBHD(vatResult.net) : '—'"></td>
+                    <td class="num text-pink-800" x-text="vatResult ? fmtBHD(vatResult.vat) : '—'"></td>
+                    <td class="num text-pink-800" x-text="vatResult ? fmtBHD(vatResult.inputVat) : '—'"></td>
+                    <td class="num text-pink-800" x-text="vatResult ? fmtBHD(vatResult.netDue) : '—'"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-gray-200 bg-white/70 p-4">
+            <p class="flex items-start gap-2 text-[11px] font-medium leading-relaxed text-gray-500">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-gray-400"><use href="#i-info" /></svg>
+              <span x-text="(settings.vat_inclusive !== 'false' ? t('vat_note_incl') : t('vat_note_excl')) + ' ' + t('vat_filing_note')"></span>
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="mt-4 border-t border-pink-100/80 bg-white/60">
+      <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-1 px-4 py-5 text-center sm:flex-row sm:text-start">
+        <p class="text-[11px] font-semibold text-gray-500">
+          <span x-text="settings.salon_name || t('app_title')"></span>
+          <span class="mx-1 text-pink-300">•</span>
+          <span x-text="t('footer_note')"></span>
+        </p>
+        <p class="num text-[11px] font-medium text-gray-400">© <span x-text="new Date().getFullYear()"></span> · Powered by Supabase</p>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ============ TOAST ============ -->
+  <div
+    x-show="toast.show"
+    x-transition:enter="transition ease-out duration-200"
+    x-transition:enter-start="opacity-0 translate-y-2"
+    x-transition:enter-end="opacity-100 translate-y-0"
+    x-transition:leave="transition ease-in duration-150"
+    x-transition:leave-start="opacity-100 translate-y-0"
+    x-transition:leave-end="opacity-0 translate-y-2"
+    class="fixed inset-x-3 bottom-4 z-[80] sm:inset-x-auto sm:end-6 sm:bottom-6"
+    role="status" aria-live="polite"
+  >
+    <div class="mx-auto flex max-w-md items-start gap-2.5 rounded-2xl px-4 py-3 text-white shadow-2xl" :class="toast.type === 'error' ? 'bg-rose-600' : 'bg-emerald-600'">
+      <svg class="mt-0.5 h-4 w-4 shrink-0"><use :href="toast.type === 'error' ? '#i-alert' : '#i-check'" /></svg>
+      <p class="flex-1 text-xs font-bold leading-relaxed" x-text="toast.msg"></p>
+      <button type="button" class="-me-1 -mt-1 grid h-6 w-6 place-items-center rounded-md text-white/80 hover:bg-white/15" @click="toast.show = false" :aria-label="t('close')">
+        <svg class="h-3.5 w-3.5"><use href="#i-x" /></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============ LOGIN MODAL ============ -->
+  <div x-show="loginOpen" x-transition.opacity class="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/45 p-4 backdrop-blur-sm" @click.self="loginOpen = false" @keydown.escape.window="loginOpen = false">
+    <div class="card w-full max-w-sm p-6" role="dialog" aria-modal="true" aria-labelledby="login-title">
+      <div class="flex items-start justify-between">
+        <div class="flex items-center gap-2.5">
+          <span class="grid h-9 w-9 place-items-center rounded-xl bg-pink-50 text-pink-600 ring-1 ring-pink-100"><svg class="h-4 w-4"><use href="#i-lock" /></svg></span>
+          <h2 id="login-title" class="text-base font-extrabold text-gray-900" x-text="t('login_title')"></h2>
+        </div>
+        <button type="button" class="icon-btn" @click="loginOpen = false" :aria-label="t('close')"><svg class="h-4 w-4"><use href="#i-x" /></svg></button>
+      </div>
+      <p class="mt-3 text-xs font-medium leading-relaxed text-gray-500" x-text="t('login_hint')"></p>
+      <form class="mt-4 space-y-3" @submit.prevent="signIn()">
+        <div>
+          <label class="label" for="login_email" x-text="t('email')"></label>
+          <input id="login_email" type="email" class="input num" dir="ltr" x-model="email" autocomplete="username" required />
+        </div>
+        <div>
+          <label class="label" for="login_password" x-text="t('password')"></label>
+          <div class="relative">
+            <input id="login_password" :type="showKey ? 'text' : 'password'" class="input pe-11" dir="ltr" x-model="password" autocomplete="current-password" required />
+            <button type="button" class="icon-btn absolute end-1.5 top-1/2 -translate-y-1/2" @click="showKey = !showKey" :title="showKey ? t('hide') : t('show')">
+              <svg class="h-4 w-4"><use :href="showKey ? '#i-eye-off' : '#i-eye'" /></svg>
+            </button>
+          </div>
+        </div>
+        <p x-show="loginError" class="rounded-lg bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700" x-text="loginError"></p>
+        <button type="submit" class="btn btn-primary w-full py-2.5" :disabled="loggingIn">
+          <svg x-show="loggingIn" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-opacity=".25" stroke-width="3" />
+            <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+          </svg>
+          <span x-text="loggingIn ? t('logging_in') : t('sign_in')"></span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ STAFF LOGIN MODAL ============ -->
+  <div x-show="staffLoginOpen" x-transition.opacity class="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/45 p-4 backdrop-blur-sm" @click.self="staffLoginOpen = false" @keydown.escape.window="staffLoginOpen = false">
+    <div class="card w-full max-w-sm p-6" role="dialog" aria-modal="true" aria-labelledby="staff-login-title">
+      <div class="flex items-start justify-between">
+        <div class="flex items-center gap-2.5">
+          <span class="grid h-9 w-9 place-items-center rounded-xl bg-pink-50 text-pink-600 ring-1 ring-pink-100"><svg class="h-4 w-4"><use href="#i-user" /></svg></span>
+          <h2 id="staff-login-title" class="text-base font-extrabold text-gray-900" x-text="t('staff_login_title')"></h2>
+        </div>
+        <button type="button" class="icon-btn" @click="staffLoginOpen = false" :aria-label="t('close')"><svg class="h-4 w-4"><use href="#i-x" /></svg></button>
+      </div>
+      <p class="mt-3 text-xs font-medium leading-relaxed text-gray-500" x-text="t('staff_login_hint')"></p>
+      <form class="mt-4 space-y-3" @submit.prevent="staffSignIn()">
+        <div>
+          <label class="label" for="staff_username" x-text="t('username')"></label>
+          <input id="staff_username" type="text" class="input num" dir="ltr" x-model="staffForm.username" autocomplete="username" maxlength="32" required />
+        </div>
+        <div>
+          <label class="label" for="staff_password" x-text="t('password')"></label>
+          <div class="relative">
+            <input id="staff_password" :type="showKey ? 'text' : 'password'" class="input pe-11" dir="ltr" x-model="staffForm.password" autocomplete="current-password" required />
+            <button type="button" class="icon-btn absolute end-1.5 top-1/2 -translate-y-1/2" @click="showKey = !showKey" :title="showKey ? t('hide') : t('show')">
+              <svg class="h-4 w-4"><use :href="showKey ? '#i-eye-off' : '#i-eye'" /></svg>
+            </button>
+          </div>
+        </div>
+        <div>
+          <label class="label" for="staff_code" x-text="t('app_code')"></label>
+          <input id="staff_code" type="password" class="input num" dir="ltr" x-model="staffForm.code" autocomplete="off" maxlength="32" required />
+        </div>
+        <p x-show="staffLoginError" class="rounded-lg bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700" x-text="staffLoginError"></p>
+        <button type="submit" class="btn btn-primary w-full py-2.5" :disabled="staffLoggingIn">
+          <svg x-show="staffLoggingIn" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-opacity=".25" stroke-width="3" />
+            <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+          </svg>
+          <span x-text="staffLoggingIn ? t('logging_in') : t('staff_sign_in')"></span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ SERVICE MODAL ============ -->
+  <div x-show="svcModal" x-transition.opacity class="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/45 p-4 backdrop-blur-sm" @click.self="svcModal = false" @keydown.escape.window="svcModal = false">
+    <div class="card max-h-[92vh] w-full max-w-md overflow-y-auto p-6" role="dialog" aria-modal="true">
+      <div class="flex items-start justify-between">
+        <h2 class="text-base font-extrabold text-gray-900" x-text="svcForm.id ? t('edit_service') : t('add_service')"></h2>
+        <button type="button" class="icon-btn" @click="svcModal = false" :aria-label="t('close')"><svg class="h-4 w-4"><use href="#i-x" /></svg></button>
+      </div>
+      <form class="mt-4 space-y-4" @submit.prevent="saveSvc()">
+        <div>
+          <label class="label" for="svc_name_ar" x-text="t('name_ar')"></label>
+          <input id="svc_name_ar" type="text" class="input" x-model="svcForm.name_ar" required maxlength="120" />
+        </div>
+        <div>
+          <label class="label" for="svc_name_en" x-text="t('name_en')"></label>
+          <input id="svc_name_en" type="text" class="input" dir="ltr" x-model="svcForm.name_en" required maxlength="120" />
+        </div>
+        <div>
+          <label class="label" for="svc_price"><span x-text="t('price')"></span><span class="text-pink-500">*</span></label>
+          <input id="svc_price" type="number" min="0" step="0.001" inputmode="decimal" class="input num" dir="ltr" x-model="svcForm.price" required />
+          <p class="mt-1.5 text-[11px] font-medium leading-relaxed text-gray-400" x-text="t('service_form_hint')"></p>
+        </div>
+        <label class="flex cursor-pointer items-center gap-2.5 rounded-xl border border-pink-100 bg-pink-50/50 px-3 py-2.5 text-sm font-bold text-gray-700">
+          <input type="checkbox" class="h-4 w-4 rounded border-gray-300" x-model="svcForm.is_active" />
+          <span x-text="t('active')"></span>
+        </label>
+        <div class="flex justify-end gap-2 pt-1">
+          <button type="button" class="btn btn-ghost" @click="svcModal = false" x-text="t('cancel')"></button>
+          <button type="submit" class="btn btn-primary" :disabled="svcSaving">
+            <svg class="h-4 w-4" :class="{ 'animate-spin': svcSaving }"><use :href="svcSaving ? '#i-refresh' : '#i-check'" /></svg>
+            <span x-text="svcSaving ? t('saving') : t('save')"></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ STAFF MODAL ============ -->
+  <div x-show="stfModal" x-transition.opacity class="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/45 p-4 backdrop-blur-sm" @click.self="stfModal = false" @keydown.escape.window="stfModal = false">
+    <div class="card max-h-[92vh] w-full max-w-md overflow-y-auto p-6" role="dialog" aria-modal="true">
+      <div class="flex items-start justify-between">
+        <h2 class="text-base font-extrabold text-gray-900" x-text="stfForm.id ? t('edit_staff') : t('add_staff')"></h2>
+        <button type="button" class="icon-btn" @click="stfModal = false" :aria-label="t('close')"><svg class="h-4 w-4"><use href="#i-x" /></svg></button>
+      </div>
+      <form class="mt-4 space-y-4" @submit.prevent="saveStf()">
+        <div>
+          <label class="label" for="stf_name" x-text="t('staff_name')"></label>
+          <input id="stf_name" type="text" class="input" x-model="stfForm.name" required maxlength="120" />
+        </div>
+        <div>
+          <label class="label" for="stf_phone" x-text="t('phone')"></label>
+          <input id="stf_phone" type="tel" inputmode="tel" class="input num" dir="ltr" x-model="stfForm.phone" maxlength="20" />
+        </div>
+        <div class="space-y-3 rounded-xl border border-pink-100 bg-pink-50/40 p-3">
+          <p class="text-xs font-extrabold text-gray-700" x-text="t('staff_login_credentials')"></p>
+          <div>
+            <label class="label" for="stf_username" x-text="t('username')"></label>
+            <input id="stf_username" type="text" class="input num" dir="ltr" x-model="stfForm.username" maxlength="32" autocomplete="off" :placeholder="t('username_ph')" />
+            <p class="mt-1 text-[11px] leading-relaxed text-gray-400" x-text="t('username_hint')"></p>
+          </div>
+          <div>
+            <label class="label" for="stf_password" x-text="t('password')"></label>
+            <input id="stf_password" type="password" class="input num" dir="ltr" x-model="stfForm.password" autocomplete="new-password" :placeholder="stfForm.id ? t('password_keep') : ''" />
+            <p class="mt-1 text-[11px] leading-relaxed text-gray-400" x-text="t('password_hint')"></p>
+          </div>
+          <label class="flex cursor-pointer items-center gap-2.5 text-sm font-bold text-gray-700">
+            <input type="checkbox" class="h-4 w-4 rounded border-gray-300" x-model="stfForm.login_enabled" />
+            <span x-text="t('login_enabled')"></span>
+          </label>
+        </div>
+        <div>
+          <label class="label" for="stf_rate"><span x-text="t('commission_rate')"></span><span class="text-pink-500">*</span></label>
+          <div class="relative">
+            <input id="stf_rate" type="number" min="0" max="100" step="0.5" inputmode="decimal" class="input num pe-9" dir="ltr" x-model="stfForm.commission_rate" required />
+            <span class="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-sm font-extrabold text-gray-400">%</span>
+          </div>
+          <p class="mt-1.5 text-[11px] font-medium text-gray-400" x-text="t('commission_note')"></p>
+        </div>
+        <div class="flex justify-end gap-2 pt-1">
+          <button type="button" class="btn btn-ghost" @click="stfModal = false" x-text="t('cancel')"></button>
+          <button type="submit" class="btn btn-primary" :disabled="stfSaving">
+            <svg class="h-4 w-4" :class="{ 'animate-spin': stfSaving }"><use :href="stfSaving ? '#i-refresh' : '#i-check'" /></svg>
+            <span x-text="stfSaving ? t('saving') : t('save')"></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ CONFIRM MODAL ============ -->
+  <div x-show="confirmBox.open" x-transition.opacity class="fixed inset-0 z-[70] flex items-center justify-center bg-gray-900/45 p-4 backdrop-blur-sm" @keydown.escape.window="confirmBox.open && confirmNo()">
+    <div class="card w-full max-w-sm p-6" role="alertdialog" aria-modal="true">
+      <div class="flex items-start gap-3">
+        <span class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-rose-50 text-rose-600 ring-1 ring-rose-100"><svg class="h-5 w-5"><use href="#i-alert" /></svg></span>
+        <div>
+          <h2 class="text-base font-extrabold text-gray-900" x-text="t('confirm')"></h2>
+          <p class="mt-1 text-sm font-medium leading-relaxed text-gray-500" x-text="confirmBox.msg"></p>
+        </div>
+      </div>
+      <div class="mt-5 flex justify-end gap-2">
+        <button type="button" class="btn btn-ghost" @click="confirmNo()" x-text="t('cancel')"></button>
+        <button type="button" class="btn btn-danger" @click="confirmYes()" x-text="t('yes')"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Print target -->
+  <div id="print-area"></div>
+
+  <!-- Boot failure notice: never leave the visitor on a blank page -->
+  <div id="boot-error" style="display:none" class="fixed inset-0 z-[80] items-center justify-center bg-white p-6 text-center">
+    <div class="max-w-md">
+      <span class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-rose-50 text-rose-600">
+        <svg class="h-7 w-7"><use href="#i-alert" /></svg>
+      </span>
+      <p class="mt-4 text-base font-extrabold text-gray-900">تعذّر تشغيل النظام · App failed to start</p>
+      <p class="mt-2 text-sm font-medium text-gray-500" id="boot-error-msg"></p>
+      <button type="button" class="btn btn-primary mt-5" onclick="location.reload()">تحديث الصفحة · Reload</button>
+    </div>
+  </div>
+
+  <!-- Scripts: app modules must load before Alpine starts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/i18n.min.js?v=20261116a"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="js/app.min.js?v=20261116a"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+  <script>
+    (function () {
+      var shown = false
+      function showBootError(msg) {
+        if (shown) return
+        shown = true
+        var box = document.getElementById('boot-error')
+        var text = document.getElementById('boot-error-msg')
+        if (!box) return
+        if (text) text.textContent = msg
+        // Inline style wins over utility classes, so this reliably reveals the box.
+        box.style.display = 'flex'
+      }
+      window.addEventListener('error', function (e) {
+        var t = e.target
+        if (t && t.tagName === 'SCRIPT' && t.src) {
+          showBootError('ملف مطلوب لم يتم تحميله: ' + t.src + ' — تأكد من رفع مجلد js كاملاً.')
+        }
+      }, true)
+      window.addEventListener('load', function () {
+        setTimeout(function () {
+          var gate = document.querySelector('[x-show="!canAccess"]')
+          var shell = document.querySelector('[x-show="canAccess"]')
+          var gateVisible = gate && getComputedStyle(gate).display !== 'none'
+          var shellVisible = shell && getComputedStyle(shell).display !== 'none'
+          if (!window.Alpine || (!gateVisible && !shellVisible)) {
+            showBootError('لم يتم تحميل ملفات التطبيق. تأكد من رفع js/app.min.js و js/i18n.min.js إلى مجلد js على السيرفر، ثم أعد التحديث.')
+          }
+        }, 6000)
+      })
+    })()
+  </script>
+</body>
+</html>

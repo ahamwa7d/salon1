@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /src/
+Disallow: /supabase/
+Disallow: /node_modules/

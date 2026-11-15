@@ -1,0 +1,12 @@
+# Keep the deployed website files byte-identical on every clone: LF endings,
+# except Windows launchers which must stay CRLF.
+* text=auto eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Images are binary.
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.webp binary
+*.ico binary

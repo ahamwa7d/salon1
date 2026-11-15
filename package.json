@@ -1,0 +1,19 @@
+{
+  "name": "salon-pos",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Bilingual beauty salon POS, commissions and Bahrain VAT reporting on Supabase.",
+  "scripts": {
+    "build:css": "tailwindcss -c tailwind.config.js -i css/input.css -o css/tailwind.css --minify",
+    "watch:css": "tailwindcss -c tailwind.config.js -i css/input.css -o css/tailwind.css --watch",
+    "build:js": "esbuild src/app.js src/i18n.js --minify --legal-comments=none --outdir=js --out-extension:.js=.min.js",
+    "build": "npm run build:css && npm run build:js",
+    "new-client": "node setup/new-client.mjs",
+    "apply-schema": "node setup/apply-schema.mjs",
+    "test:setup": "node --test setup/provision.test.mjs setup/apply-schema.test.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.24.2",
+    "tailwindcss": "3.4.17"
+  }
+}
