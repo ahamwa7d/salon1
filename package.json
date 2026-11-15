@@ -10,7 +10,8 @@
     "build": "npm run build:css && npm run build:js",
     "new-client": "node setup/new-client.mjs",
     "apply-schema": "node setup/apply-schema.mjs",
-    "test:setup": "node --test setup/provision.test.mjs setup/apply-schema.test.mjs"
+    "configure": "node setup/configure-site.mjs",
+    "test:setup": "node --test setup/provision.test.mjs setup/apply-schema.test.mjs setup/configure-site.test.mjs"
   },
   "devDependencies": {
     "esbuild": "0.24.2",
