@@ -106,6 +106,7 @@ salon-pos/
 │   └── tailwind.css        # Compiled production CSS
 ├── js/
 │   ├── config.js           # Supabase URL + anon key  (the only file you edit)
+│   ├── config.example.js   # Placeholder copy for linking another client
 │   ├── branding.js         # Shared loader for name, logo, contact, social, legal text
 │   ├── i18n.min.js         # Compiled (minified) English / Arabic strings
 │   └── app.min.js          # Compiled (minified) Alpine app logic
@@ -312,6 +313,36 @@ npm run apply-schema
 ```
 
 It runs `supabase/schema.sql`, then verifies `public_info`, `public_legal_page` and the `branding` bucket.
+
+### 3.9 Reusing this repository for another client
+
+The same repository can be deployed twice: once as the seller's own demo/trial site and once per client.
+The **only** file that differs between two installations is `js/config.js` — it holds the project URL and
+the public key, nothing else:
+
+```js
+window.SB_CONFIG = {
+  url: 'https://<project-ref>.supabase.co',
+  anonKey: '<publishable / anon key>'
+}
+```
+
+`js/config.example.js` is the placeholder version committed to Git. To link the site to a different client:
+
+1. **Create the project** for that client (Dashboard, or `npm run new-client`).
+2. **Apply the schema** — SQL Editor → paste `supabase/schema.sql` → Run, or `npm run apply-schema`.
+3. **Point the site at it**: copy `js/config.example.js` over `js/config.js` and paste the new project's
+   URL and publishable key. Commit this only if the repository is dedicated to that one client;
+   otherwise keep the trial values in Git and change `js/config.js` only on the deployed copy.
+4. **Create the client's admin user**: Authentication → Users → Add user (Auto Confirm), then disable
+   *Allow new users to sign up*.
+5. Upload the site files and log in once to fill **Admin → Settings** and **Admin → Pages**.
+
+Nothing else is client-specific: salon name, logo, phone, address, social links, SEO text and the three
+legal pages all live in the `settings` table and are edited from the dashboard.
+
+> If you keep this repository public/shared, prefer step 3's second option: leave the trial keys in Git
+> and edit `js/config.js` only inside the client's uploaded copy.
 
 ---
 
