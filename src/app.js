@@ -588,7 +588,12 @@ document.addEventListener('alpine:init', () => {
     },
 
     async signIn() {
-      if (!sb) return
+      // Without a configured client there is nothing to authenticate against,
+      // so say it instead of leaving the button looking dead.
+      if (!sb) {
+        this.loginError = this.t('setup_required_login')
+        return
+      }
       this.loggingIn = true
       this.loginError = ''
       const { error } = await sb.auth.signInWithPassword({ email: this.email, password: this.password })

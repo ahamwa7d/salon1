@@ -32,7 +32,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="css/tailwind.css?v=20261116a" />
+  <link rel="stylesheet" href="css/tailwind.css?v=20261116c" />
 
   <style>
     :root {
@@ -351,6 +351,15 @@
     </header>
 
     <main>
+      <!-- Shown only when js/config.js still has placeholders: makes a missing
+           Supabase connection obvious instead of leaving buttons looking dead. -->
+      <div x-show="!configured" x-cloak class="border-b border-amber-200 bg-amber-50">
+        <div class="mx-auto flex max-w-7xl items-start gap-2 px-4 py-2.5 text-xs font-bold leading-relaxed text-amber-900 sm:items-center sm:px-6">
+          <svg class="mt-0.5 h-4 w-4 shrink-0 sm:mt-0" aria-hidden="true"><use href="#i-alert" /></svg>
+          <span x-text="t('setup_banner')"></span>
+        </div>
+      </div>
+
       <!-- Hero -->
       <section id="top" class="relative isolate overflow-hidden bg-gray-950">
         <img :src="heroImage" :alt="salonName" class="absolute inset-0 -z-20 h-full w-full object-cover" />
@@ -2792,9 +2801,9 @@
   <!-- Scripts: app modules must load before Alpine starts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/config.js"></script>
-  <script src="js/i18n.min.js?v=20261116a"></script>
+  <script src="js/i18n.min.js?v=20261116c"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="js/app.min.js?v=20261116a"></script>
+  <script src="js/app.min.js?v=20261116c"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
   <script>
     (function () {
