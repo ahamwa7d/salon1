@@ -98,8 +98,14 @@ salon-pos/
 ├── privacy.html            # Legal page shell — content comes from the database
 ├── terms.html              # Legal page shell — content comes from the database
 ├── usage-policy.html       # Legal page shell — content comes from the database
+├── manifest.webmanifest    # Installable-app manifest (name, colours, icons)
+├── sw.js                   # Service worker: offline shell + instant updates
 ├── img/
 │   ├── og-cover.jpg        # Fallback social sharing image
+│   ├── icon-192.png        # Home-screen icon (Android)
+│   ├── icon-512.png        # Home-screen icon (splash / stores)
+│   ├── icon-maskable-512.png
+│   ├── apple-touch-icon.png
 │   └── services/           # Local service / hero / about photos
 ├── css/
 │   ├── input.css           # Tailwind source directives
@@ -129,7 +135,7 @@ salon-pos/
 └── robots.txt              # Keeps the POS out of search engines
 ```
 
-**Deploy only:** `index.html`, `privacy.html`, `terms.html`, `usage-policy.html`, `css/`, `js/`, `img/`, `.htaccess`, `robots.txt`.
+**Deploy only:** `index.html`, `privacy.html`, `terms.html`, `usage-policy.html`, `manifest.webmanifest`, `sw.js`, `css/`, `js/`, `img/`, `.htaccess`, `robots.txt`.
 Never upload `src/`, `supabase/`, `setup/`, `clients/`, `package.json`, `tailwind.config.js` or `node_modules/`.
 The shipped JavaScript is minified, and `.htaccess` returns 404 for those source paths even if a
 copy is left behind.
@@ -337,8 +343,8 @@ own project. The site shows a “setup required” banner until both values are 
    URL and publishable key. It validates the URL and key, and rejects `service_role`.
 4. **Create the client's admin user** in Authentication → Users (Auto Confirm), then disable
    *Allow new users to sign up*.
-5. **Upload** the site files (`index.html`, `privacy.html`, `terms.html`, `usage-policy.html`, `css/`,
-   `js/`, `img/`, `.htaccess`, `robots.txt`).
+5. **Upload** the site files (`index.html`, `privacy.html`, `terms.html`, `usage-policy.html`,
+   `manifest.webmanifest`, `sw.js`, `css/`, `js/`, `img/`, `.htaccess`, `robots.txt`).
 6. **Hand over** the site and the admin login. The client signs in and fills everything else from
    **Admin → Settings** (name, logo, phone, address, hours, map, email, social links, SEO) and
    **Admin → Pages** (privacy, terms, usage policy).
@@ -350,13 +356,40 @@ schema serves every client, and each client has a separate Supabase project, so 
 > After editing `js/config.js` for one client, run `git checkout -- js/config.js` before preparing the next
 > client so your repository stays neutral.
 
+### 3.10 Phones, tablets and the installable app
+
+The same build is verified at every common viewport — 320, 360, 375, 390, 412, 414, 430 CSS px (phones),
+768 and 820 (tablets), 1024, 1280, 1366, 1440 and 1920 (desktops), plus landscape phones — with **no
+horizontal scrolling** on the landing page, the three legal pages, the booking form, the dashboard tabs or
+the admin forms.
+
+What is handled explicitly:
+
+| Area | Behaviour |
+| --- | --- |
+| Narrow phones (≤ 360px) | Brand name wraps to two lines instead of being cut; the account button becomes an icon |
+| Touch keyboards | Inputs are 16px on touch devices, so iOS Safari never zooms the page on focus |
+| Tap targets | Language keys are at least 38×38px; buttons use the full `btn` padding |
+| Landscape / short screens | Every dialog is capped at `100dvh − 2rem` and scrolls inside, so the close button is always reachable |
+| Notched iPhones | `viewport-fit=cover` + `env(safe-area-inset-*)` keep the sticky header and footer clear of the notch |
+| Installed app | `manifest.webmanifest` (standalone display, 192/512/maskable icons) and `sw.js` (offline shell, network-first updates) |
+
+**Install it:** Android/Chrome → menu → *Install app* (or *Add to Home screen*); iPhone/Safari → Share →
+*Add to Home Screen*. The home-screen icon uses `img/icon-*.png`; if a client uploads a logo, the in-page
+favicon and the app title follow it automatically, while the launcher icon stays the packaged one.
+
+`sw.js` never caches `js/config.js`, so a device can never keep talking to a swapped Supabase project, and
+it serves the network version first — a new deployment appears on the next visit without clearing data.
+When you change `sw.js` itself, bump the `CACHE` constant (`salon-shell-v2` → `v3`).
+
 ---
+
 
 ## 4. Hostinger deployment
 
 1. In hPanel, open **Files → File Manager → public_html**.
-2. Upload `index.html`, `privacy.html`, `terms.html`, `usage-policy.html`, the `css` folder, the `js` folder, the `img`
-   folder, `.htaccess` and `robots.txt`.
+2. Upload `index.html`, `privacy.html`, `terms.html`, `usage-policy.html`, `manifest.webmanifest`, `sw.js`, the
+   `css` folder, the `js` folder, the `img` folder, `.htaccess` and `robots.txt`.
 3. Enable **SSL** in hPanel and force HTTPS (the supplied `.htaccess` also redirects HTTP → HTTPS).
 4. Open the domain, sign in as admin, and create your services and staff.
 

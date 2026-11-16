@@ -38,6 +38,15 @@ RedirectMatch 404 (?i)/(package(-lock)?\.json|tailwind\.config\.js|README(\.[a-z
   Header always unset Server
 </IfModule>
 
+# Installable app (PWA)
+AddType application/manifest+json .webmanifest
+
+<FilesMatch "^(sw\.js|manifest\.webmanifest)$">
+  <IfModule mod_headers.c>
+    Header set Cache-Control "no-cache, must-revalidate"
+  </IfModule>
+</FilesMatch>
+
 # Do not cache runtime configuration
 <Files "config.js">
   <IfModule mod_headers.c>

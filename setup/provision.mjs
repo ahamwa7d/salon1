@@ -23,6 +23,8 @@ const DEPLOY_FILES = [
   'privacy.html',
   'terms.html',
   'usage-policy.html',
+  'manifest.webmanifest',
+  'sw.js',
   'robots.txt',
   '.htaccess'
 ]

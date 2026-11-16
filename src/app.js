@@ -311,6 +311,9 @@ document.addEventListener('alpine:init', () => {
       set('twitter-description', 'content', description)
       set('twitter-image', 'content', image)
       set('favicon', 'href', info.logo_url)
+      set('app-name', 'content', name)
+      set('apple-app-title', 'content', name)
+      set('apple-touch-icon', 'href', info.logo_url)
 
       const ld = {
         '@context': 'https://schema.org',

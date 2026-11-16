@@ -68,7 +68,7 @@ async function main() {
     console.log('   ' + key.slice(0, 18) + '…')
     if (!changed) console.log('   (كان مربوطًا بهذا المشروع بالفعل)')
     console.log('\nالخطوات التالية:')
-    console.log('  1) ارفع ملفات الموقع (index.html, privacy.html, terms.html, usage-policy.html, css/, js/, img/, .htaccess, robots.txt).')
+    console.log('  1) ارفع ملفات الموقع (index.html, privacy.html, terms.html, usage-policy.html, manifest.webmanifest, sw.js, css/, js/, img/, .htaccess, robots.txt).')
     console.log('  2) أنشئ حساب المدير في Supabase → Authentication → Users (Auto Confirm)، وأوقف التسجيل العام.')
     console.log('  3) افتح الموقع → دخول النظام → الإدارة: عبّئ الاسم والشعار والتواصل وSEO، وأرسل للعميل بيانات الدخول.')
     console.log('')

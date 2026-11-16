@@ -4,6 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#db2777" />
+  <!-- Installable app shell (PWA). manifest.webmanifest is generated once per
+       deployment; the dashboard still controls every visible brand value. -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta id="app-name" name="application-name" content="Salon" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta id="apple-app-title" name="apple-mobile-web-app-title" content="Salon" />
+  <link id="apple-touch-icon" rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png" />
   <!-- The brand name, description and social image are filled from the admin
        dashboard settings at runtime. These defaults keep the page valid
        before the settings load and for crawlers that do not run JavaScript. -->
@@ -32,7 +41,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="css/tailwind.css?v=20261116c" />
+  <link rel="stylesheet" href="css/tailwind.css?v=20261116f" />
 
   <style>
     :root {
@@ -124,6 +133,35 @@
 
     .lang-btn { padding: .3rem .55rem; border-radius: .55rem; font-size: .72rem; font-weight: 800; color: #9d174d; }
     .lang-btn-active { background: #fff; color: #be185d; box-shadow: 0 1px 4px rgba(190, 24, 93, .18); }
+
+    /* Brand name: two tidy lines on narrow phones instead of "صال..." */
+    .brand-name {
+      display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+      overflow: hidden; overflow-wrap: anywhere; line-height: 1.15;
+    }
+    @media (min-width: 640px) {
+      .brand-name { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    }
+
+    /* ---------- Phones, tablets and notched screens ---------- */
+    /* iOS Safari zooms the whole page when a focused field is under 16px, so
+       touch devices get 16px inputs and comfortably tappable language keys. */
+    @media (max-width: 640px), (pointer: coarse) {
+      .input { font-size: 16px; }
+      .lang-btn { min-width: 2.4rem; min-height: 2.4rem; padding: .3rem .4rem; }
+    }
+    /* Every dialog stays inside the visual viewport: landscape phones, soft
+       keyboards and browser chrome all shrink it. The card scrolls inside. */
+    [role="dialog"] {
+      max-height: calc(100vh - 2rem);
+      max-height: calc(100dvh - 2rem);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+    /* Keep the sticky header clear of the notch / status bar in standalone mode. */
+    header { padding-top: env(safe-area-inset-top, 0px); }
+    footer { padding-bottom: env(safe-area-inset-bottom, 0px); }
 
     .pill {
       display: inline-flex; align-items: center; justify-content: center; gap: .25rem;
@@ -312,13 +350,13 @@
     <!-- Header -->
     <header class="sticky top-0 z-40 border-b border-pink-100/70 bg-white/90 backdrop-blur-xl">
       <div class="mx-auto flex h-16 max-w-7xl items-center gap-2 px-4 sm:px-6">
-        <a href="#top" class="flex min-w-0 items-center gap-2.5" @click.prevent="scrollToId('top')">
+        <a href="#top" class="flex min-w-0 flex-1 items-center gap-2.5 lg:flex-initial" @click.prevent="scrollToId('top')">
           <span x-show="!brandLogo" class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-pink-500 to-rose-600 text-white shadow-lg shadow-pink-500/25">
             <svg class="h-5 w-5"><use href="#i-sparkles" /></svg>
           </span>
           <img x-show="brandLogo" :src="brandLogo" :alt="salonName" class="h-10 w-10 shrink-0 rounded-2xl bg-white object-cover ring-1 ring-pink-100" />
-          <span class="min-w-0">
-            <span class="block max-w-[10rem] truncate text-[15px] font-extrabold tracking-tight text-gray-900 sm:max-w-[18rem] sm:text-base" x-text="salonName"></span>
+          <span class="min-w-0 flex-1">
+            <span class="brand-name max-w-full text-[14px] font-extrabold tracking-tight text-gray-900 sm:max-w-[18rem] sm:text-base" x-text="salonName"></span>
             <span class="hidden text-[10px] font-bold uppercase tracking-[0.18em] text-pink-500 sm:block" x-text="brandTagline"></span>
           </span>
         </a>
@@ -335,10 +373,9 @@
             <button type="button" class="lang-btn" :class="{ 'lang-btn-active': lang === 'ar' }" @click="setLang('ar')" aria-label="العربية" title="العربية">ع</button>
             <button type="button" class="lang-btn" :class="{ 'lang-btn-active': lang === 'en' }" @click="setLang('en')" aria-label="English" title="English">EN</button>
           </div>
-          <button type="button" class="btn btn-primary btn-sm" @click="entryOpen = true">
+          <button type="button" class="btn btn-primary btn-sm" @click="entryOpen = true" :aria-label="t('entry_button')" :title="t('entry_button')">
             <svg class="h-4 w-4"><use href="#i-user" /></svg>
             <span class="hidden sm:inline" x-text="t('entry_button')"></span>
-            <span class="sm:hidden" x-text="t('login')"></span>
           </button>
         </div>
       </div>
@@ -2801,9 +2838,9 @@
   <!-- Scripts: app modules must load before Alpine starts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/config.js"></script>
-  <script src="js/i18n.min.js?v=20261116c"></script>
+  <script src="js/i18n.min.js?v=20261116f"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="js/app.min.js?v=20261116c"></script>
+  <script src="js/app.min.js?v=20261116f"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
   <script>
     (function () {
@@ -2836,6 +2873,15 @@
         }, 6000)
       })
     })()
+  </script>
+  <script>
+    // Installable app: cache the shell for offline use and a home-screen icon.
+    // Only on HTTPS or localhost; file:// and old browsers are left untouched.
+    if ('serviceWorker' in navigator && (location.protocol === 'https:' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname))) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js').catch(function () { /* non-fatal */ })
+      })
+    }
   </script>
 </body>
 </html>

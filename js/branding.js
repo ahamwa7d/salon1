@@ -220,10 +220,19 @@
     if (has(info.logo_url)) {
       var icon = document.querySelector('link[rel="icon"]')
       if (icon) icon.setAttribute('href', info.logo_url)
+      var appleIcon = document.querySelector('link[rel="apple-touch-icon"]')
+      if (appleIcon) appleIcon.setAttribute('href', info.logo_url)
       var ogImage = document.querySelector('meta[property="og:image"]')
       if (ogImage) ogImage.setAttribute('content', info.logo_url)
       var twitterImage = document.querySelector('meta[name="twitter:image"]')
       if (twitterImage) twitterImage.setAttribute('content', info.logo_url)
+    }
+
+    if (has(info.salon_name)) {
+      var appName = document.querySelector('meta[name="application-name"]')
+      if (appName) appName.setAttribute('content', info.salon_name)
+      var appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]')
+      if (appleTitle) appleTitle.setAttribute('content', info.salon_name)
     }
   }
 
