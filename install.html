@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تفعيل نظام إدارة وحجز الصالون</title>
+  <style>
+    :root {
+      --bg: #fbf7f4;
+      --card: #ffffff;
+      --ink: #231b18;
+      --muted: #6c5f58;
+      --accent: #9c5660;
+      --accent-dark: #7d4149;
+      --gold: #c69c53;
+      --border: #eadfd7;
+      --ok: #197a4c;
+      --ok-bg: #ecf9f1;
+      --err: #b42318;
+      --err-bg: #fef3f2;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;
+      background: radial-gradient(circle at top, #fff1eb 0%, var(--bg) 55%);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 20px 14px 40px;
+    }
+    .wrap { max-width: 560px; margin: 0 auto; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 24px 20px;
+      box-shadow: 0 14px 36px rgba(66, 35, 39, 0.06);
+      margin-bottom: 16px;
+    }
+    .badge {
+      display: inline-block;
+      background: #fdf4e7;
+      color: #8f651d;
+      border: 1px solid #f0dfb9;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    h1 { margin: 0 0 8px; font-size: 22px; }
+    .sub { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.65; }
+    .step-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: 800;
+      margin: 0 0 14px;
+    }
+    .step-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--accent); color: #fff;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 13px; flex-shrink: 0;
+    }
+    .field { margin-bottom: 14px; }
+    label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 15px;
+      background: #fff;
+      color: var(--ink);
+    }
+    input:focus, select:focus { outline: none; border-color: var(--accent); }
+    .ltr { direction: ltr; text-align: left; }
+    .preview {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      background: #faf6f3;
+      padding: 8px 10px;
+      border-radius: 10px;
+      direction: ltr;
+      text-align: left;
+      word-break: break-all;
+    }
+    .phone-row { display: grid; grid-template-columns: 115px 1fr; gap: 8px; }
+    .oauth-btn {
+      width: 100%;
+      padding: 13px 16px;
+      border-radius: 13px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .oauth-btn:hover { border-color: var(--accent); }
+    .oauth-btn.connected {
+      border-color: var(--ok);
+      background: var(--ok-bg);
+      color: var(--ok);
+    }
+    .status-pill {
+      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: #f4ece6;
+      color: var(--muted);
+    }
+    .oauth-btn.connected .status-pill {
+      background: var(--ok);
+      color: #fff;
+    }
+    .helper-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 12.5px;
+      margin: 6px 0 14px;
+    }
+    .helper-links a { color: var(--accent-dark); text-decoration: none; font-weight: 600; }
+    .helper-links a:hover { text-decoration: underline; }
+    .launch-btn {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: #fff;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .launch-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .alert-err {
+      background: var(--err-bg);
+      color: var(--err);
+      border: 1px solid #fecdca;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 13.5px;
+      font-weight: 700;
+      margin-top: 12px;
+      display: none;
+    }
+    .loader-box {
+      display: none;
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 12px;
+      background: #faf6f3;
+      border: 1px solid var(--border);
+      font-size: 13.5px;
+      line-height: 1.6;
+    }
+    .bar-track {
+      height: 7px;
+      background: #eadfd7;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .bar-fill {
+      height: 100%;
+      width: 35%;
+      background: linear-gradient(90deg, var(--accent), var(--gold));
+      animation: pulseBar 2.2s infinite ease-in-out;
+    }
+    @keyframes pulseBar {
+      0% { transform: translateX(120%); }
+      100% { transform: translateX(-180%); }
+    }
+    .success-card { display: none; }
+    .info-box {
+      background: #faf6f3;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      margin: 12px 0;
+    }
+    .info-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    .info-val { font-size: 14px; font-weight: 700; word-break: break-all; }
+    .actions { display: flex; gap: 8px; margin-top: 8px; }
+    .btn-sm {
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--ink);
+    }
+    .btn-sm.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .note { font-size: 13px; color: var(--muted); line-height: 1.7; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <span class="badge">تفعيل ذاتي بضغطة زر</span>
+      <h1>إعداد وتشغيل نظام الصالون</h1>
+      <p class="sub">أدخلي بيانات الصالون، اربطي حسابي GitHub وSupabase، وسيتولى النظام إنشاء الموقع وقاعدة البيانات تلقائياً خلال 60 إلى 90 ثانية.</p>
+    </div>
+
+    <div id="setupFlow">
+      <div class="card">
+        <div class="step-title"><span class="step-num">1</span> بيانات الصالون والتفعيل</div>
+
+        <div class="field">
+          <label for="licenseKey">كود التفعيل (License Key)</label>
+          <input id="licenseKey" type="text" class="ltr" placeholder="AWJ-SLN-XXXX" autocomplete="off" />
+        </div>
+
+        <div class="field">
+          <label for="salonSlug">اسم الصالون بالإنجليزية للرابط (Salon Slug)</label>
+          <input id="salonSlug" type="text" class="ltr" placeholder="nelly-nails" autocomplete="off" />
+          <div class="preview" id="slugPreview">https://&lt;username&gt;.github.io/your-salon</div>
+        </div>
+
+        <div class="field">
+          <label for="adminEmail">البريد الإلكتروني للمديرة</label>
+          <input id="adminEmail" type="email" class="ltr" placeholder="manager@salon.com" />
+        </div>
+
+        <div class="field">
+          <label for="adminPassword">كلمة المرور للوحة الإدارة (8 أحرف على الأقل)</label>
+          <input id="adminPassword" type="password" class="ltr" minlength="8" placeholder="••••••••" />
+        </div>
+
+        <div class="field">
+          <label for="whatsappNumber">رقم الواتساب لاستلام الروابط وبيانات الدخول</label>
+          <div class="phone-row">
+            <select id="countryCode" class="ltr">
+              <option value="973" selected>🇧🇭 +973</option>
+              <option value="966">🇸🇦 +966</option>
+              <option value="971">🇦🇪 +971</option>
+              <option value="965">🇰🇼 +965</option>
+              <option value="974">🇶🇦 +974</option>
+              <option value="968">🇴🇲 +968</option>
+            </select>
+            <input id="whatsappNumber" type="tel" class="ltr" placeholder="33999819" />
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="step-title"><span class="step-num">2</span> ربط الحسابات بضغطة زر</div>
+
+        <button type="button" class="oauth-btn" id="btnGithub">
+          <span>1. ربط حساب GitHub ونشر الموقع</span>
+          <span class="status-pill" id="ghStatus">غير مربوط</span>
+        </button>
+
+        <button type="button" class="oauth-btn" id="btnSupabase">
+          <span>2. ربط حساب Supabase وإنشاء قاعدة البيانات</span>
+          <span class="status-pill" id="sbStatus">غير مربوط</span>
+        </button>
+
+        <div class="helper-links">
+          <a href="https://github.com/signup" target="_blank" rel="noopener">ليس لديكِ حساب؟ أنشئي حساب GitHub مجاني من هنا</a>
+          <a href="https://supabase.com/dashboard" target="_blank" rel="noopener">أنشئي حساب Supabase مجاني من هنا</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="step-title"><span class="step-num">3</span> الإطلاق والاستلام</div>
+
+        <button type="button" class="launch-btn" id="btnLaunch" disabled>إطلاق نظام الصالون الآن</button>
+
+        <div class="loader-box" id="loaderBox">
+          جاري تجهيز قاعدة البيانات وإنشاء مستودع الصالون وتفعيل الموقع... قد يستغرق ذلك من 60 إلى 90 ثانية، يرجى عدم إغلاق الصفحة.
+          <div class="bar-track"><div class="bar-fill"></div></div>
+        </div>
+
+        <div class="alert-err" id="errorBox"></div>
+      </div>
+    </div>
+
+    <div class="card success-card" id="successCard">
+      <span class="badge" style="background:var(--ok-bg);color:var(--ok);border-color:#b7ebc6;">تم التفعيل بنجاح ✓</span>
+      <h1>مبارك! نظام الصالون جاهز الآن</h1>
+
+      <div class="info-box">
+        <div class="info-label">رابط موقع الحجز للزبونات</div>
+        <div class="info-val" id="resSiteUrl"></div>
+        <div class="actions">
+          <button type="button" class="btn-sm" onclick="copyText('resSiteUrl', this)">نسخ الرابط</button>
+          <a class="btn-sm primary" id="openSiteLink" href="#" target="_blank" rel="noopener">فتح الموقع</a>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <div class="info-label">رابط لوحة الإدارة</div>
+        <div class="info-val" id="resAdminUrl"></div>
+        <div class="actions">
+          <button type="button" class="btn-sm" onclick="copyText('resAdminUrl', this)">نسخ الرابط</button>
+          <a class="btn-sm primary" id="openAdminLink" href="#" target="_blank" rel="noopener">فتح لوحة الإدارة</a>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <div class="info-label">بيانات الدخول للوحة الإدارة</div>
+        <div class="info-val" id="resCreds"></div>
+      </div>
+
+      <p class="note">
+        • تم إرسال الروابط وبيانات الدخول إلى رقم الواتساب المسجل.<br />
+        • تنبيه لطيف: يستغرق تفعيل الرابط على GitHub Pages من دقيقة إلى دقيقتين ليعمل بشكل كامل.<br />
+        • هل ترغبين بربط دومين خاص باسم الصالون لاحقاً؟ يمكنك التواصل معنا لترتيب ذلك كخيار إضافي.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const GITHUB_CLIENT_ID = "YOUR_GITHUB_CLIENT_ID";
+    const SUPABASE_CLIENT_ID = "YOUR_SUPABASE_CLIENT_ID";
+    const N8N_WEBHOOK_URL = "https://n8n.awj-bh.cloud/webhook/salon-auto-install";
+
+    const STORAGE_KEY = "awj_salon_installer_state_v1";
+    const fields = {
+      licenseKey: document.getElementById("licenseKey"),
+      salonSlug: document.getElementById("salonSlug"),
+      adminEmail: document.getElementById("adminEmail"),
+      adminPassword: document.getElementById("adminPassword"),
+      countryCode: document.getElementById("countryCode"),
+      whatsappNumber: document.getElementById("whatsappNumber")
+    };
+
+    const btnGithub = document.getElementById("btnGithub");
+    const btnSupabase = document.getElementById("btnSupabase");
+    const btnLaunch = document.getElementById("btnLaunch");
+    const ghStatus = document.getElementById("ghStatus");
+    const sbStatus = document.getElementById("sbStatus");
+    const slugPreview = document.getElementById("slugPreview");
+    const errorBox = document.getElementById("errorBox");
+    const loaderBox = document.getElementById("loaderBox");
+
+    function getRedirectUri() {
+      return window.location.origin + window.location.pathname;
+    }
+
+    function sanitizeSlug(val) {
+      return (val || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, "-")
+        .replace(/-{2,}/g, "-")
+        .replace(/^-+|-+$/g, "");
+    }
+
+    function loadState() {
+      try {
+        return JSON.parse(sessionStorage.getItem(STORAGE_KEY) || "{}");
+      } catch {
+        return {};
+      }
+    }
+
+    function saveState(patch) {
+      const next = { ...loadState(), ...patch };
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      return next;
+    }
+
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.style.display = "block";
+    }
+
+    function hideError() {
+      errorBox.style.display = "none";
+      errorBox.textContent = "";
+    }
+
+    function updatePreviewAndButton() {
+      const cleanSlug = sanitizeSlug(fields.salonSlug.value);
+      slugPreview.textContent = `https://<username>.github.io/${cleanSlug || "your-salon"}`;
+
+      const state = loadState();
+      const ghOk = Boolean(state.github_code);
+      const sbOk = Boolean(state.supabase_code);
+
+      btnGithub.classList.toggle("connected", ghOk);
+      ghStatus.textContent = ghOk ? "تم الربط بنجاح ✓" : "غير مربوط";
+
+      btnSupabase.classList.toggle("connected", sbOk);
+      sbStatus.textContent = sbOk ? "تم الربط بنجاح ✓" : "غير مربوط";
+
+      const formOk =
+        fields.licenseKey.value.trim().length > 0 &&
+        cleanSlug.length >= 2 &&
+        fields.adminEmail.value.trim().includes("@") &&
+        fields.adminPassword.value.length >= 8 &&
+        fields.whatsappNumber.value.replace(/\D/g, "").length >= 6;
+
+      btnLaunch.disabled = !(formOk && ghOk && sbOk);
+    }
+
+    // استعادة الحقول المحفوظة والتقاط OAuth code عند العودة
+    (function boot() {
+      const saved = loadState();
+      if (saved.license_key) fields.licenseKey.value = saved.license_key;
+      if (saved.salon_slug) fields.salonSlug.value = saved.salon_slug;
+      if (saved.admin_email) fields.adminEmail.value = saved.admin_email;
+      if (saved.admin_password) fields.adminPassword.value = saved.admin_password;
+      if (saved.country_code) fields.countryCode.value = saved.country_code;
+      if (saved.whatsapp_local) fields.whatsappNumber.value = saved.whatsapp_local;
+
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+      const oauthState = params.get("state");
+
+      if (code && oauthState === "github") {
+        saveState({ github_code: code });
+        window.history.replaceState({}, document.title, getRedirectUri());
+      } else if (code && oauthState === "supabase") {
+        saveState({ supabase_code: code });
+        window.history.replaceState({}, document.title, getRedirectUri());
+      }
+
+      updatePreviewAndButton();
+    })();
+
+    Object.entries(fields).forEach(([key, el]) => {
+      el.addEventListener("input", () => {
+        if (key === "salonSlug") {
+          const cleaned = sanitizeSlug(el.value);
+          if (el.value !== cleaned) el.value = cleaned;
+        }
+        saveState({
+          license_key: fields.licenseKey.value,
+          salon_slug: sanitizeSlug(fields.salonSlug.value),
+          admin_email: fields.adminEmail.value,
+          admin_password: fields.adminPassword.value,
+          country_code: fields.countryCode.value,
+          whatsapp_local: fields.whatsappNumber.value
+        });
+        updatePreviewAndButton();
+      });
+    });
+
+    btnGithub.addEventListener("click", () => {
+      const redirectUri = encodeURIComponent(getRedirectUri());
+      const url = `https://github.com/login/oauth/authorize?client_id=${encodeURIComponent(GITHUB_CLIENT_ID)}&scope=repo&redirect_uri=${redirectUri}&state=github`;
+      window.location.href = url;
+    });
+
+    btnSupabase.addEventListener("click", () => {
+      const redirectUri = encodeURIComponent(getRedirectUri());
+      const url = `https://api.supabase.com/v1/oauth/authorize?client_id=${encodeURIComponent(SUPABASE_CLIENT_ID)}&response_type=code&redirect_uri=${redirectUri}&state=supabase`;
+      window.location.href = url;
+    });
+
+    btnLaunch.addEventListener("click", async () => {
+      hideError();
+      const state = loadState();
+      const cleanSlug = sanitizeSlug(fields.salonSlug.value);
+      const rawPhone = fields.whatsappNumber.value.replace(/\D/g, "").replace(/^0+/, "");
+      const fullWhatsapp = rawPhone.startsWith(fields.countryCode.value)
+        ? rawPhone
+        : `${fields.countryCode.value}${rawPhone}`;
+
+      const payload = {
+        license_key: fields.licenseKey.value.trim(),
+        salon_slug: cleanSlug,
+        admin_email: fields.adminEmail.value.trim(),
+        admin_password: fields.adminPassword.value,
+        whatsapp: fullWhatsapp,
+        github_code: state.github_code,
+        supabase_code: state.supabase_code,
+        redirect_uri: getRedirectUri()
+      };
+
+      btnLaunch.disabled = true;
+      loaderBox.style.display = "block";
+
+      try {
+        const res = await fetch(N8N_WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json().catch(() => ({}));
+
+        loaderBox.style.display = "none";
+
+        if (!res.ok || data.success === false) {
+          showError(data.message || "تعذر إتمام التفعيل. يرجى التحقق من كود التفعيل والمحاولة مرة أخرى.");
+          btnLaunch.disabled = false;
+          return;
+        }
+
+        sessionStorage.removeItem(STORAGE_KEY);
+        document.getElementById("setupFlow").style.display = "none";
+        document.getElementById("successCard").style.display = "block";
+
+        const siteUrl = data.site_url || `https://<username>.github.io/${cleanSlug}/`;
+        const adminUrl = data.admin_url || `${siteUrl.replace(/\/?$/, "/")}admin.html`;
+
+        document.getElementById("resSiteUrl").textContent = siteUrl;
+        document.getElementById("openSiteLink").href = siteUrl;
+        document.getElementById("resAdminUrl").textContent = adminUrl;
+        document.getElementById("openAdminLink").href = adminUrl;
+        document.getElementById("resCreds").textContent =
+          `البريد الإلكتروني: ${payload.admin_email}  |  كلمة المرور: ${payload.admin_password}`;
+      } catch (err) {
+        loaderBox.style.display = "none";
+        showError("حدث خطأ في الاتصال بالخادم أثناء التفعيل. يرجى المحاولة مرة أخرى.");
+        btnLaunch.disabled = false;
+      }
+    });
+
+    function copyText(elementId, btnEl) {
+      const txt = document.getElementById(elementId)?.textContent || "";
+      if (!txt) return;
+      navigator.clipboard?.writeText(txt);
+      const old = btnEl.textContent;
+      btnEl.textContent = "تم النسخ ✓";
+      setTimeout(() => { btnEl.textContent = old; }, 1600);
+    }
+  </script>
+</body>
+</html>
