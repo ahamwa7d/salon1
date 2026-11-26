@@ -4,12 +4,12 @@
  * Strategy: network first, cache as a fallback, so a new deployment is always
  * picked up immediately when the visitor is online. Only this origin's static
  * files plus the pinned CDN bundles are cached — Supabase traffic (auth, REST,
- * storage) and Google Fonts always go straight to the network. js/config.js is
+ * storage) and Google Fonts always go straight to the network. ./config.js is
  * never cached, otherwise a device could keep talking to a swapped project.
  */
 'use strict'
 
-const CACHE = 'salon-shell-v2'
+const CACHE = 'salon-shell-v3'
 const CDN = 'https://cdn.jsdelivr.net'
 const SHELL = [
   './index.html',
@@ -61,7 +61,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   if (url.origin !== self.location.origin) return
-  if (url.pathname.endsWith('/js/config.js')) return
+  if (url.pathname.endsWith('/config.js') || url.pathname.endsWith('/js/config.js')) return
 
   event.respondWith(
     fetch(request)

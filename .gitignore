@@ -4,3 +4,7 @@ node_modules/
 .DS_Store
 Thumbs.db
 clients/
+
+# Per-deployment connection settings. install.html → n8n creates this file in
+# the client's repository; config.example.js is the committed template.
+config.js

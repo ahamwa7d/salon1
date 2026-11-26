@@ -10,15 +10,25 @@
 (function () {
   'use strict'
 
-  var cfg = window.SB_CONFIG || {}
+  var cfg = window.APP_CONFIG || {}
   var lang = 'ar'
   try { lang = localStorage.getItem('salon_lang') || 'ar' } catch (_e) { /* ignore */ }
 
   var info = {}
   var page = null
 
+  function isPlaceholder(value) {
+    var v = String(value == null ? '' : value).trim()
+    return !v || v === '%%SUPABASE_URL%%' || v === '%%SUPABASE_ANON_KEY%%' ||
+      v === '%%SALON_NAME%%' || v.indexOf('YOUR-') !== -1
+  }
+
   function configured() {
-    return Boolean(cfg.url && cfg.anonKey && String(cfg.url).indexOf('YOUR-') === -1)
+    return !isPlaceholder(cfg.SUPABASE_URL) && !isPlaceholder(cfg.SUPABASE_ANON_KEY)
+  }
+
+  function configName() {
+    return isPlaceholder(cfg.SALON_NAME) ? '' : String(cfg.SALON_NAME).trim()
   }
 
   function esc(value) {
@@ -31,13 +41,20 @@
     return String(value == null ? '' : value).trim() !== ''
   }
 
+  // Name priority: what the manager saved in the dashboard, then the name the
+  // installer wrote into config.js, then a neutral label.
+  function brand() {
+    if (has(info.salon_name)) return info.salon_name
+    return configName() || (lang === 'ar' ? 'الصالون' : 'Salon')
+  }
+
   function rpc(fn, body) {
-    var url = String(cfg.url).replace(/\/+$/, '') + '/rest/v1/rpc/' + fn
+    var url = String(cfg.SUPABASE_URL).replace(/\/+$/, '') + '/rest/v1/rpc/' + fn
     return fetch(url, {
       method: 'POST',
       headers: {
-        apikey: cfg.anonKey,
-        Authorization: 'Bearer ' + cfg.anonKey,
+        apikey: cfg.SUPABASE_ANON_KEY,
+        Authorization: 'Bearer ' + cfg.SUPABASE_ANON_KEY,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(body || {})
@@ -197,13 +214,13 @@
 
   function applyMeta(pageTitle) {
     var isAr = lang === 'ar'
-    var brand = info.salon_name || (isAr ? 'الصالون' : 'Salon')
+    var brandName = brand()
     var seoTitle = isAr ? info.seo_title_ar : info.seo_title_en
     var seoDesc = isAr ? info.seo_description_ar : info.seo_description_en
 
     document.title = has(seoTitle)
       ? pageTitle + ' · ' + seoTitle
-      : pageTitle + ' · ' + brand
+      : pageTitle + ' · ' + brandName
 
     if (has(seoDesc)) {
       var meta = document.querySelector('meta[name="description"]')
@@ -211,7 +228,7 @@
     }
 
     var ogSite = document.querySelector('meta[property="og:site_name"]')
-    if (ogSite && has(info.salon_name)) ogSite.setAttribute('content', info.salon_name)
+    if (ogSite) ogSite.setAttribute('content', brandName)
     var ogTitle = document.querySelector('meta[property="og:title"]')
     if (ogTitle) ogTitle.setAttribute('content', document.title)
     var twitterTitle = document.querySelector('meta[name="twitter:title"]')
@@ -230,15 +247,15 @@
 
     if (has(info.salon_name)) {
       var appName = document.querySelector('meta[name="application-name"]')
-      if (appName) appName.setAttribute('content', info.salon_name)
+      if (appName) appName.setAttribute('content', brandName)
       var appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]')
-      if (appleTitle) appleTitle.setAttribute('content', info.salon_name)
+      if (appleTitle) appleTitle.setAttribute('content', brandName)
     }
   }
 
   function applyInfo() {
-    var brand = info.salon_name || (lang === 'ar' ? 'الصالون' : 'Salon')
-    setText('[data-brand-name]', brand)
+    var brandName = brand()
+    setText('[data-brand-name]', brandName)
 
     var tagline = lang === 'ar' ? info.tagline_ar : info.tagline_en
     setText('[data-brand-tagline]', tagline || '')
@@ -250,7 +267,7 @@
       logos.forEach(function (img) {
         if (hasLogo) {
           img.setAttribute('src', info.logo_url)
-          img.setAttribute('alt', brand || 'Logo')
+          img.setAttribute('alt', brandName || 'Logo')
           img.classList.remove('hidden')
         } else {
           img.classList.add('hidden')

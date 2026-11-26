@@ -5,7 +5,7 @@
  *   npm run new-client
  *
  * It asks for a Supabase Personal Access Token, creates a dedicated project,
- * applies supabase/schema.sql, creates the admin login and writes:
+ * applies schema.sql, creates the admin login and writes:
  *
  *   clients/<slug>/site/   upload this folder to the client's hosting
  *   clients/<slug>/client.json

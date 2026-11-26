@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
- * Apply supabase/schema.sql to an existing Supabase project.
+ * Apply schema.sql (repository root) to an existing Supabase project.
  *
  *   npm run apply-schema
  *
@@ -54,7 +54,7 @@ async function main() {
   }
 
   try {
-    console.log('\n=== تطبيق supabase/schema.sql على مشروع موجود ===\n')
+    console.log('\n=== تطبيق schema.sql على مشروع موجود ===\n')
     console.log('نحتاج Personal Access Token من: https://supabase.com/dashboard/account/tokens')
     console.log('التوكن يبقى على جهازك فقط ولا يُحفظ في أي ملف.\n')
 
@@ -69,7 +69,7 @@ async function main() {
     console.log('  المشروع: ' + (project.name || ref) + '  (' + ref + ')')
     console.log('  الحالة: ' + (project.status || 'UNKNOWN'))
 
-    const sql = await readFile(path.join(root, 'supabase', 'schema.sql'), 'utf8')
+    const sql = await readFile(path.join(root, 'schema.sql'), 'utf8')
     console.log('\nجارٍ تطبيق المخطط (' + sql.split('\n').length + ' سطرًا)…')
     await runSql({ token, ref, sql })
     console.log('  ✅ تم تنفيذ المخطط.')

@@ -41,7 +41,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="css/tailwind.css?v=20261116f" />
+  <link rel="stylesheet" href="css/tailwind.css?v=20261126a" />
 
   <style>
     :root {
@@ -388,12 +388,23 @@
     </header>
 
     <main>
-      <!-- Shown only when js/config.js still has placeholders: makes a missing
-           Supabase connection obvious instead of leaving buttons looking dead. -->
-      <div x-show="!configured" x-cloak class="border-b border-amber-200 bg-amber-50">
-        <div class="mx-auto flex max-w-7xl items-start gap-2 px-4 py-2.5 text-xs font-bold leading-relaxed text-amber-900 sm:items-center sm:px-6">
-          <svg class="mt-0.5 h-4 w-4 shrink-0 sm:mt-0" aria-hidden="true"><use href="#i-alert" /></svg>
-          <span x-text="t('setup_banner')"></span>
+      <!-- Shown only when ./config.js still has placeholders: makes a missing
+           Supabase connection obvious and points to the 1-click installer. -->
+      <div x-show="!configured" x-cloak class="border-b border-amber-200 bg-gradient-to-l from-amber-50 via-rose-50 to-amber-50">
+        <div class="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div class="flex items-start gap-3">
+            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-amber-100 text-amber-700 ring-1 ring-amber-200">
+              <svg class="h-5 w-5" aria-hidden="true"><use href="#i-alert" /></svg>
+            </span>
+            <div class="min-w-0">
+              <p class="text-sm font-extrabold text-amber-900" x-text="t('setup_title')"></p>
+              <p class="mt-0.5 text-xs font-medium leading-relaxed text-amber-800" x-text="t('setup_banner')"></p>
+            </div>
+          </div>
+          <a href="install.html" class="btn btn-primary shrink-0 self-start sm:self-auto">
+            <svg class="h-4 w-4"><use href="#i-sparkles" /></svg>
+            <span x-text="t('setup_cta')"></span>
+          </a>
         </div>
       </div>
 
@@ -2837,10 +2848,10 @@
 
   <!-- Scripts: app modules must load before Alpine starts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/config.js"></script>
-  <script src="js/i18n.min.js?v=20261116f"></script>
+  <script src="config.js"></script>
+  <script src="js/i18n.min.js?v=20261126a"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="js/app.min.js?v=20261116f"></script>
+  <script src="js/app.min.js?v=20261126a"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
   <script>
     (function () {

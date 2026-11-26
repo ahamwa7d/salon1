@@ -1,3 +1,21 @@
+-- ===========================================================================
+-- Salon POS — complete database schema
+--
+-- This file is executed as-is by the installer (install.html → n8n →
+-- Supabase Management API /v1/projects/<ref>/database/query). It is idempotent:
+-- running it again on the same project only reconciles policies, functions and
+-- seed rows.
+--
+-- It creates:
+--   * services, staff, appointments (invoices + 10% VAT), settings, expenses
+--   * managers (public.admins) + an AFTER INSERT trigger on auth.users
+--   * every RPC (public_booking, staff_*, invoice_*, public_info, …)
+--   * full RLS: anonymous visitors can only use the public_* RPCs, staff use
+--     their own token-checked RPCs, and only managers touch tables directly
+--   * the branding storage bucket and its policies
+--   * the default settings and legal-page text
+-- ===========================================================================
+
 create extension if not exists pg_net with schema extensions;
 create extension if not exists moddatetime with schema extensions;
 create extension if not exists pgcrypto with schema extensions;
@@ -178,21 +196,90 @@ alter table public.staff_login_attempts enable row level security;
 alter table public.whatsapp_log enable row level security;
 alter table public.sheets_log enable row level security;
 
+-- ---------------------------------------------------------------------
+-- Managers (admin role)
+--
+-- Every Supabase Auth user of this project is a salon manager. The trigger
+-- below creates the row automatically, so the installer only has to call the
+-- Auth Admin API and the dashboard works on the very first login. The backfill
+-- covers accounts that existed before this schema was applied.
+-- ---------------------------------------------------------------------
+create table if not exists public.admins (
+  id uuid primary key references auth.users(id) on delete cascade,
+  email text,
+  role text not null default 'admin' check (role in ('admin','manager','owner')),
+  created_at timestamptz not null default now()
+);
+
+alter table public.admins enable row level security;
+
+drop policy if exists admins_select_self on public.admins;
+create policy admins_select_self on public.admins
+  for select to authenticated using (id = auth.uid());
+
+revoke all on public.admins from anon, authenticated;
+grant select on public.admins to authenticated;
+
+create or replace function public.handle_new_admin()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_role text;
+begin
+  v_role := coalesce(nullif(new.raw_user_meta_data ->> 'role', ''), 'admin');
+  if v_role not in ('admin', 'manager', 'owner') then
+    v_role := 'admin';
+  end if;
+  insert into public.admins (id, email, role)
+  values (new.id, new.email, v_role)
+  on conflict (id) do update
+    set email = excluded.email,
+        role = excluded.role;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+after insert on auth.users
+for each row execute function public.handle_new_admin();
+
+insert into public.admins (id, email, role)
+select u.id, u.email, 'admin'
+from auth.users u
+on conflict (id) do nothing;
+
+-- SECURITY DEFINER so RLS policies and RPCs can call it without exposing the
+-- admins table itself to the browser.
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$ select exists (select 1 from public.admins where id = auth.uid() and role in ('admin','manager','owner')) $$;
+
+revoke all on function public.is_admin() from public;
+grant execute on function public.is_admin() to authenticated;
+
 -- Anonymous access is closed: only authenticated admins read tables directly,
 -- and staff read through token-checked RPCs further down.
 drop policy if exists services_select_all on public.services;
 drop policy if exists services_select_public on public.services;
 
 drop policy if exists services_admin_write on public.services;
-create policy services_admin_write on public.services for all to authenticated using (true) with check (true);
+create policy services_admin_write on public.services for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 drop policy if exists staff_select_all on public.staff;
 drop policy if exists staff_select_public on public.staff;
 drop policy if exists staff_select_admin on public.staff;
-create policy staff_select_admin on public.staff for select to authenticated using (true);
+create policy staff_select_admin on public.staff for select to authenticated using (public.is_admin());
 
 drop policy if exists staff_admin_write on public.staff;
-create policy staff_admin_write on public.staff for all to authenticated using (true) with check (true);
+create policy staff_admin_write on public.staff for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 -- The POS no longer exposes staff data anonymously: staff lists come from
 -- public.staff_list(token) and services from public.staff_services(token).
@@ -201,26 +288,26 @@ drop function if exists public.public_staff();
 drop policy if exists appointments_insert_anon on public.appointments;
 
 drop policy if exists appointments_insert_authenticated on public.appointments;
-create policy appointments_insert_authenticated on public.appointments for insert to authenticated with check (true);
+create policy appointments_insert_authenticated on public.appointments for insert to authenticated with check (public.is_admin());
 
 drop policy if exists appointments_select_admin on public.appointments;
-create policy appointments_select_admin on public.appointments for select to authenticated using (true);
+create policy appointments_select_admin on public.appointments for select to authenticated using (public.is_admin());
 
 drop policy if exists appointments_update_admin on public.appointments;
-create policy appointments_update_admin on public.appointments for update to authenticated using (true) with check (true);
+create policy appointments_update_admin on public.appointments for update to authenticated using (public.is_admin()) with check (public.is_admin());
 
 drop policy if exists appointments_delete_admin on public.appointments;
-create policy appointments_delete_admin on public.appointments for delete to authenticated using (true);
+create policy appointments_delete_admin on public.appointments for delete to authenticated using (public.is_admin());
 
 drop policy if exists settings_select_public on public.settings;
 drop policy if exists settings_select_admin on public.settings;
-create policy settings_select_admin on public.settings for select to authenticated using (true);
+create policy settings_select_admin on public.settings for select to authenticated using (public.is_admin());
 
 drop policy if exists settings_admin_write on public.settings;
-create policy settings_admin_write on public.settings for all to authenticated using (true) with check (true);
+create policy settings_admin_write on public.settings for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 drop policy if exists whatsapp_log_admin_select on public.whatsapp_log;
-create policy whatsapp_log_admin_select on public.whatsapp_log for select to authenticated using (true);
+create policy whatsapp_log_admin_select on public.whatsapp_log for select to authenticated using (public.is_admin());
 
 insert into public.settings (setting_key, setting_value) values
   -- Deliberately blank for a new white-label install: every client fills these
@@ -457,15 +544,15 @@ create policy branding_public_read on storage.objects
 
 drop policy if exists branding_admin_insert on storage.objects;
 create policy branding_admin_insert on storage.objects
-  for insert to authenticated with check (bucket_id = 'branding');
+  for insert to authenticated with check (bucket_id = 'branding' and public.is_admin());
 
 drop policy if exists branding_admin_update on storage.objects;
 create policy branding_admin_update on storage.objects
-  for update to authenticated using (bucket_id = 'branding') with check (bucket_id = 'branding');
+  for update to authenticated using (bucket_id = 'branding' and public.is_admin()) with check (bucket_id = 'branding' and public.is_admin());
 
 drop policy if exists branding_admin_delete on storage.objects;
 create policy branding_admin_delete on storage.objects
-  for delete to authenticated using (bucket_id = 'branding');
+  for delete to authenticated using (bucket_id = 'branding' and public.is_admin());
 
 create or replace function public.set_appointment_totals()
 returns trigger
@@ -537,16 +624,8 @@ drop function if exists public.admin_sheet_log();
 -- The duration was removed from services (name, price and picture only).
 alter table public.services drop column if exists duration;
 
-create or replace function public.is_admin()
-returns boolean
-language sql
-stable
-security definer
-set search_path = public
-as $$ select auth.uid() is not null $$;
-
-revoke all on function public.is_admin() from public;
-grant execute on function public.is_admin() to authenticated;
+-- public.is_admin() is defined next to the admins table at the top of this
+-- file (it must exist before the RLS policies that call it).
 
 -- Admin only: set or clear a staff member's username/password.
 create or replace function public.admin_set_staff_login(
@@ -1792,7 +1871,7 @@ alter table public.expenses enable row level security;
 
 drop policy if exists expenses_admin_all on public.expenses;
 create policy expenses_admin_all on public.expenses
-  for all to authenticated using (true) with check (true);
+  for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 grant select, insert, update, delete on public.expenses to authenticated;
 revoke all on public.expenses from anon;

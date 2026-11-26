@@ -75,9 +75,11 @@ test('waitForProject gives up on a failed provisioning status', async () => {
 })
 
 test('configSource quotes values safely', () => {
-  const src = configSource({ url: 'https://x.supabase.co', anonKey: 'sb_publishable_x' })
-  assert.match(src, /https:\/\/x\.supabase\.co/)
+  const src = configSource({ url: 'https://x.supabase.co', anonKey: 'sb_publishable_x', salonName: 'Nelly "Nails"' })
+  assert.match(src, /SUPABASE_URL: "https:\/\/x\.supabase\.co"/)
   assert.match(src, /sb_publishable_x/)
+  assert.match(src, /Nelly \\"Nails\\"/)
+  assert.match(src, /window\.APP_CONFIG/)
 })
 
 test('provisionClient creates the project, applies SQL and writes a deployable site', async () => {
@@ -94,6 +96,7 @@ test('provisionClient creates the project, applies SQL and writes a deployable s
   await writeFile(path.join(root, 'img', 'x.jpg'), 'img', 'utf8')
   await writeFile(path.join(root, 'robots.txt'), 'robots', 'utf8')
   await writeFile(path.join(root, '.htaccess'), 'htaccess', 'utf8')
+  await writeFile(path.join(root, 'install.html'), 'installer', 'utf8')
   await writeFile(path.join(root, 'src.js'), 'do not copy', 'utf8')
 
   const { fetchImpl, calls } = recorder({
@@ -131,10 +134,17 @@ test('provisionClient creates the project, applies SQL and writes a deployable s
   const siteIndex = await readFile(path.join(result.siteDir, 'index.html'), 'utf8')
   assert.match(siteIndex, /site/)
 
-  const config = await readFile(path.join(result.siteDir, 'js', 'config.js'), 'utf8')
+  const config = await readFile(path.join(result.siteDir, 'config.js'), 'utf8')
   assert.match(config, /https:\/\/ref123\.supabase\.co/)
   assert.match(config, /anon123/)
+  assert.match(config, /Nelly Nails Salon/)
   assert.doesNotMatch(config, /service123/)
+
+  const staleConfig = await readFile(path.join(result.siteDir, 'js', 'config.js'), 'utf8').catch(() => null)
+  assert.equal(staleConfig, null)
+
+  const installer = await readFile(path.join(result.siteDir, 'install.html'), 'utf8').catch(() => null)
+  assert.equal(installer, null)
 
   const app = await readFile(path.join(result.siteDir, 'js', 'app.min.js'), 'utf8')
   assert.equal(app, 'app')

@@ -1,15 +1,32 @@
-const isConfigured = () => {
-  const c = window.SB_CONFIG || {}
-  return Boolean(
-    c.url && c.anonKey &&
-    window.supabase &&
-    !String(c.url).includes('YOUR-') &&
-    !String(c.anonKey).includes('YOUR-')
-  )
+// ---------------------------------------------------------------------------
+// Connection settings.
+//
+// The installer (install.html → n8n) writes ./config.js with window.APP_CONFIG
+// for every salon, so this file never contains a project URL or key. If the
+// placeholders are still there the app renders an "activate me" notice that
+// links to install.html instead of failing silently.
+// ---------------------------------------------------------------------------
+const APP_CONFIG = window.APP_CONFIG || {}
+
+const isPlaceholder = (value) => {
+  const v = String(value == null ? '' : value).trim()
+  return !v || v === '%%SUPABASE_URL%%' || v === '%%SUPABASE_ANON_KEY%%' ||
+    v === '%%SALON_NAME%%' || v.includes('YOUR-')
 }
 
+const appConfigName = (() => {
+  const name = String(APP_CONFIG.SALON_NAME == null ? '' : APP_CONFIG.SALON_NAME).trim()
+  return isPlaceholder(name) ? '' : name
+})()
+
+const isConfigured = () => Boolean(
+  window.supabase &&
+  !isPlaceholder(APP_CONFIG.SUPABASE_URL) &&
+  !isPlaceholder(APP_CONFIG.SUPABASE_ANON_KEY)
+)
+
 const sb = isConfigured()
-  ? window.supabase.createClient(window.SB_CONFIG.url, window.SB_CONFIG.anonKey)
+  ? window.supabase.createClient(APP_CONFIG.SUPABASE_URL, APP_CONFIG.SUPABASE_ANON_KEY)
   : null
 
 const CHART_COLORS = ['#db2777', '#f472b6', '#fb7185', '#a855f7', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#64748b']
@@ -35,6 +52,7 @@ document.addEventListener('alpine:init', () => {
     email: '',
     password: '',
     loginOpen: false,
+    entryIntent: '',
     loggingIn: false,
     loginError: '',
     svcModal: false,
@@ -126,7 +144,7 @@ document.addEventListener('alpine:init', () => {
       return this.authChecked && (Boolean(this.user) || Boolean(this.staffSession))
     },
     get salonName() {
-      return this.publicInfo.salon_name || this.settings.salon_name || this.brandName || this.t('app_title')
+      return this.publicInfo.salon_name || this.settings.salon_name || this.brandName || appConfigName || this.t('app_title')
     },
     get brandLogo() {
       return this.publicInfo.logo_url || this.settings.logo_url || ''
@@ -238,8 +256,13 @@ document.addEventListener('alpine:init', () => {
       this.lang = localStorage.getItem('salon_lang') || 'ar'
       this.applyDir()
       this.resetPublicBooking()
+      // admin.html (the link the installer shows) lands on index.html?entry=admin
+      // and should open the manager login immediately.
+      this.entryIntent = new URLSearchParams(location.search).get('entry') || ''
       if (!sb) {
         this.authChecked = true
+        if (this.entryIntent) this.loginOpen = true
+        this.entryIntent = ''
         return
       }
       this.setDefaultDates()
@@ -289,7 +312,7 @@ document.addEventListener('alpine:init', () => {
     applyBranding() {
       const info = this.publicInfo || {}
       const ar = this.lang === 'ar'
-      const name = info.salon_name || this.settings.salon_name || this.brandName || ''
+      const name = info.salon_name || this.settings.salon_name || this.brandName || appConfigName || ''
       const seoTitle = ar ? info.seo_title_ar : info.seo_title_en
       const seoDesc = ar ? info.seo_description_ar : info.seo_description_en
       const description = seoDesc || (ar ? info.about_ar : info.about_en) || this.t('meta_description')
@@ -375,12 +398,16 @@ document.addEventListener('alpine:init', () => {
         this.clearStaffSession()
         this.authChecked = true
         this.refreshAfterAuth()
+        if (this.entryIntent === 'admin') this.tab = 'admin'
+        this.entryIntent = ''
         return
       }
 
       await Promise.all([this.loadBranding(), this.restoreStaffSession()])
       this.authChecked = true
       if (!this.user && !this.staffSession) {
+        if (this.entryIntent) this.loginOpen = true
+        this.entryIntent = ''
         this.loadPublicData()
         return
       }
@@ -997,7 +1024,7 @@ document.addEventListener('alpine:init', () => {
       if (this.user) this.loadToday()
     },
     // Turns a database error into a helpful message: a missing column/function
-    // means the database still runs an older version of supabase/schema.sql.
+    // means the database still runs an older version of schema.sql.
     dbErrorKey(error) {
       const code = String((error && error.code) || '')
       const msg = String((error && error.message) || '')
@@ -2248,7 +2275,7 @@ function writeExpense_(ss, data) {
       const v = this.vatResult
       const rows = [
         [this.t('vat_title')],
-        [this.settings.salon_name || this.t('app_title')],
+        [this.salonName],
         ...(this.settings.vat_number ? [[this.t('vat_reg_no'), this.settings.vat_number]] : []),
         [this.t('vat_print_period'), `${this.vat.from} - ${this.vat.to}`],
         [this.t('vat_print_basis'), this.vat.basis === 'completed' ? this.t('basis_completed') : this.t('basis_all')],
@@ -2296,7 +2323,7 @@ function writeExpense_(ss, data) {
             ${logo}
             <div>
               <h1 style="font-size:20px;font-weight:800;color:#db2777;margin:0 0 4px">${this.esc(this.t('vat_print_title'))}</h1>
-              <p style="font-size:13px;color:#374151;font-weight:700;margin:0 0 2px">${this.esc(this.settings.salon_name || this.t('app_title'))}</p>
+              <p style="font-size:13px;color:#374151;font-weight:700;margin:0 0 2px">${this.esc(this.salonName)}</p>
               ${contactLine ? `<p style="font-size:11px;color:#6b7280;margin:0">${contactLine}</p>` : ''}
             </div>
           </div>

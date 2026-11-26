@@ -1,0 +1,1309 @@
+{
+  "name": "Salon Complete 1-Click OAuth Auto Installer",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "salon-auto-install",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        100,
+        400
+      ],
+      "webhookId": "salon-auto-install"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "master_supabase_url",
+              "value": "https://YOUR_MASTER_PROJECT.supabase.co",
+              "type": "string"
+            },
+            {
+              "id": "2",
+              "name": "master_service_role_key",
+              "value": "YOUR_MASTER_SERVICE_ROLE_KEY",
+              "type": "string"
+            },
+            {
+              "id": "3",
+              "name": "github_client_id",
+              "value": "YOUR_GITHUB_CLIENT_ID",
+              "type": "string"
+            },
+            {
+              "id": "4",
+              "name": "github_client_secret",
+              "value": "YOUR_GITHUB_CLIENT_SECRET",
+              "type": "string"
+            },
+            {
+              "id": "5",
+              "name": "template_owner",
+              "value": "ahamwa7d",
+              "type": "string"
+            },
+            {
+              "id": "6",
+              "name": "template_repo",
+              "value": "salon1",
+              "type": "string"
+            },
+            {
+              "id": "7",
+              "name": "supabase_client_id",
+              "value": "YOUR_SUPABASE_CLIENT_ID",
+              "type": "string"
+            },
+            {
+              "id": "8",
+              "name": "supabase_client_secret",
+              "value": "YOUR_SUPABASE_CLIENT_SECRET",
+              "type": "string"
+            },
+            {
+              "id": "9",
+              "name": "evo_api_url",
+              "value": "https://evo.awj-bh.cloud",
+              "type": "string"
+            },
+            {
+              "id": "10",
+              "name": "evo_instance",
+              "value": "YOUR_INSTANCE_NAME",
+              "type": "string"
+            },
+            {
+              "id": "11",
+              "name": "evo_apikey",
+              "value": "YOUR_EVOLUTION_API_KEY",
+              "type": "string"
+            },
+            {
+              "id": "12",
+              "name": "db_password",
+              "value": "={{ 'Sln@' + Math.random().toString(36).slice(-10) + '99!' }}",
+              "type": "string"
+            },
+            {
+              "id": "13",
+              "name": "organization_id",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "config-vars",
+      "name": "Config Variables",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.master_supabase_url + '/rest/v1/salon_licenses?license_key=eq.' + encodeURIComponent(String($('Webhook Trigger').item.json.body.license_key || '').trim()) + '&status=eq.active&select=id,license_key,status&limit=1' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $json.master_service_role_key }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $json.master_service_role_key }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "check-license",
+      "name": "Check License Key",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        540,
+        400
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "license-exists",
+              "leftValue": "={{ $json.id || '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-license-valid",
+      "name": "Is License Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        980,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseCode": 403,
+        "responseBody": "={{ JSON.stringify({ success: false, message: 'كود التفعيل غير صحيح أو تم استخدامه مسبقاً.' }) }}"
+      },
+      "id": "respond-invalid",
+      "name": "Respond Invalid License",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        980,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://github.com/login/oauth/access_token",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "client_id",
+              "value": "={{ $('Config Variables').item.json.github_client_id }}"
+            },
+            {
+              "name": "client_secret",
+              "value": "={{ $('Config Variables').item.json.github_client_secret }}"
+            },
+            {
+              "name": "code",
+              "value": "={{ $('Webhook Trigger').item.json.body.github_code }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "gh-token",
+      "name": "1. GitHub Exchange Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1000,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/user",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $json.access_token }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "gh-user",
+      "name": "2. Get GitHub Username",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1220,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://api.github.com/repos/' + $('Config Variables').item.json.template_owner + '/' + $('Config Variables').item.json.template_repo + '/generate' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $('1. GitHub Exchange Token').item.json.access_token }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ owner: $json.login, name: $('Webhook Trigger').item.json.body.salon_slug, description: 'Salon booking & management system', private: false, include_all_branches: false }) }}",
+        "options": {}
+      },
+      "id": "gh-clone",
+      "name": "3. Create Repo from Template",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1440,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://api.github.com/repos/' + $('2. Get GitHub Username').item.json.login + '/' + $('Webhook Trigger').item.json.body.salon_slug + '/contents/CNAME' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $('1. GitHub Exchange Token').item.json.access_token }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "gh-cname-get",
+      "name": "3a. Get CNAME SHA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1560,
+        220
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "DELETE",
+        "url": "={{ 'https://api.github.com/repos/' + $('2. Get GitHub Username').item.json.login + '/' + $('Webhook Trigger').item.json.body.salon_slug + '/contents/CNAME' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $('1. GitHub Exchange Token').item.json.access_token }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ message: 'Remove template-only CNAME so GitHub Pages uses the project URL', sha: $json.sha }) }}",
+        "options": {}
+      },
+      "id": "gh-cname-del",
+      "name": "3b. Delete CNAME",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1680,
+        220
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://api.github.com/repos/' + $('2. Get GitHub Username').item.json.login + '/' + $('Webhook Trigger').item.json.body.salon_slug + '/contents/install.html' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $('1. GitHub Exchange Token').item.json.access_token }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "gh-install-get",
+      "name": "3c. Get install.html SHA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1800,
+        220
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "DELETE",
+        "url": "={{ 'https://api.github.com/repos/' + $('2. Get GitHub Username').item.json.login + '/' + $('Webhook Trigger').item.json.body.salon_slug + '/contents/install.html' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $('1. GitHub Exchange Token').item.json.access_token }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ message: 'Remove the one-time installer from the client site', sha: $json.sha }) }}",
+        "options": {}
+      },
+      "id": "gh-install-del",
+      "name": "3d. Delete install.html",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1920,
+        220
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.supabase.com/v1/oauth/token",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "grant_type",
+              "value": "authorization_code"
+            },
+            {
+              "name": "code",
+              "value": "={{ $('Webhook Trigger').item.json.body.supabase_code }}"
+            },
+            {
+              "name": "redirect_uri",
+              "value": "={{ $('Webhook Trigger').item.json.body.redirect_uri }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "sb-token",
+      "name": "4. Supabase Exchange Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1660,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.supabase.com/v1/organizations",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $json.access_token }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "sb-orgs",
+      "name": "5. Get Supabase Org ID",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1880,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.supabase.com/v1/projects",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $('4. Supabase Exchange Token').item.json.access_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ organization_id: $json.id, name: $('Webhook Trigger').item.json.body.salon_slug, region: 'ap-south-1', plan: 'free', db_pass: $('Config Variables').item.json.db_password }) }}",
+        "options": {}
+      },
+      "id": "sb-create",
+      "name": "6. Create Supabase Project",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2210,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 75,
+        "unit": "seconds"
+      },
+      "id": "wait-db",
+      "name": "7. Wait for DB Provisioning",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2320,
+        220
+      ],
+      "webhookId": "salon-wait-db"
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://api.supabase.com/v1/projects/' + $('6. Create Supabase Project').item.json.id + '/api-keys' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $('4. Supabase Exchange Token').item.json.access_token }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "sb-keys",
+      "name": "8. Get Project API Keys",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2540,
+        220
+      ],
+      "retryOnFail": true,
+      "maxTries": 8,
+      "waitBetweenTries": 15000
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://api.github.com/repos/' + $('Config Variables').item.json.template_owner + '/' + $('Config Variables').item.json.template_repo + '/contents/schema.sql?ref=main' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $('1. GitHub Exchange Token').item.json.access_token }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fetch-sql",
+      "name": "9. Fetch schema.sql",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2760,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json;\nconst encoded = String(body.content || '').replace(/\\s+/g, '');\nconst query = encoded ? Buffer.from(encoded, 'base64').toString('utf8') : '';\nif (!query.trim()) {\n  throw new Error('schema.sql is empty or missing from the template repository');\n}\nreturn [{ json: { query } }];"
+      },
+      "id": "decode-sql",
+      "name": "9b. Decode schema.sql",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2980,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://api.supabase.com/v1/projects/' + $('6. Create Supabase Project').item.json.id + '/database/query' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $('4. Supabase Exchange Token').item.json.access_token }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ query: $json.query }) }}",
+        "options": {}
+      },
+      "id": "run-sql",
+      "name": "10. Execute schema.sql",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3200,
+        220
+      ],
+      "retryOnFail": true,
+      "maxTries": 6,
+      "waitBetweenTries": 15000
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ 'https://api.supabase.com/v1/projects/' + $('6. Create Supabase Project').item.json.id + '/config/auth' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $('4. Supabase Exchange Token').item.json.access_token }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ site_url: 'https://' + $('2. Get GitHub Username').item.json.login + '.github.io/' + $('Webhook Trigger').item.json.body.salon_slug, uri_allow_list: 'https://' + $('2. Get GitHub Username').item.json.login + '.github.io/' + $('Webhook Trigger').item.json.body.salon_slug + '/*', disable_signup: true }) }}",
+        "options": {}
+      },
+      "id": "sb-auth-urls",
+      "name": "11. Update Auth Site URL",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3420,
+        220
+      ],
+      "retryOnFail": true,
+      "maxTries": 4,
+      "waitBetweenTries": 10000
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $items('8. Get Project API Keys').map((item) => item.json);\nconst list = Array.isArray(raw[0]) ? raw[0] : raw;\nconst findKey = (name) => {\n  const row = list.find((k) => k && k.name === name);\n  return row ? (row.api_key || row.apiKey || '') : '';\n};\nconst anonKey = findKey('anon') || findKey('publishable');\nconst serviceRoleKey = findKey('service_role') || findKey('secret');\nconst projectRef = $('6. Create Supabase Project').item.json.id;\nconst slug = $('Webhook Trigger').item.json.body.salon_slug;\nconst ghUser = $('2. Get GitHub Username').item.json.login;\nconst displayName = slug.split('-').filter(Boolean).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');\nconst siteUrl = `https://${ghUser}.github.io/${slug}/`;\nconst adminUrl = `${siteUrl}admin.html`;\nconst supabaseUrl = `https://${projectRef}.supabase.co`;\nconst configContent = `window.APP_CONFIG = {\\n  SUPABASE_URL: \"${supabaseUrl}\",\\n  SUPABASE_ANON_KEY: \"${anonKey}\",\\n  SALON_NAME: \"${displayName}\"\\n};\\n`;\nlet rawPhone = String($('Webhook Trigger').item.json.body.whatsapp || '').replace(/\\D/g, '');\nif (rawPhone.length === 8) rawPhone = '973' + rawPhone;\nif (!anonKey) {\n  throw new Error('The new Supabase project did not return an anon/publishable key');\n}\nreturn [{ json: { base64Config: Buffer.from(configContent).toString('base64'), projectRef, supabaseUrl, anonKey, serviceRoleKey, siteUrl, adminUrl, displayName, cleanPhone: rawPhone } }];"
+      },
+      "id": "prepare-all",
+      "name": "12. Prepare Config & Keys",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3640,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.supabaseUrl + '/auth/v1/admin/users' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $json.serviceRoleKey }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $json.serviceRoleKey }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ email: $('Webhook Trigger').item.json.body.admin_email, password: $('Webhook Trigger').item.json.body.admin_password, email_confirm: true, user_metadata: { role: 'admin', salon_slug: $('Webhook Trigger').item.json.body.salon_slug } }) }}",
+        "options": {}
+      },
+      "id": "create-admin-user",
+      "name": "13. Create Admin User in Auth",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3860,
+        220
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://api.github.com/repos/' + $('2. Get GitHub Username').item.json.login + '/' + $('Webhook Trigger').item.json.body.salon_slug + '/contents/config.js' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $('1. GitHub Exchange Token').item.json.access_token }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ message: 'Configure Salon Supabase Credentials', content: $('12. Prepare Config & Keys').item.json.base64Config }) }}",
+        "options": {}
+      },
+      "id": "gh-push-config",
+      "name": "14. Push config.js to Client Repo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4080,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://api.github.com/repos/' + $('2. Get GitHub Username').item.json.login + '/' + $('Webhook Trigger').item.json.body.salon_slug + '/pages' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $('1. GitHub Exchange Token').item.json.access_token }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"source\":{\"branch\":\"main\",\"path\":\"/\"}}",
+        "options": {}
+      },
+      "id": "gh-pages",
+      "name": "15. Enable GitHub Pages",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4300,
+        220
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 10000
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config Variables').item.json.evo_api_url + '/chat/whatsappNumbers/' + $('Config Variables').item.json.evo_instance }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $('Config Variables').item.json.evo_apikey }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ numbers: [$('12. Prepare Config & Keys').item.json.cleanPhone] }) }}",
+        "options": {}
+      },
+      "id": "evo-check-wa",
+      "name": "16. Check WhatsApp Number",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4520,
+        220
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "wa-exists",
+              "leftValue": "={{ $json[0]?.exists || $json.exists || false }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-wa-exists",
+      "name": "Has WhatsApp?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        4740,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config Variables').item.json.evo_api_url + '/message/sendText/' + $('Config Variables').item.json.evo_instance }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $('Config Variables').item.json.evo_apikey }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $('12. Prepare Config & Keys').item.json.cleanPhone, text: 'أهلاً بكِ في نظام إدارة وحجز الصالونات ✨\\n\\nتم تجهيز موقع الصالون وقاعدة البيانات بنجاح:\\n\\n🌐 *رابط الحجز للزبونات:*\\n' + $('12. Prepare Config & Keys').item.json.siteUrl + '\\n\\n🔐 *رابط لوحة الإدارة:*\\n' + $('12. Prepare Config & Keys').item.json.adminUrl + '\\n\\n👤 *بيانات الدخول:*\\n• البريد الإلكتروني: ' + $('Webhook Trigger').item.json.body.admin_email + '\\n• كلمة المرور: ' + $('Webhook Trigger').item.json.body.admin_password + '\\n\\nملاحظة: يستغرق تفعيل الرابط على GitHub Pages دقيقة إلى دقيقتين ليعمل بشكل كامل.' }) }}",
+        "options": {}
+      },
+      "id": "evo-send-msg",
+      "name": "17. Send WhatsApp Welcome",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4960,
+        120
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $('Config Variables').item.json.master_supabase_url + '/rest/v1/salon_licenses?id=eq.' + $('Check License Key (row)').first().json.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $('Config Variables').item.json.master_service_role_key }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $('Config Variables').item.json.master_service_role_key }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ status: 'used', used_at: new Date().toISOString(), deployed_site_url: $('12. Prepare Config & Keys').item.json.siteUrl, deployed_supabase_url: $('12. Prepare Config & Keys').item.json.supabaseUrl }) }}",
+        "options": {}
+      },
+      "id": "mark-license-used",
+      "name": "18. Mark License as Used",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5180,
+        220
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, site_url: $('12. Prepare Config & Keys').item.json.siteUrl, admin_url: $('12. Prepare Config & Keys').item.json.adminUrl, supabase_url: $('12. Prepare Config & Keys').item.json.supabaseUrl, salon_name: $('12. Prepare Config & Keys').item.json.displayName }) }}"
+      },
+      "id": "respond-success",
+      "name": "19. Respond with Live URLs",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        5400,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all().map((item) => item.json);\nconst rows = [];\nfor (const json of items) {\n  if (Array.isArray(json)) rows.push(...json);\n  else if (json && json.id) rows.push(json);\n}\nconst row = rows.find((r) => r && r.status === 'active') || rows[0] || null;\nreturn [{ json: row || {} }];"
+      },
+      "id": "license-row",
+      "name": "Check License Key (row)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        760,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all().map((item) => item.json);\nconst orgs = [];\nfor (const json of items) {\n  if (Array.isArray(json)) orgs.push(...json);\n  else if (json && json.id) orgs.push(json);\n}\nconst preferred = String($('Config Variables').item.json.organization_id || '').trim();\nconst org = preferred ? orgs.find((o) => o.id === preferred) : orgs[0];\nif (!org || !org.id) throw new Error('No Supabase organization was found for this account. Set organization_id in Config Variables.');\nreturn [{ json: { id: org.id, name: org.name || '' } }];"
+      },
+      "id": "sb-org-pick",
+      "name": "5b. Pick Supabase Organization",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1990,
+        220
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Config Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config Variables": {
+      "main": [
+        [
+          {
+            "node": "Check License Key",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check License Key": {
+      "main": [
+        [
+          {
+            "node": "Check License Key (row)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is License Valid?": {
+      "main": [
+        [
+          {
+            "node": "1. GitHub Exchange Token",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Invalid License",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "1. GitHub Exchange Token": {
+      "main": [
+        [
+          {
+            "node": "2. Get GitHub Username",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2. Get GitHub Username": {
+      "main": [
+        [
+          {
+            "node": "3. Create Repo from Template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3. Create Repo from Template": {
+      "main": [
+        [
+          {
+            "node": "3a. Get CNAME SHA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "4. Supabase Exchange Token": {
+      "main": [
+        [
+          {
+            "node": "5. Get Supabase Org ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "5. Get Supabase Org ID": {
+      "main": [
+        [
+          {
+            "node": "5b. Pick Supabase Organization",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "6. Create Supabase Project": {
+      "main": [
+        [
+          {
+            "node": "7. Wait for DB Provisioning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "7. Wait for DB Provisioning": {
+      "main": [
+        [
+          {
+            "node": "8. Get Project API Keys",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "8. Get Project API Keys": {
+      "main": [
+        [
+          {
+            "node": "9. Fetch schema.sql",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "9. Fetch schema.sql": {
+      "main": [
+        [
+          {
+            "node": "9b. Decode schema.sql",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "9b. Decode schema.sql": {
+      "main": [
+        [
+          {
+            "node": "10. Execute schema.sql",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "10. Execute schema.sql": {
+      "main": [
+        [
+          {
+            "node": "11. Update Auth Site URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "11. Update Auth Site URL": {
+      "main": [
+        [
+          {
+            "node": "12. Prepare Config & Keys",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "12. Prepare Config & Keys": {
+      "main": [
+        [
+          {
+            "node": "13. Create Admin User in Auth",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "13. Create Admin User in Auth": {
+      "main": [
+        [
+          {
+            "node": "14. Push config.js to Client Repo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "14. Push config.js to Client Repo": {
+      "main": [
+        [
+          {
+            "node": "15. Enable GitHub Pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "15. Enable GitHub Pages": {
+      "main": [
+        [
+          {
+            "node": "16. Check WhatsApp Number",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "16. Check WhatsApp Number": {
+      "main": [
+        [
+          {
+            "node": "Has WhatsApp?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has WhatsApp?": {
+      "main": [
+        [
+          {
+            "node": "17. Send WhatsApp Welcome",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "18. Mark License as Used",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "17. Send WhatsApp Welcome": {
+      "main": [
+        [
+          {
+            "node": "18. Mark License as Used",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "18. Mark License as Used": {
+      "main": [
+        [
+          {
+            "node": "19. Respond with Live URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3a. Get CNAME SHA": {
+      "main": [
+        [
+          {
+            "node": "3b. Delete CNAME",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3b. Delete CNAME": {
+      "main": [
+        [
+          {
+            "node": "3c. Get install.html SHA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3c. Get install.html SHA": {
+      "main": [
+        [
+          {
+            "node": "3d. Delete install.html",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3d. Delete install.html": {
+      "main": [
+        [
+          {
+            "node": "4. Supabase Exchange Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check License Key (row)": {
+      "main": [
+        [
+          {
+            "node": "Is License Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "5b. Pick Supabase Organization": {
+      "main": [
+        [
+          {
+            "node": "6. Create Supabase Project",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "active": false,
+  "versionId": "salon-auto-installer-v1"
+}

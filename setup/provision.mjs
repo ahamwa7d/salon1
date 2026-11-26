@@ -3,7 +3,7 @@
  *
  * This file is NOT part of the deployed website. It uses the Supabase
  * Management API with a Personal Access Token that stays on the seller's
- * machine, creates a dedicated project per client, applies supabase/schema.sql
+ * machine, creates a dedicated project per client, applies schema.sql
  * and materialises a ready-to-upload site folder:
  *
  *   clients/<slug>/site/   <- upload this to the client's hosting
@@ -12,7 +12,7 @@
  * The token, database password and service-role key are never written to disk;
  * they are printed once so the seller can store them in a password manager.
  */
-import { mkdir, writeFile, readFile, cp, stat } from 'node:fs/promises'
+import { mkdir, writeFile, readFile, cp, stat, rm } from 'node:fs/promises'
 import path from 'node:path'
 
 export const API_BASE = 'https://api.supabase.com'
@@ -20,6 +20,7 @@ export const DEFAULT_REGION = 'ap-southeast-1'
 
 const DEPLOY_FILES = [
   'index.html',
+  'admin.html',
   'privacy.html',
   'terms.html',
   'usage-policy.html',
@@ -137,7 +138,7 @@ export async function waitForProject({
   throw new Error('Timed out waiting for the project (last status: ' + last + ')')
 }
 
-/** Run SQL through the Management API (used for supabase/schema.sql). */
+/** Run SQL through the Management API (used for schema.sql). */
 export async function runSql({ token, ref, sql, fetchImpl = fetch }) {
   return managementApi(fetchImpl, token, '/v1/projects/' + ref + '/database/query', {
     method: 'POST',
@@ -201,12 +202,17 @@ export async function configureAuth({ token, ref, siteUrl, fetchImpl = fetch }) 
   })
 }
 
-export function configSource({ url, anonKey }) {
-  return "window.SB_CONFIG = {\n  url: '" + url + "',\n  anonKey: '" + anonKey + "'\n}\n"
+export function configSource({ url, anonKey, salonName }) {
+  const name = String(salonName || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+  return 'window.APP_CONFIG = {\n' +
+    '  SUPABASE_URL: "' + url + '",\n' +
+    '  SUPABASE_ANON_KEY: "' + anonKey + '",\n' +
+    '  SALON_NAME: "' + name + '"\n' +
+    '};\n'
 }
 
 /** Copy only the deployable website files and write the client's config.js. */
-export async function writeClientSite({ root, target, url, anonKey }) {
+export async function writeClientSite({ root, target, url, anonKey, salonName }) {
   await mkdir(target, { recursive: true })
   for (const dir of DEPLOY_DIRS) {
     const from = path.join(root, dir)
@@ -226,8 +232,9 @@ export async function writeClientSite({ root, target, url, anonKey }) {
     }
     await cp(from, path.join(target, file))
   }
-  await mkdir(path.join(target, 'js'), { recursive: true })
-  await writeFile(path.join(target, 'js', 'config.js'), configSource({ url, anonKey }), 'utf8')
+  // The old per-deployment file lived in js/; never ship it with a client copy.
+  await rm(path.join(target, 'js', 'config.js'), { force: true })
+  await writeFile(path.join(target, 'config.js'), configSource({ url, anonKey, salonName }), 'utf8')
 }
 
 /**
@@ -261,7 +268,7 @@ export async function provisionClient({
   log('   project created: ' + ref + ' — waiting for the database…')
 
   await waitForProject({ token, ref, fetchImpl, sleep, log })
-  log('   database is healthy — applying supabase/schema.sql…')
+  log('   database is healthy — applying schema.sql…')
   await runSql({ token, ref, sql, fetchImpl })
 
   const keys = await getProjectKeys({ token, ref, fetchImpl })
@@ -278,7 +285,7 @@ export async function provisionClient({
   }
 
   log('   writing ' + siteDir)
-  await writeClientSite({ root, target: siteDir, url, anonKey: keys.anon })
+  await writeClientSite({ root, target: siteDir, url, anonKey: keys.anon, salonName: name })
   await writeFile(
     path.join(clientDir, 'client.json'),
     JSON.stringify(
@@ -305,5 +312,5 @@ export async function provisionClient({
 }
 
 export async function readSchema(root) {
-  return readFile(path.join(root, 'supabase', 'schema.sql'), 'utf8')
+  return readFile(path.join(root, 'schema.sql'), 'utf8')
 }

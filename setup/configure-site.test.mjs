@@ -18,9 +18,11 @@ test('normalizeKey accepts publishable keys and anon JWTs only', () => {
   assert.equal(normalizeKey(''), '')
 })
 
-test('configSource writes both values into window.SB_CONFIG', () => {
-  const src = configSource({ url: 'https://x.supabase.co', anonKey: 'sb_publishable_abc123456789' })
-  assert.match(src, /url: 'https:\/\/x\.supabase\.co'/)
-  assert.match(src, /anonKey: 'sb_publishable_abc123456789'/)
-  assert.match(src, /window\.SB_CONFIG/)
+test('configSource writes the project connection into window.APP_CONFIG', () => {
+  const src = configSource({ url: 'https://x.supabase.co', anonKey: 'sb_publishable_abc123456789', salonName: 'Lamsa' })
+  assert.match(src, /SUPABASE_URL: "https:\/\/x\.supabase\.co"/)
+  assert.match(src, /SUPABASE_ANON_KEY: "sb_publishable_abc123456789"/)
+  assert.match(src, /SALON_NAME: "Lamsa"/)
+  assert.match(src, /window\.APP_CONFIG/)
+  assert.doesNotMatch(src, /SB_CONFIG/)
 })

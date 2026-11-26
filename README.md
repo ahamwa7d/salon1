@@ -1,10 +1,11 @@
-# Nelly Nails Salon & Spa — Website, POS & Management
+# Salon POS — White-label Website, POS & Management
 
 A lightweight, bilingual (Arabic / English) beauty salon website with online booking, a full POS, staff commissions, expenses tracking, Google Sheets backup and Bahrain VAT reporting.
 
 - **Frontend:** static SPA — HTML5, Tailwind CSS, Alpine.js, Chart.js, Cairo font
 - **Backend:** Supabase only (PostgreSQL + Row Level Security + Auth + database triggers)
-- **Server requirement:** none. Deploy the static files to Hostinger; all data operations go straight to Supabase.
+- **Server requirement:** none. Deploy the static files to GitHub Pages; all data operations go straight to Supabase.
+- **Self-installer:** `install.html` + the n8n workflow create the client's repo, Supabase project, database and admin account from the client's own accounts.
 - **Currency:** Bahraini Dinar (BHD, 3 decimals)
 - **Timezone:** Asia/Bahrain (UTC+3) used for appointments, reports and grouping
 
@@ -95,11 +96,17 @@ A lightweight, bilingual (Arabic / English) beauty salon website with online boo
 ```
 salon-pos/
 ├── index.html              # Landing page + SPA UI (Arabic RTL / English LTR)
+├── admin.html              # Shortcut that opens the manager login (index.html?entry=admin)
+├── install.html            # One-click installer: licence → GitHub OAuth → Supabase OAuth → launch
 ├── privacy.html            # Legal page shell — content comes from the database
 ├── terms.html              # Legal page shell — content comes from the database
 ├── usage-policy.html       # Legal page shell — content comes from the database
 ├── manifest.webmanifest    # Installable-app manifest (name, colours, icons)
 ├── sw.js                   # Service worker: offline shell + instant updates
+├── config.js               # ACTIVE connection file (git-ignored, written by the installer)
+├── config.example.js       # Template for window.APP_CONFIG
+├── schema.sql              # Complete database schema executed by the installer
+├── salon-full-auto-installer.json  # n8n workflow (seller-side, never uploaded)
 ├── img/
 │   ├── og-cover.jpg        # Fallback social sharing image
 │   ├── icon-192.png        # Home-screen icon (Android)
@@ -111,7 +118,6 @@ salon-pos/
 │   ├── input.css           # Tailwind source directives
 │   └── tailwind.css        # Compiled production CSS
 ├── js/
-│   ├── config.js           # Supabase URL + publishable key (placeholders in Git)
 │   ├── branding.js         # Shared loader for name, logo, contact, social, legal text
 │   ├── i18n.min.js         # Compiled (minified) English / Arabic strings
 │   └── app.min.js          # Compiled (minified) Alpine app logic
@@ -119,7 +125,7 @@ salon-pos/
 │   ├── i18n.js             # All Arabic / English interface strings
 │   └── app.js              # Alpine app state, Supabase RPC calls, charts, VAT
 ├── supabase/               # SOURCE — keep private, never upload
-│   ├── schema.sql          # Tables, RLS policies, RPCs, triggers, WhatsApp webhook
+│   ├── salon-licenses.sql  # Licence table for the seller's master project
 │   └── seed.sql            # Optional demo services and staff
 ├── setup/                  # SOURCE — seller-only client provisioning (never upload)
 │   ├── create-client.cmd    # Windows double-click launcher
@@ -135,7 +141,7 @@ salon-pos/
 └── robots.txt              # Keeps the POS out of search engines
 ```
 
-**Deploy only:** `index.html`, `privacy.html`, `terms.html`, `usage-policy.html`, `manifest.webmanifest`, `sw.js`, `css/`, `js/`, `img/`, `.htaccess`, `robots.txt`.
+**Deploy only:** `index.html`, `admin.html`, `install.html`, `privacy.html`, `terms.html`, `usage-policy.html`, `manifest.webmanifest`, `sw.js`, `css/`, `js/`, `img/`, `.htaccess`, `robots.txt` and the per-install `config.js`. Never upload `src/`, `supabase/`, `setup/`, `clients/`, `schema.sql`, `salon-full-auto-installer.json`, `package.json`, `tailwind.config.js` or `node_modules/`.
 Never upload `src/`, `supabase/`, `setup/`, `clients/`, `package.json`, `tailwind.config.js` or `node_modules/`.
 The shipped JavaScript is minified, and `.htaccess` returns 404 for those source paths even if a
 copy is left behind.
@@ -145,7 +151,7 @@ copy is left behind.
 npm install          # first time only
 npm run build        # rebuilds css/tailwind.css + js/app.min.js + js/i18n.min.js
 ```
-Delete `node_modules/` afterwards. `js/config.js` is never built or minified.
+Delete `node_modules/` afterwards. `config.js` is never built or minified.
 
 ---
 
@@ -153,7 +159,7 @@ Delete `node_modules/` afterwards. `js/config.js` is never built or minified.
 
 ### 3.1 Create the project
 1. Create a project at [supabase.com](https://supabase.com).
-2. Open **SQL Editor** and run the entire contents of `supabase/schema.sql`.
+2. Open **SQL Editor** and run the entire contents of the root `schema.sql`.
 3. Optionally run `supabase/seed.sql` to load demo services and three staff members.
 4. If your project does not allow `CREATE EXTENSION`, enable **pg_net** and **moddatetime** first from
    **Database → Extensions**, then run the SQL again.
@@ -161,27 +167,37 @@ Delete `node_modules/` afterwards. `js/config.js` is never built or minified.
 ### 3.2 Create the admin account
 1. Go to **Authentication → Users → Add user**.
 2. Enter the salon admin email and a strong password, and confirm the user (auto-confirm).
-3. Go to **Authentication → Sign In / Providers → Email** and disable **Allow new users to sign up**.
-   This is important: every authenticated user has full admin access.
-4. Set **Authentication → URL Configuration → Site URL** to your production domain.
+3. Every authenticated Auth user is a manager. The schema installs an `AFTER INSERT` trigger on
+   `auth.users` that creates the matching `public.admins` row automatically, and backfills users that
+   existed before the schema ran.
+4. Go to **Authentication → Sign In / Providers → Email** and disable **Allow new users to sign up**.
+   This is important: every authenticated user is a manager.
+5. Set **Authentication → URL Configuration → Site URL** to your production domain.
 
 ### 3.3 Connect the frontend
-Edit `js/config.js`:
+Every page loads the root `config.js` before the app:
 
 ```js
-window.SB_CONFIG = {
-  url: 'https://YOUR-PROJECT-REF.supabase.co',
-  anonKey: 'YOUR-SUPABASE-ANON-KEY'
+window.APP_CONFIG = {
+  SUPABASE_URL: 'https://YOUR-PROJECT-REF.supabase.co',
+  SUPABASE_ANON_KEY: 'YOUR-SUPABASE-PUBLISHABLE-KEY',
+  SALON_NAME: 'Your Salon'
 }
 ```
 
 Find both values in **Supabase → Project Settings → API**.
-Use the **anon public** key only. Never put the `service_role` key in the browser.
+Use the **publishable / anon** key only. Never put the `service_role` key in the browser.
+
+`config.js` is **git-ignored**, so the template repository never contains a real project. The one-click
+installer writes it for the client. For a manual install, copy `config.example.js` to `config.js`, or run
+`npm run configure`, then edit the values. While the file is missing (or still contains `%%…%%`
+placeholders) the site shows the Arabic activation banner and links to `install.html`.
 
 ### 3.4 Verify
 Open `index.html`. You should see the **public landing page** with services and the booking form.
-A yellow setup banner appears while the config is missing. Use **Staff area → Manager account** to
-sign in with the admin user, go to **Admin → Settings**, and save the salon and contact details.
+If the activation banner appears, `config.js` is missing or still has placeholders — open `install.html`
+or run `npm run configure`. Use **Staff area → Manager account** (or `admin.html`) to sign in with the
+admin user, go to **Admin → Settings**, and save the salon and contact details.
 
 > If you previously ran an older `schema.sql`, re-run the current one from the SQL Editor. It is
 > idempotent: it adds the new tables/columns/RPCs and revokes anonymous access without deleting data.
@@ -263,14 +279,14 @@ handlers and `javascript:` URLs are stripped, so a pasted snippet cannot run on 
 
 **Per-client launch checklist**
 
-1. Create a new Supabase project and run the current `supabase/schema.sql` in the SQL Editor.
+1. Create a new Supabase project and run the current `schema.sql` in the SQL Editor (or use `install.html`).
 2. Create the admin user and disable public sign-ups (see 3.2).
-3. Copy this website folder, edit `js/config.js` with that project's URL and anon key.
+3. Write the connection file: run `install.html`, or copy this folder and run `npm run configure` to create `config.js` with that project's URL and publishable key.
 4. Sign in → **Admin → Settings**: upload the logo, set name, phone, address, hours, map, email,
    social links, tagline, about text and SEO.
 5. **Admin → Pages**: review/personalise the three legal pages (the schema seeds complete bilingual
    drafts) and replace `{phone}`/`{email}`/`{address}` values as needed.
-6. Deploy only the front-end files listed in section 4.
+6. Deploy only the front-end files listed in section 4, including `config.js`.
 
 > `public_info` returns only the fields above. `public_services` returns service id, both names and the
 > image URL (never prices), and `public_staff_list` returns active staff id and name only.
@@ -278,83 +294,55 @@ handlers and `javascript:` URLs are stripped, so a pasted snippet cannot run on 
 Service pictures live in `img/services/` and are matched by service name (`serviceImage()` in
 `src/app.js`); the services editor only contains the Arabic name, English name and price.
 
-### 3.8 One-command setup for a new client (seller tool)
+### 3.8 One-click self-install (the product)
 
-Instead of repeating the manual steps above for every sale, the seller can run:
+The customer never touches code. `install.html` walks through three screens:
 
-```bash
-npm install        # first time only
-npm run new-client
-```
+1. **Salon data** — licence key, English slug, manager email/password, WhatsApp number.
+2. **Accounts** — GitHub OAuth (repository + Pages) then Supabase OAuth (project + database), each on the
+   customer's own account. No password or personal access token ever reaches the seller.
+3. **Launch** — the page POSTs to the n8n webhook (`N8N_WEBHOOK_URL`) and shows the live booking and
+   admin URLs plus the manager login.
 
-The script asks for a Supabase **Personal Access Token** (`sbp_…`, created at
-<https://supabase.com/dashboard/account/tokens>), the organization, the client name, region, database
-password and admin login, then it:
+The n8n workflow (`salon-full-auto-installer.json`) then:
 
-1. creates a dedicated Supabase project (`POST /v1/projects`),
-2. waits until the database is `ACTIVE_HEALTHY`,
-3. runs the whole `supabase/schema.sql` through the Management API,
-4. creates the admin Auth user (email confirmed),
-5. tries to disable public sign-ups and set the Site URL,
-6. writes `clients/<slug>/site/` — a complete, ready-to-upload copy with `js/config.js` already pointing
-   at the new project.
+1. validates the licence against the seller's master project (`salon_licenses`, `status = active`),
+2. creates a **public repository from this template** in the customer's GitHub account,
+3. deletes the template-only `CNAME` and `install.html` so the new site uses its own Pages URL,
+4. creates a Supabase project in the customer's organization and waits until it is healthy,
+5. runs `schema.sql` through the Management API,
+6. creates the manager Auth user (the `auth.users` trigger fills `public.admins`),
+7. pushes the generated `config.js` (URL + publishable key + salon name) to the repository,
+8. enables GitHub Pages, sends the WhatsApp welcome message and marks the licence `used`.
 
-Secrets (database password, admin password, `service_role` key) are printed once and never written to
-disk. `clients/` is git-ignored. Full details and the manual fallback live in `setup/README.md`.
+The licence table lives in the seller's master project, never in a client project. Create it once with
+`supabase/salon-licenses.sql`; it seeds `TEST-1234` for end-to-end testing.
 
-> The tool creates **projects**, not Supabase **accounts**: the account, organization and billing stay
-> with the seller. The access token must never be shipped to the browser or the deployed site.
+> **The template repository must be public.** GitHub only lets an OAuth user generate a repository from a
+> template they can read, and GitHub Free only serves Pages from public repositories. The site and its
+> files are delivered to every visitor anyway; the paid value is the one-click install and the licence gate.
 
-Tests for the provisioning logic (no network required):
+### 3.9 Seller checklist (once)
 
-```bash
-npm run test:setup
-```
-
-To bring an **existing** project up to date with the latest schema (for example the demo project) there
-is a companion command that only needs a Personal Access Token and the project ref:
-
-```bash
-npm run apply-schema
-```
-
-It runs `supabase/schema.sql`, then verifies `public_info`, `public_legal_page` and the `branding` bucket.
-
-### 3.9 Reusing the same files for another client
-
-The business model is: **one identical set of files per client**. The *only* thing that changes between
-two installations is `js/config.js` — it holds the project URL and the public key, nothing else:
-
-```js
-window.SB_CONFIG = {
-  url: 'https://<project-ref>.supabase.co',
-  anonKey: '<publishable / anon key>'
-}
-```
-
-The committed `js/config.js` contains placeholders, so an unedited upload never connects to the seller's
-own project. The site shows a “setup required” banner until both values are filled.
-
-#### Steps per sale
-
-1. **Create the project** for that client (Dashboard, or `npm run new-client`).
-2. **Apply the schema** — SQL Editor → paste `supabase/schema.sql` → Run, or `npm run apply-schema`.
-3. **Link the site**: run `npm run configure` (or edit `js/config.js` by hand) and paste the new project's
-   URL and publishable key. It validates the URL and key, and rejects `service_role`.
-4. **Create the client's admin user** in Authentication → Users (Auto Confirm), then disable
-   *Allow new users to sign up*.
-5. **Upload** the site files (`index.html`, `privacy.html`, `terms.html`, `usage-policy.html`,
-   `manifest.webmanifest`, `sw.js`, `css/`, `js/`, `img/`, `.htaccess`, `robots.txt`).
-6. **Hand over** the site and the admin login. The client signs in and fills everything else from
-   **Admin → Settings** (name, logo, phone, address, hours, map, email, social links, SEO) and
-   **Admin → Pages** (privacy, terms, usage policy).
+1. Create the master Supabase project and run `supabase/salon-licenses.sql`.
+2. Make this repository **public** and mark it as a **Template repository** (Settings → Template
+   repository). Keep the root `config.js` untracked and never commit a real project into it.
+3. Import `salon-full-auto-installer.json` into n8n and fill its **Config Variables** node
+   (`master_supabase_url`, `master_service_role_key`, GitHub/Supabase OAuth client IDs and secrets,
+   template owner/repo, WhatsApp/Evolution keys).
+4. Add **HTTP Basic Auth** credentials to the Supabase token node.
+5. Activate the workflow and keep `https://n8n.awj-bh.cloud/webhook/salon-auto-install` reachable.
+6. Fill the three constants at the top of `install.html` (`GITHUB_CLIENT_ID`, `SUPABASE_CLIENT_ID`,
+   `N8N_WEBHOOK_URL`) and deploy it. Register the **exact** page URL as the OAuth callback in both the
+   GitHub OAuth App and the Supabase OAuth App (`https://salon.awj-bh.com/install.html` for production).
+7. Open `install.html` yourself and run it once with `TEST-1234`.
 
 Nothing else is client-specific: the salon name, logo, contact details, social links, SEO text and the
-three legal pages all live in the `settings` table and are edited from the dashboard. The same database
-schema serves every client, and each client has a separate Supabase project, so no data is ever shared.
+three legal pages all live in the `settings` table and are edited from the dashboard. Every installation
+has its own repository and its own Supabase project, so no data is ever shared.
 
-> After editing `js/config.js` for one client, run `git checkout -- js/config.js` before preparing the next
-> client so your repository stays neutral.
+The seller-side CLI (`npm run new-client` / `npm run apply-schema` / `npm run configure`) still exists as
+a manual fallback; it now writes the root `config.js` instead of `js/config.js`.
 
 ### 3.10 Phones, tablets and the installable app
 
@@ -378,25 +366,49 @@ What is handled explicitly:
 *Add to Home Screen*. The home-screen icon uses `img/icon-*.png`; if a client uploads a logo, the in-page
 favicon and the app title follow it automatically, while the launcher icon stays the packaged one.
 
-`sw.js` never caches `js/config.js`, so a device can never keep talking to a swapped Supabase project, and
+`sw.js` never caches `config.js`, so a device can never keep talking to a swapped Supabase project, and
 it serves the network version first — a new deployment appears on the next visit without clearing data.
-When you change `sw.js` itself, bump the `CACHE` constant (`salon-shell-v2` → `v3`).
+When you change `sw.js` itself, bump the `CACHE` constant (`salon-shell-v3` → `v4`).
 
 ---
 
 
-## 4. Hostinger deployment
+## 4. Deployment
+
+### GitHub Pages (used by the installer)
+
+`install.html` + n8n take care of this automatically. For a manual deployment:
+
+1. Create the repository from this template (or push the front-end files to a new repository).
+2. **Settings → Pages** → Source: **Deploy from a branch** → `main` / `/ (root)`.
+3. Leave the default `https://<user>.github.io/<repo>/` URL, or add a custom domain and enable
+   **Enforce HTTPS** (a `CNAME` file is created in the repository root).
+4. Open the site; while `config.js` is missing it shows the activation banner with a link to `install.html`.
+
+The repository must be **public** for two reasons: GitHub Free only serves Pages from public repositories,
+and the installer's OAuth token can only generate a repository from a **public** template. The workflow
+deletes the template-only `CNAME` and `install.html` from every generated repository, so each client site
+is served from its own `/<repo>/` path and cannot claim `salon.awj-bh.com`.
+
+The repository ships a `.nojekyll` file so GitHub Pages serves the files as-is (no Jekyll build step).
+
+> **A Pages site built from `main` has no `config.js`** (it is git-ignored), so it shows the activation
+> banner. That is correct for the template. To keep a working demo, publish it from a separate `demo`
+> branch that adds `config.js` (never merge that commit into `main`), or upload the demo to Hostinger
+> with `config.js`.
+
+### Hostinger (alternative)
 
 1. In hPanel, open **Files → File Manager → public_html**.
-2. Upload `index.html`, `privacy.html`, `terms.html`, `usage-policy.html`, `manifest.webmanifest`, `sw.js`, the
-   `css` folder, the `js` folder, the `img` folder, `.htaccess` and `robots.txt`.
+2. Upload `index.html`, `admin.html`, `privacy.html`, `terms.html`, `usage-policy.html`,
+   `manifest.webmanifest`, `sw.js`, `config.js`, the `css` folder, the `js` folder, the `img` folder,
+   `.htaccess` and `robots.txt`.
 3. Enable **SSL** in hPanel and force HTTPS (the supplied `.htaccess` also redirects HTTP → HTTPS).
 4. Open the domain, sign in as admin, and create your services and staff.
 
-Upload **only** the files above. Do **not** upload `src/`, `supabase/`, `package.json`,
-`package-lock.json`, `tailwind.config.js`, `README.md` or `node_modules/`. The supplied `.htaccess`
-already returns 404 for those paths as a second line of defence, but leaving them off the server is
-better.
+Upload **only** the files above. Do **not** upload `src/`, `supabase/`, `schema.sql`,
+`salon-full-auto-installer.json`, `package.json`, `package-lock.json`, `tailwind.config.js`, `README.md`
+or `node_modules/`. The supplied `.htaccess` already returns 404 for those paths as a second line of defence.
 
 No Node.js, PHP, database or build step is required at runtime. The site is pure static hosting.
 
@@ -412,7 +424,7 @@ Upload the regenerated `css/tailwind.css`, `js/app.min.js` and `js/i18n.min.js`.
 Each `?v=` cache-bust hint is optional; `.htaccess` sends HTML and `config.js` with no-cache headers.
 
 ### Updating the Supabase keys
-`js/config.js` is marked no-cache in `.htaccess`. After changing keys, hard-refresh the browser
+`config.js` is marked no-cache in `.htaccess`. After changing keys, hard-refresh the browser
 (Ctrl+F5) or append `?v=2` to the URL.
 
 ---
@@ -557,18 +569,18 @@ new invoice number. The `sync_appointment_sheet` trigger queues the booking row,
 
 | Symptom | Fix |
 |---|---|
-| Yellow “Setup required” banner | Edit `js/config.js` with the real URL and anon key |
+| Yellow “Setup required” banner | Create `config.js` with the real URL and publishable key (`npm run configure`, or open `install.html`) |
 | “Invalid login credentials” | Create/confirm the user in Supabase Auth; check the email and password |
 | No services or staff in POS | Run `seed.sql`, or add records in **Admin**; check that they are **Active** |
 | Booking fails | Check the browser console/network tab; verify RLS policies were created by `schema.sql` |
-| Booking says the database is outdated | Run the latest `supabase/schema.sql` — `public_booking` and `public_info` must exist |
+| Booking says the database is outdated | Run the latest `schema.sql` — `public_booking` and `public_info` must exist |
 | Landing page shows no services | Run `schema.sql`, add active services and staff, then reload; pictures fall back to `img/services/nails.jpg` |
 | Google Sheet says “Not sent” | Set the Apps Script `/exec` URL in Settings, save, then use **Send test row** |
 | Google Sheet shows **Failed** | Re-deploy the Apps Script as a Web App with access **Anyone** and copy the new `/exec` URL |
 | `column ... does not exist` while running SQL | An older table already exists. Re-run the latest `schema.sql` — it adds missing `is_active`, `created_at`, `phone`, `notes` and `updated_at` columns automatically. If that still fails, drop the four tables and re-run the schema (see README). |
 | WhatsApp alert not received | Check the four Evolution settings and the instance connection state. In the SQL Editor run `select * from net._http_response order by created desc limit 10;` to inspect pg_net delivery errors. |
 | Reports show no data | Only **completed** services count; change the appointment status or the VAT basis |
-| Expenses page says the table is missing | Run the latest `supabase/schema.sql` — it creates `expenses` plus the `staff_expenses`, `staff_create_expense` and `staff_delete_expense` RPCs |
+| Expenses page says the table is missing | Run the latest `schema.sql` — it creates `expenses` plus the `staff_expenses`, `staff_create_expense` and `staff_delete_expense` RPCs |
 | Staff cannot see the expenses list | By design: staff can add an expense but never view, total or delete expense records; only the admin can. Re-run the latest `schema.sql` to apply the revoked read/delete RPCs. |
 | Expenses tab is missing in Google Sheets | Re-copy the Apps Script code from Settings (the old version wrote bookings only) and re-deploy the Web App |
 | Charts do not render | Ensure `cdn.jsdelivr.net` is reachable; a strict corporate firewall may block it |
