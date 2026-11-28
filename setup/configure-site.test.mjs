@@ -26,3 +26,24 @@ test('configSource writes the project connection into window.APP_CONFIG', () => 
   assert.match(src, /window\.APP_CONFIG/)
   assert.doesNotMatch(src, /SB_CONFIG/)
 })
+
+test('configSource keeps the optional Google client id and defaults it to empty', () => {
+  const withGoogle = configSource({
+    url: 'https://x.supabase.co',
+    anonKey: 'sb_publishable_abc123456789',
+    salonName: 'Lamsa',
+    googleClientId: '123-abc.apps.googleusercontent.com'
+  })
+  assert.match(withGoogle, /GOOGLE_CLIENT_ID: "123-abc\.apps\.googleusercontent\.com"/)
+
+  const withoutGoogle = configSource({ url: 'https://x.supabase.co', anonKey: 'sb_publishable_abc123456789', salonName: 'Lamsa' })
+  assert.match(withoutGoogle, /GOOGLE_CLIENT_ID: ""/)
+
+  const escaped = configSource({
+    url: 'https://x.supabase.co',
+    anonKey: 'sb_publishable_abc123456789',
+    salonName: 'Lamsa',
+    googleClientId: 'a"b\\c.apps.googleusercontent.com'
+  })
+  assert.match(escaped, /GOOGLE_CLIENT_ID: "a\\"b\\\\c\.apps\.googleusercontent\.com"/)
+})

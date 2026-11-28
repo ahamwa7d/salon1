@@ -80,6 +80,17 @@ test('configSource quotes values safely', () => {
   assert.match(src, /sb_publishable_x/)
   assert.match(src, /Nelly \\"Nails\\"/)
   assert.match(src, /window\.APP_CONFIG/)
+  assert.match(src, /GOOGLE_CLIENT_ID: ""/)
+})
+
+test('configSource writes the optional Google client id', () => {
+  const src = configSource({
+    url: 'https://x.supabase.co',
+    anonKey: 'sb_publishable_x',
+    salonName: 'Lamsa',
+    googleClientId: '999-test.apps.googleusercontent.com'
+  })
+  assert.match(src, /GOOGLE_CLIENT_ID: "999-test\.apps\.googleusercontent\.com"/)
 })
 
 test('provisionClient creates the project, applies SQL and writes a deployable site', async () => {
@@ -120,6 +131,7 @@ test('provisionClient creates the project, applies SQL and writes a deployable s
     adminEmail: 'admin@example.com',
     adminPassword: 'admin-secret',
     siteUrl: 'https://example.com',
+    googleClientId: '999-provision.apps.googleusercontent.com',
     root,
     clientsDir,
     sql: 'select 1;',
@@ -138,6 +150,7 @@ test('provisionClient creates the project, applies SQL and writes a deployable s
   assert.match(config, /https:\/\/ref123\.supabase\.co/)
   assert.match(config, /anon123/)
   assert.match(config, /Nelly Nails Salon/)
+  assert.match(config, /GOOGLE_CLIENT_ID: "999-provision\.apps\.googleusercontent\.com"/)
   assert.doesNotMatch(config, /service123/)
 
   const staleConfig = await readFile(path.join(result.siteDir, 'js', 'config.js'), 'utf8').catch(() => null)

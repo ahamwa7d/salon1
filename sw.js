@@ -9,7 +9,7 @@
  */
 'use strict'
 
-const CACHE = 'salon-shell-v3'
+const CACHE = 'salon-shell-v4'
 const CDN = 'https://cdn.jsdelivr.net'
 const SHELL = [
   './index.html',

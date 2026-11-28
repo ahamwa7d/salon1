@@ -575,8 +575,12 @@ begin
   -- as pending and can only be completed/cancelled by an authenticated admin.
   new.status := 'pending';
   -- Official invoice number is always assigned by the database, never by the
-  -- client, so numbers stay unique and sequential.
-  new.invoice_no := lpad(nextval('public.invoice_number_seq')::text, 6, '0');
+  -- client, so numbers stay unique and sequential. The only exception is the
+  -- admin-only restore from a Google Sheet backup, which supplies the original
+  -- number so historical tax invoices keep their official sequence.
+  if new.invoice_no is null or btrim(new.invoice_no) = '' then
+    new.invoice_no := lpad(nextval('public.invoice_number_seq')::text, 6, '0');
+  end if;
   return new;
 end;
 $$;
@@ -1417,6 +1421,11 @@ declare
   v_admin_msg text;
   v_client_msg text;
 begin
+  -- Bulk restore from a Google Sheet backup must not send WhatsApp messages
+  -- or queue thousands of outbound sheet rows.
+  if current_setting('salon.restore', true) = 'on' then
+    return new;
+  end if;
   -- A notification problem must never block saving a booking.
   begin
     select setting_value into v_salon from public.settings where setting_key = 'salon_name';
@@ -1657,6 +1666,9 @@ security definer
 set search_path = public, extensions
 as $$
 begin
+  if current_setting('salon.restore', true) = 'on' then
+    return new;
+  end if;
   begin
     perform public.sheet_send(new.id, 'booking');
   exception when others then
@@ -2110,6 +2122,9 @@ security definer
 set search_path = public, extensions
 as $$
 begin
+  if current_setting('salon.restore', true) = 'on' then
+    return new;
+  end if;
   begin
     perform public.sheet_send_expense(new.id, 'expense');
   exception when others then
@@ -2123,3 +2138,227 @@ create trigger trg_sync_expense_sheet
 after insert or update of title, amount, method, notes, staff_id, spent_at
 on public.expenses
 for each row execute function public.sync_expense_sheet();
+
+-- =====================================================================
+-- Google Sheet backup restore (admin only)
+-- =====================================================================
+-- The dashboard writes a backup to the manager's own Google Drive with the
+-- browser's OAuth token (drive.file). This function only receives the parsed
+-- rows and applies them in one transaction:
+--   * upsert by primary key, so nothing that is missing from the sheet is
+--     deleted;
+--   * invoice numbers are preserved for tax records and the invoice sequence
+--     is moved forward so new bookings never reuse a number;
+--   * password hashes, the staff access code and API keys are never accepted;
+--   * WhatsApp notifications and outbound Sheets sync are suspended while the
+--     restore runs (session flag salon.restore), so a restore cannot message
+--     clients or flood the Apps Script deployment.
+-- The browser never gets a secret: it only calls this function as the signed-in
+-- manager, and the function refuses everyone who is not in public.admins.
+create or replace function public.admin_restore_backup(p_payload jsonb)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  r jsonb;
+  n bigint;
+  v_id uuid;
+  v_max bigint;
+  v_last bigint;
+  v_called boolean;
+  v_counts jsonb := '{}'::jsonb;
+  -- Never restored from a public backup file: hashes, codes and API keys.
+  v_secret_keys text[] := array['staff_app_code_hash', 'evolution_api_key'];
+begin
+  if not public.is_admin() then
+    raise exception 'not_admin';
+  end if;
+  if p_payload is null or jsonb_typeof(p_payload) <> 'object' then
+    raise exception 'invalid_payload';
+  end if;
+
+  -- Silent mode for the notification/sync triggers (transaction-local).
+  perform set_config('salon.restore', 'on', true);
+
+  -- ---------------------------------------------------------------- services
+  n := 0;
+  for r in select value from jsonb_array_elements(coalesce(p_payload->'services', '[]'::jsonb)) loop
+    v_id := nullif(btrim(coalesce(r->>'id', '')), '')::uuid;
+    if v_id is null then
+      continue;
+    end if;
+    insert into public.services (id, name_ar, name_en, price, image_url, is_active, created_at)
+    values (
+      v_id,
+      coalesce(nullif(btrim(r->>'name_ar'), ''), 'خدمة'),
+      coalesce(nullif(btrim(r->>'name_en'), ''), 'Service'),
+      coalesce((nullif(btrim(r->>'price'), ''))::numeric, 0),
+      nullif(btrim(coalesce(r->>'image_url', '')), ''),
+      coalesce((nullif(btrim(r->>'is_active'), ''))::boolean, true),
+      coalesce((nullif(btrim(r->>'created_at'), ''))::timestamptz, now())
+    )
+    on conflict (id) do update set
+      name_ar = excluded.name_ar,
+      name_en = excluded.name_en,
+      price = excluded.price,
+      image_url = excluded.image_url,
+      is_active = excluded.is_active;
+    n := n + 1;
+  end loop;
+  v_counts := v_counts || jsonb_build_object('services', n);
+
+  -- ------------------------------------------------------------------- staff
+  -- password_hash is intentionally absent from the payload and is left as-is.
+  n := 0;
+  for r in select value from jsonb_array_elements(coalesce(p_payload->'staff', '[]'::jsonb)) loop
+    v_id := nullif(btrim(coalesce(r->>'id', '')), '')::uuid;
+    if v_id is null then
+      continue;
+    end if;
+    insert into public.staff (id, name, phone, commission_rate, username, login_enabled, is_active, created_at)
+    values (
+      v_id,
+      coalesce(nullif(btrim(r->>'name'), ''), 'موظفة'),
+      nullif(btrim(coalesce(r->>'phone', '')), ''),
+      coalesce((nullif(btrim(r->>'commission_rate'), ''))::numeric, 0),
+      nullif(lower(btrim(coalesce(r->>'username', ''))), ''),
+      coalesce((nullif(btrim(r->>'login_enabled'), ''))::boolean, false),
+      coalesce((nullif(btrim(r->>'is_active'), ''))::boolean, true),
+      coalesce((nullif(btrim(r->>'created_at'), ''))::timestamptz, now())
+    )
+    on conflict (id) do update set
+      name = excluded.name,
+      phone = excluded.phone,
+      commission_rate = excluded.commission_rate,
+      username = excluded.username,
+      login_enabled = excluded.login_enabled,
+      is_active = excluded.is_active;
+    n := n + 1;
+  end loop;
+  v_counts := v_counts || jsonb_build_object('staff', n);
+
+  -- -------------------------------------------------------------- appointments
+  n := 0;
+  for r in select value from jsonb_array_elements(coalesce(p_payload->'appointments', '[]'::jsonb)) loop
+    v_id := nullif(btrim(coalesce(r->>'id', '')), '')::uuid;
+    if v_id is null then
+      continue;
+    end if;
+    -- The insert trigger assigns invoice/status/totals, so insert first and
+    -- then write the historical values back in a second statement.
+    insert into public.appointments (
+      id, invoice_no, client_name, client_phone, service_id, staff_id,
+      appointment_date, payment_proof, notes, created_at
+    )
+    values (
+      v_id,
+      nullif(btrim(coalesce(r->>'invoice_no', '')), ''),
+      coalesce(nullif(btrim(r->>'client_name'), ''), '—'),
+      coalesce(nullif(btrim(r->>'client_phone'), ''), '—'),
+      (nullif(btrim(coalesce(r->>'service_id', '')), ''))::uuid,
+      (nullif(btrim(coalesce(r->>'staff_id', '')), ''))::uuid,
+      coalesce((nullif(btrim(r->>'appointment_date'), ''))::timestamptz, now()),
+      nullif(btrim(coalesce(r->>'payment_proof', '')), ''),
+      nullif(btrim(coalesce(r->>'notes', '')), ''),
+      coalesce((nullif(btrim(r->>'created_at'), ''))::timestamptz, now())
+    )
+    on conflict (id) do nothing;
+
+    update public.appointments a set
+      client_name = coalesce(nullif(btrim(r->>'client_name'), ''), a.client_name),
+      client_phone = coalesce(nullif(btrim(r->>'client_phone'), ''), a.client_phone),
+      service_id = coalesce((nullif(btrim(coalesce(r->>'service_id', '')), ''))::uuid, a.service_id),
+      staff_id = coalesce((nullif(btrim(coalesce(r->>'staff_id', '')), ''))::uuid, a.staff_id),
+      appointment_date = coalesce((nullif(btrim(r->>'appointment_date'), ''))::timestamptz, a.appointment_date),
+      payment_proof = nullif(btrim(coalesce(r->>'payment_proof', '')), ''),
+      notes = nullif(btrim(coalesce(r->>'notes', '')), ''),
+      invoice_no = coalesce(nullif(btrim(r->>'invoice_no'), ''), a.invoice_no),
+      total_price = coalesce((nullif(btrim(r->>'total_price'), ''))::numeric, a.total_price),
+      commission_amount = coalesce((nullif(btrim(r->>'commission_amount'), ''))::numeric, a.commission_amount),
+      status = case
+        when r->>'status' in ('pending', 'completed', 'cancelled') then r->>'status'
+        else a.status
+      end
+    where a.id = v_id;
+    n := n + 1;
+  end loop;
+  v_counts := v_counts || jsonb_build_object('appointments', n);
+
+  -- ----------------------------------------------------------------- expenses
+  n := 0;
+  for r in select value from jsonb_array_elements(coalesce(p_payload->'expenses', '[]'::jsonb)) loop
+    v_id := nullif(btrim(coalesce(r->>'id', '')), '')::uuid;
+    if v_id is null then
+      continue;
+    end if;
+    insert into public.expenses (
+      id, title, amount, method, notes, vendor_name, vendor_vat_no, invoice_no,
+      vat_amount, staff_id, created_by, spent_at, created_at
+    )
+    values (
+      v_id,
+      coalesce(nullif(btrim(r->>'title'), ''), 'مصروف'),
+      coalesce((nullif(btrim(r->>'amount'), ''))::numeric, 0.001),
+      case when r->>'method' in ('cash', 'benefitpay') then r->>'method' else 'cash' end,
+      nullif(btrim(coalesce(r->>'notes', '')), ''),
+      nullif(btrim(coalesce(r->>'vendor_name', '')), ''),
+      nullif(btrim(coalesce(r->>'vendor_vat_no', '')), ''),
+      nullif(btrim(coalesce(r->>'invoice_no', '')), ''),
+      coalesce((nullif(btrim(r->>'vat_amount'), ''))::numeric, 0),
+      (nullif(btrim(coalesce(r->>'staff_id', '')), ''))::uuid,
+      case when r->>'created_by' in ('admin', 'staff') then r->>'created_by' else 'admin' end,
+      coalesce((nullif(btrim(r->>'spent_at'), ''))::timestamptz, now()),
+      coalesce((nullif(btrim(r->>'created_at'), ''))::timestamptz, now())
+    )
+    on conflict (id) do update set
+      title = excluded.title,
+      amount = excluded.amount,
+      method = excluded.method,
+      notes = excluded.notes,
+      vendor_name = excluded.vendor_name,
+      vendor_vat_no = excluded.vendor_vat_no,
+      invoice_no = excluded.invoice_no,
+      vat_amount = excluded.vat_amount,
+      staff_id = excluded.staff_id,
+      spent_at = excluded.spent_at;
+    n := n + 1;
+  end loop;
+  v_counts := v_counts || jsonb_build_object('expenses', n);
+
+  -- ----------------------------------------------------------------- settings
+  -- Secrets are rejected even if a hand-edited sheet contains them.
+  n := 0;
+  for r in select value from jsonb_array_elements(coalesce(p_payload->'settings', '[]'::jsonb)) loop
+    if coalesce(r->>'setting_key', '') = any(v_secret_keys) then
+      continue;
+    end if;
+    if nullif(btrim(coalesce(r->>'setting_key', '')), '') is null then
+      continue;
+    end if;
+    insert into public.settings (setting_key, setting_value)
+    values (btrim(r->>'setting_key'), r->>'setting_value')
+    on conflict (setting_key) do update set setting_value = excluded.setting_value;
+    n := n + 1;
+  end loop;
+  v_counts := v_counts || jsonb_build_object('settings', n);
+
+  -- Keep the official invoice sequence ahead of every restored number.
+  select coalesce(max((regexp_replace(invoice_no, '[^0-9]', '', 'g'))::bigint), 0)
+    into v_max
+  from public.appointments
+  where invoice_no ~ '^[0-9]+$';
+
+  select last_value, is_called into v_last, v_called from public.invoice_number_seq;
+  if v_max > 0 and (not coalesce(v_called, false) or v_max >= coalesce(v_last, 0)) then
+    perform setval('public.invoice_number_seq', v_max, true);
+  end if;
+
+  return v_counts;
+end;
+$$;
+
+revoke all on function public.admin_restore_backup(jsonb) from public;
+revoke all on function public.admin_restore_backup(jsonb) from anon;
+grant execute on function public.admin_restore_backup(jsonb) to authenticated;

@@ -15,10 +15,10 @@ DirectoryIndex index.html
 # Only the built front-end (html, css, js, images, fonts) is public.
 # ---------------------------------------------------------------------
 RedirectMatch 404 (?i)/(supabase|src|node_modules|\.git|\.github)(/|$)
-RedirectMatch 404 (?i)\.(sql|md|log|env|ini|bak|old|orig|map|ts|tsx|scss|sass|less|json|lock|yml|yaml)$
+RedirectMatch 404 (?i)\.(sql|md|log|env|ini|bak|old|orig|map|ts|tsx|scss|sass|less|json|lock|yml|yaml|csv|xlsx|zip|gsheet)$
 RedirectMatch 404 (?i)/(package(-lock)?\.json|tailwind\.config\.js|README(\.[a-z]+)?|LICENSE|\.htaccess|\.htpasswd|\.gitignore|robots\.txt\.bak)$
 
-<FilesMatch "(?i)^(\.|.*\.(sql|md|log|env|ini|bak|old|orig|map|ts|tsx|json|lock|yml|yaml|config\.js\.map))$">
+<FilesMatch "(?i)^(\.|.*\.(sql|md|log|env|ini|bak|old|orig|map|ts|tsx|json|lock|yml|yaml|csv|xlsx|zip|gsheet|config\.js\.map))$">
   Require all denied
 </FilesMatch>
 
@@ -32,7 +32,7 @@ RedirectMatch 404 (?i)/(package(-lock)?\.json|tailwind\.config\.js|README(\.[a-z
   Header always set X-Frame-Options "SAMEORIGIN"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
-  Header always set Cross-Origin-Opener-Policy "same-origin"
+  Header always set Cross-Origin-Opener-Policy "same-origin-allow-popups"
   Header always set X-Permitted-Cross-Domain-Policies "none"
   Header always unset X-Powered-By
   Header always unset Server

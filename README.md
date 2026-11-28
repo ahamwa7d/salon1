@@ -38,6 +38,8 @@ A lightweight, bilingual (Arabic / English) beauty salon website with online boo
   Evolution API and Google Sheets sync
 - Brand identity card (logo, hero/about images, taglines, about text), social links and SEO fields
 - Legal-page editor for privacy, terms and usage policies with live placeholders and safe HTML
+- Google Drive backup & restore in the manager's own account (see 5.1), including an optional
+  automatic backup after every save
 
 ### Reports
 - Custom date range plus Today / This Month / Last Month / This Year shortcuts
@@ -88,6 +90,9 @@ A lightweight, bilingual (Arabic / English) beauty salon website with online boo
 - Failed staff logins are throttled (8 attempts per username / 15 minutes).
 - Prices and commissions are recalculated by a database trigger — clients cannot tamper with totals.
 - Only an authenticated admin (Supabase Auth) can manage staff logins, the access code and all settings.
+- The Drive backup never uploads a secret: `password_hash`, `staff_app_code_hash` and
+  `evolution_api_key` are excluded, and `admin_restore_backup()` refuses them. The OAuth token lives in
+  memory and is discarded on sign-out.
 
 ---
 
@@ -181,12 +186,16 @@ Every page loads the root `config.js` before the app:
 window.APP_CONFIG = {
   SUPABASE_URL: 'https://YOUR-PROJECT-REF.supabase.co',
   SUPABASE_ANON_KEY: 'YOUR-SUPABASE-PUBLISHABLE-KEY',
-  SALON_NAME: 'Your Salon'
+  SALON_NAME: 'Your Salon',
+  GOOGLE_CLIENT_ID: 'YOUR-GOOGLE-OAUTH-CLIENT-ID.apps.googleusercontent.com'
 }
 ```
 
-Find both values in **Supabase → Project Settings → API**.
+Find both Supabase values in **Supabase → Project Settings → API**.
 Use the **publishable / anon** key only. Never put the `service_role` key in the browser.
+
+`GOOGLE_CLIENT_ID` is optional and only enables the browser-side Drive backup (section 5.1). It is a
+public OAuth client ID, not a secret. Leave it empty to hide the feature with an Arabic notice.
 
 `config.js` is **git-ignored**, so the template repository never contains a real project. The one-click
 installer writes it for the client. For a manual install, copy `config.example.js` to `config.js`, or run
@@ -504,6 +513,47 @@ was connected late. The log shows `Sent`, `Sending`, `Failed` or `Not sent` (`SK
 why, e.g. URL unset). Because the call originates in Supabase's cloud, the URL must be public HTTPS;
 `localhost` will not work.
 
+### 5.1 Google Drive backup & restore (manager's own account)
+
+Separate from the Apps Script mirror above, **Admin → Backup** copies the whole database to a Google
+Sheet in the manager's own Drive, and restores it on demand. No server, no service account and no
+Google secret is involved:
+
+1. The manager presses **Connect Google account for backup**. Google Identity Services opens a popup
+   in the browser and returns a short-lived token for the
+   `https://www.googleapis.com/auth/drive.file` scope. The token is kept in memory only and is
+   discarded on sign-out or reload.
+2. **Back up to Google Sheet now** creates (or updates) one spreadsheet named after the salon, with a
+   separate tab per table: services, staff, appointments, expenses and settings. Each tab is cleared
+   and rewritten, so deleted rows disappear from the backup too.
+3. **Automatic backup after saving** repeats the backup 15 seconds after a booking or admin edit while
+   the Google session is still active. It never opens a popup in the background.
+4. **Restore from a Google Sheet link** reads the same link, shows the row counts per table, asks for
+   confirmation, then calls the admin-only RPC `admin_restore_backup(jsonb)`. Rows are upserted by
+   primary key, invoice numbers are preserved, the invoice sequence is moved forward and rows missing
+   from the file are **not** deleted.
+
+Privacy rules of the feature:
+
+- `staff.password_hash`, `settings.staff_app_code_hash` and `settings.evolution_api_key` are never
+  written to the sheet, and the restore function rejects them even if the sheet is edited by hand.
+- Staff passwords must be reset after a restore to a brand-new database.
+- With `drive.file`, the app can only read files it created itself — the manager must use the same
+  Google account.
+- The sheet contains client names, phones, appointments and invoices: keep it private.
+
+Google Cloud setup (once for the seller):
+
+1. Create an OAuth **Web application** client, add the site origin (for example
+   `https://salon.awj-bh.com`) to **Authorised JavaScript origins**, and enable the **Google Sheets
+   API** and **Google Drive API**.
+2. Put the client ID into `config.js` as `GOOGLE_CLIENT_ID`, or into the n8n **Config Variables** node
+   (the installer writes it into every client `config.js`).
+3. While the OAuth consent screen is in *Testing*, add the manager's Google address as a test user.
+
+Restore needs the current `schema.sql`. On an older database, run it again from the SQL Editor; the
+script is idempotent and adds `admin_restore_backup` without touching existing data.
+
 ---
 
 ## 6. VAT accounting notes
@@ -553,6 +603,11 @@ why, e.g. URL unset). Because the call originates in Supabase's cloud, the URL m
 | `whatsapp_log` | Outbound message log for the admin diagnostics panel |
 | `sheets_log` | Google Sheets sync attempts and pg_net request ids |
 | `expenses` | Title, amount `numeric(10,3)`, method (`cash` / `benefitpay`), notes, `vendor_name`, `vendor_vat_no`, `invoice_no`, `vat_amount`, `staff_id`, `created_by`, `spent_at` |
+
+Admin-only RPCs used by the dashboard: `admin_test_whatsapp`, `admin_whatsapp_log`,
+`admin_test_sheet`, `admin_sync_all_to_sheet`, `admin_sheet_log`, `admin_set_staff_login`,
+`admin_set_staff_code` and `admin_restore_backup(jsonb)`. The restore RPC is `SECURITY DEFINER`, checks
+`public.is_admin()`, upserts by primary key and never deletes rows that are missing from the payload.
 
 `appointments.status` is one of `pending`, `completed`, `cancelled`.
 

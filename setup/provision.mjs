@@ -202,17 +202,19 @@ export async function configureAuth({ token, ref, siteUrl, fetchImpl = fetch }) 
   })
 }
 
-export function configSource({ url, anonKey, salonName }) {
+export function configSource({ url, anonKey, salonName, googleClientId }) {
   const name = String(salonName || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+  const google = String(googleClientId || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"')
   return 'window.APP_CONFIG = {\n' +
     '  SUPABASE_URL: "' + url + '",\n' +
     '  SUPABASE_ANON_KEY: "' + anonKey + '",\n' +
-    '  SALON_NAME: "' + name + '"\n' +
+    '  SALON_NAME: "' + name + '",\n' +
+    '  GOOGLE_CLIENT_ID: "' + google + '"\n' +
     '};\n'
 }
 
 /** Copy only the deployable website files and write the client's config.js. */
-export async function writeClientSite({ root, target, url, anonKey, salonName }) {
+export async function writeClientSite({ root, target, url, anonKey, salonName, googleClientId }) {
   await mkdir(target, { recursive: true })
   for (const dir of DEPLOY_DIRS) {
     const from = path.join(root, dir)
@@ -234,7 +236,7 @@ export async function writeClientSite({ root, target, url, anonKey, salonName })
   }
   // The old per-deployment file lived in js/; never ship it with a client copy.
   await rm(path.join(target, 'js', 'config.js'), { force: true })
-  await writeFile(path.join(target, 'config.js'), configSource({ url, anonKey, salonName }), 'utf8')
+  await writeFile(path.join(target, 'config.js'), configSource({ url, anonKey, salonName, googleClientId }), 'utf8')
 }
 
 /**
@@ -253,6 +255,7 @@ export async function provisionClient({
   root,
   clientsDir,
   sql,
+  googleClientId = '',
   fetchImpl = fetch,
   sleep,
   log = () => {},
@@ -285,7 +288,7 @@ export async function provisionClient({
   }
 
   log('   writing ' + siteDir)
-  await writeClientSite({ root, target: siteDir, url, anonKey: keys.anon, salonName: name })
+  await writeClientSite({ root, target: siteDir, url, anonKey: keys.anon, salonName: name, googleClientId })
   await writeFile(
     path.join(clientDir, 'client.json'),
     JSON.stringify(

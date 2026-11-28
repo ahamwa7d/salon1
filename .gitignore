@@ -8,3 +8,11 @@ clients/
 # Per-deployment connection settings. install.html → n8n creates this file in
 # the client's repository; config.example.js is the committed template.
 config.js
+
+# Local copies of salon data (backups, exports, screenshots of invoices).
+# Guest data must never be committed, even to a private fork.
+backups/
+exports/
+salon-backup-*.json
+*.backup.json
+*.sql.gz

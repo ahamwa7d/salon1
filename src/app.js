@@ -31,6 +31,175 @@ const sb = isConfigured()
 
 const CHART_COLORS = ['#db2777', '#f472b6', '#fb7185', '#a855f7', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#64748b']
 
+// ---------------------------------------------------------------------------
+// Google Drive backup (manager's own account, browser only).
+//
+// The site never sees a Google secret: the manager signs in with Google
+// Identity Services in this browser and the token stays in memory (it is never
+// written to localStorage). The scope is drive.file, so the app can only touch
+// files it created itself. Rows are written to a Google Sheet named after the
+// salon; the database restore runs through the admin-only RPC
+// public.admin_restore_backup(), which refuses anyone who is not an admin.
+// ---------------------------------------------------------------------------
+const GOOGLE_DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file'
+const GOOGLE_SHEET_MIME = 'application/vnd.google-apps.spreadsheet'
+
+const googleClientId = (() => {
+  const value = String(APP_CONFIG.GOOGLE_CLIENT_ID == null ? '' : APP_CONFIG.GOOGLE_CLIENT_ID).trim()
+  if (!value || value.includes('%%') || /^YOUR[_-]/i.test(value)) return ''
+  return /\.apps\.googleusercontent\.com$/i.test(value) ? value : ''
+})()
+
+const BACKUP_META_KEY = 'salon_google_backup:' + String(APP_CONFIG.SUPABASE_URL || 'local')
+const BACKUP_CHUNK = 200
+
+// One tab per table. password_hash is never exported; settings secrets are
+// filtered out below. Column order drives the sheet header row.
+const BACKUP_TABLES = [
+  {
+    key: 'services',
+    label: 'الخدمات',
+    columns: ['id', 'name_ar', 'name_en', 'price', 'image_url', 'is_active', 'created_at'],
+    order: 'created_at'
+  },
+  {
+    key: 'staff',
+    label: 'الموظفات',
+    columns: ['id', 'name', 'phone', 'commission_rate', 'username', 'login_enabled', 'is_active', 'created_at'],
+    order: 'created_at'
+  },
+  {
+    key: 'appointments',
+    label: 'المواعيد',
+    columns: [
+      'id', 'invoice_no', 'client_name', 'client_phone', 'service_id', 'staff_id',
+      'appointment_date', 'payment_proof', 'status', 'total_price',
+      'commission_amount', 'notes', 'created_at'
+    ],
+    order: 'created_at'
+  },
+  {
+    key: 'expenses',
+    label: 'المصروفات',
+    columns: [
+      'id', 'title', 'amount', 'method', 'notes', 'vendor_name', 'vendor_vat_no',
+      'invoice_no', 'vat_amount', 'staff_id', 'created_by', 'spent_at', 'created_at'
+    ],
+    order: 'created_at'
+  },
+  {
+    key: 'settings',
+    label: 'الإعدادات',
+    columns: ['setting_key', 'setting_value'],
+    order: 'setting_key',
+    exclude: ['staff_app_code_hash', 'evolution_api_key']
+  }
+]
+
+let googleToken = ''
+let googleTokenExpiry = 0
+let googleTokenClient = null
+let googleTokenPending = null
+let backupRunLock = false
+let backupAutoTimer = null
+let restorePayload = null
+
+function hasGoogleToken() {
+  return Boolean(googleToken) && Date.now() < googleTokenExpiry
+}
+
+function waitForGoogleIdentity(timeoutMs) {
+  return new Promise((resolve, reject) => {
+    const started = Date.now()
+    const tick = () => {
+      const api = window.google && window.google.accounts && window.google.accounts.oauth2
+      if (api) { resolve(api); return }
+      if (Date.now() - started > timeoutMs) { reject(new Error('gis_unavailable')); return }
+      setTimeout(tick, 200)
+    }
+    tick()
+  })
+}
+
+// Opens the Google popup once and resolves with a short-lived access token.
+function requestGoogleToken(prompt) {
+  return new Promise((resolve, reject) => {
+    if (hasGoogleToken()) { resolve(googleToken); return }
+    waitForGoogleIdentity(8000).then((oauth2) => {
+      if (!googleTokenClient) {
+        googleTokenClient = oauth2.initTokenClient({
+          client_id: googleClientId,
+          scope: GOOGLE_DRIVE_SCOPE,
+          callback: (resp) => {
+            const pending = googleTokenPending
+            googleTokenPending = null
+            if (!pending) return
+            if (resp && resp.access_token) {
+              googleToken = resp.access_token
+              const lifeMs = Math.max(60, Number(resp.expires_in || 3600)) * 1000
+              googleTokenExpiry = Date.now() + lifeMs - 90000
+              pending.resolve(googleToken)
+            } else {
+              pending.reject(new Error('no_token'))
+            }
+          },
+          error_callback: (err) => {
+            const pending = googleTokenPending
+            googleTokenPending = null
+            if (pending) pending.reject(new Error((err && err.type) || 'oauth_error'))
+          }
+        })
+      }
+      if (googleTokenPending) googleTokenPending.reject(new Error('superseded'))
+      googleTokenPending = { resolve, reject }
+      try {
+        googleTokenClient.requestAccessToken({ prompt: prompt || '' })
+      } catch (error) {
+        googleTokenPending = null
+        reject(new Error((error && error.message) || 'oauth_error'))
+      }
+    }).catch(reject)
+  })
+}
+
+function parseSheetId(value) {
+  const raw = String(value || '').trim()
+  if (!raw) return ''
+  const byPath = raw.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]{20,})/)
+  if (byPath) return byPath[1]
+  const byQuery = raw.match(/[?&]id=([a-zA-Z0-9_-]{20,})/)
+  if (byQuery) return byQuery[1]
+  return /^[a-zA-Z0-9_-]{20,}$/.test(raw) ? raw : ''
+}
+
+async function googleApi(url, options) {
+  if (!hasGoogleToken()) throw new Error('auth')
+  let res
+  try {
+    res = await fetch(url, Object.assign({}, options || {}, {
+      headers: Object.assign(
+        { Authorization: 'Bearer ' + googleToken },
+        (options && options.headers) || {}
+      )
+    }))
+  } catch (_e) {
+    throw new Error('google_network')
+  }
+  if (res.ok) return res
+  if (res.status === 401) {
+    googleToken = ''
+    googleTokenExpiry = 0
+    throw new Error('auth')
+  }
+  if (res.status === 403 || res.status === 404) throw new Error('access')
+  throw new Error('google_' + res.status)
+}
+
+async function googleJson(url, options) {
+  const res = await googleApi(url, options)
+  return res.json()
+}
+
 document.addEventListener('alpine:init', () => {
   Alpine.data('salonApp', () => ({
     lang: 'ar',
@@ -101,6 +270,24 @@ document.addEventListener('alpine:init', () => {
     sheetSyncing: false,
     sheetLog: [],
     sheetLogLoading: false,
+
+    // ---- Google Drive backup & restore (browser OAuth, drive.file) ----
+    backup: {
+      connected: false,
+      connecting: false,
+      running: false,
+      auto: false,
+      lastAt: '',
+      fileId: '',
+      fileUrl: '',
+      error: '',
+      progress: '',
+      reading: false,
+      restoring: false,
+      shareUrl: '',
+      preview: null,
+      restoreError: ''
+    },
 
     // ---- Expenses ----
     expenses: [],
@@ -254,6 +441,7 @@ document.addEventListener('alpine:init', () => {
 
     init() {
       this.lang = localStorage.getItem('salon_lang') || 'ar'
+      this.loadBackupMeta()
       this.applyDir()
       this.resetPublicBooking()
       // admin.html (the link the installer shows) lands on index.html?entry=admin
@@ -507,9 +695,9 @@ document.addEventListener('alpine:init', () => {
       clearTimeout(this.toastTimer)
       this.toastTimer = setTimeout(() => { this.toast.show = false }, 4000)
     },
-    askConfirm(msg) {
+    askConfirm(msg, label) {
       return new Promise(resolve => {
-        this.confirmBox = { open: true, msg, resolve }
+        this.confirmBox = { open: true, msg, label: label || '', resolve }
       })
     },
     confirmYes() {
@@ -788,6 +976,21 @@ document.addEventListener('alpine:init', () => {
       this.waLog = []
       this.sheetLog = []
       this.staffCodeSet = false
+      // Close the Drive session with the admin session; metadata stays so the
+      // last backup link is still visible after signing in again.
+      googleToken = ''
+      googleTokenExpiry = 0
+      restorePayload = null
+      backupRunLock = false
+      clearTimeout(backupAutoTimer)
+      this.backup.connected = false
+      this.backup.preview = null
+      this.backup.shareUrl = ''
+      this.backup.error = ''
+      this.backup.restoreError = ''
+      this.backup.running = false
+      this.backup.reading = false
+      this.backup.restoring = false
       this.loadBase()
       this.loadPublicData()
       this.loadBranding()
@@ -1020,6 +1223,7 @@ document.addEventListener('alpine:init', () => {
         } catch (_e) { /* the WhatsApp button stays hidden without the text */ }
       }
       this.showToast('success', this.t('booking_created'))
+      this.maybeAutoBackup()
       this.resetPos()
       if (this.user) this.loadToday()
     },
@@ -1155,6 +1359,7 @@ document.addEventListener('alpine:init', () => {
       }
       a.status = status
       this.showToast('success', this.t('saved'))
+      this.maybeAutoBackup()
       this.loadToday()
     },
     async deleteAppt(a) {
@@ -1167,6 +1372,7 @@ document.addEventListener('alpine:init', () => {
         return
       }
       this.showToast('success', this.t('deleted'))
+      this.maybeAutoBackup()
       this.loadAppts()
       this.loadToday()
     },
@@ -1225,6 +1431,7 @@ document.addEventListener('alpine:init', () => {
       }
       this.svcModal = false
       this.showToast('success', this.t('saved'))
+      this.maybeAutoBackup()
       this.loadServices()
     },
     async deleteSvc(s) {
@@ -1237,6 +1444,7 @@ document.addEventListener('alpine:init', () => {
         return
       }
       this.showToast('success', this.t('deleted'))
+      this.maybeAutoBackup()
       this.loadServices()
     },
     async toggleSvc(s) {
@@ -1248,6 +1456,7 @@ document.addEventListener('alpine:init', () => {
       }
       s.is_active = !s.is_active
       this.showToast('success', this.t('saved'))
+      this.maybeAutoBackup()
     },
 
     openStfModal(s = null) {
@@ -1345,6 +1554,7 @@ document.addEventListener('alpine:init', () => {
 
       this.stfModal = false
       this.showToast('success', this.t('saved'))
+      this.maybeAutoBackup()
       this.loadStaff()
     },
     async deleteStf(s) {
@@ -1357,6 +1567,7 @@ document.addEventListener('alpine:init', () => {
         return
       }
       this.showToast('success', this.t('deleted'))
+      this.maybeAutoBackup()
       this.loadStaff()
     },
     async toggleStf(s) {
@@ -1368,6 +1579,7 @@ document.addEventListener('alpine:init', () => {
       }
       s.is_active = !s.is_active
       this.showToast('success', this.t('saved'))
+      this.maybeAutoBackup()
     },
 
     async saveSettings() {
@@ -1411,6 +1623,7 @@ document.addEventListener('alpine:init', () => {
         return
       }
       this.showToast('success', this.t('settings_saved'))
+      this.maybeAutoBackup()
       // Refresh the public identity so the header, footer, contact card and
       // social links reflect the new values immediately, without a reload.
       await this.loadBranding()
@@ -1651,6 +1864,372 @@ document.addEventListener('alpine:init', () => {
       if (row.status_code == null) return 'bg-amber-100 text-amber-700'
       return 'bg-rose-100 text-rose-700'
     },
+
+    // -----------------------------------------------------------------------
+    // Google Drive backup & restore
+    // -----------------------------------------------------------------------
+    get backupReady() {
+      return Boolean(googleClientId && sb)
+    },
+
+    loadBackupMeta() {
+      try {
+        const meta = JSON.parse(localStorage.getItem(BACKUP_META_KEY) || '{}') || {}
+        this.backup.auto = Boolean(meta.auto)
+        this.backup.lastAt = typeof meta.lastAt === 'string' ? meta.lastAt : ''
+        this.backup.fileId = typeof meta.fileId === 'string' ? meta.fileId : ''
+        this.backup.fileUrl = typeof meta.fileUrl === 'string' ? meta.fileUrl : ''
+      } catch (_e) { /* private mode */ }
+    },
+
+    saveBackupMeta() {
+      try {
+        localStorage.setItem(BACKUP_META_KEY, JSON.stringify({
+          auto: Boolean(this.backup.auto),
+          lastAt: this.backup.lastAt || '',
+          fileId: this.backup.fileId || '',
+          fileUrl: this.backup.fileUrl || ''
+        }))
+      } catch (_e) { /* private mode */ }
+    },
+
+    setBackupAuto() {
+      this.saveBackupMeta()
+      if (this.backup.auto) this.maybeAutoBackup()
+    },
+
+    backupCounts(counts) {
+      const c = counts || {}
+      return this.t('backup_counts')
+        .replace('{services}', String(c.services || 0))
+        .replace('{staff}', String(c.staff || 0))
+        .replace('{appointments}', String(c.appointments || 0))
+        .replace('{expenses}', String(c.expenses || 0))
+        .replace('{settings}', String(c.settings || 0))
+    },
+
+    backupName() {
+      const name = String(this.settings.salon_name || this.publicInfo.salon_name || appConfigName || 'Salon').trim()
+      return name || 'Salon'
+    },
+
+    backupError(error) {
+      const code = String((error && error.message) || error || '')
+      if (code === 'db_outdated') return this.t('backup_restore_db_outdated')
+      if (code === 'not_admin' || code === 'invalid_payload') return this.t('backup_error_not_admin')
+      if (code === 'empty') return this.t('backup_restore_empty')
+      if (code === 'auth' || code === 'no_token' || code === 'oauth_error' || code === 'superseded') {
+        return this.t('backup_error_auth')
+      }
+      if (code === 'gis_unavailable') return this.t('backup_error_gis')
+      if (code === 'access') return this.t('backup_error_access')
+      if (code === 'db_read' || code === 'restore_failed') return this.t('backup_error_db')
+      if (code.indexOf('google_') === 0) return this.t('backup_error_google')
+      return this.t('backup_failed')
+    },
+
+    async connectGoogle() {
+      if (!this.backupReady) {
+        this.showToast('error', this.t('backup_not_configured'))
+        return
+      }
+      this.backup.connecting = true
+      this.backup.error = ''
+      try {
+        await requestGoogleToken('')
+        this.backup.connected = true
+        this.showToast('success', this.t('backup_connected_toast'))
+      } catch (error) {
+        const code = String((error && error.message) || '')
+        this.backup.error = (code === 'gis_unavailable')
+          ? this.t('backup_error_gis')
+          : (code === 'auth' || code === 'no_token') ? this.t('backup_error_auth') : this.t('backup_signin_cancelled')
+        this.showToast('error', this.backup.error)
+      } finally {
+        this.backup.connecting = false
+      }
+    },
+
+    disconnectGoogle() {
+      try {
+        const api = window.google && window.google.accounts && window.google.accounts.oauth2
+        if (googleToken && api) api.revoke(googleToken, () => {})
+      } catch (_e) { /* ignore */ }
+      googleToken = ''
+      googleTokenExpiry = 0
+      this.backup.connected = false
+      this.showToast('success', this.t('backup_disconnected'))
+    },
+
+    // Read every row of a table, 1000 at a time (PostgREST page size).
+    async selectAllRows(table) {
+      const rows = []
+      const pageSize = 1000
+      for (let from = 0; from < 20000; from += pageSize) {
+        let query = sb
+          .from(table.key)
+          .select(table.columns.join(','))
+          .range(from, from + pageSize - 1)
+        if (table.order) query = query.order(table.order, { ascending: true })
+        const { data, error } = await query
+        if (error) throw new Error('db_read')
+        const page = data || []
+        rows.push(...page)
+        if (page.length < pageSize) break
+      }
+      if (table.exclude && table.exclude.length) {
+        const deny = new Set(table.exclude)
+        return rows.filter(row => !deny.has(row.setting_key))
+      }
+      return rows
+    },
+
+    async ensureBackupSpreadsheet(name) {
+      const query = "name = '" + String(name).replace(/'/g, "\\'") + "' and mimeType = '" +
+        GOOGLE_SHEET_MIME + "' and trashed = false"
+      const url = 'https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(query) +
+        '&fields=' + encodeURIComponent('files(id,name,webViewLink,modifiedTime)') +
+        '&orderBy=' + encodeURIComponent('modifiedTime desc') + '&pageSize=5&spaces=drive'
+      const found = await googleJson(url)
+      const files = (found && found.files) || []
+      if (files.length) {
+        const file = files[0]
+        return {
+          id: file.id,
+          url: file.webViewLink || ('https://docs.google.com/spreadsheets/d/' + file.id + '/edit')
+        }
+      }
+      const created = await googleJson('https://sheets.googleapis.com/v4/spreadsheets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          properties: { title: name, locale: 'ar' },
+          sheets: BACKUP_TABLES.map(table => ({ properties: { title: table.label } }))
+        })
+      })
+      if (!created || !created.spreadsheetId) throw new Error('google_sheet_create')
+      return {
+        id: created.spreadsheetId,
+        url: 'https://docs.google.com/spreadsheets/d/' + created.spreadsheetId + '/edit'
+      }
+    },
+
+    async ensureBackupTabs(id) {
+      const meta = await googleJson('https://sheets.googleapis.com/v4/spreadsheets/' +
+        encodeURIComponent(id) + '?fields=' + encodeURIComponent('sheets.properties(title)'))
+      const have = new Set(((meta && meta.sheets) || []).map(sheet => String((sheet.properties || {}).title || '').trim()))
+      const missing = BACKUP_TABLES.filter(table => !have.has(table.label) && !have.has(table.key))
+      if (!missing.length) return
+      await googleJson('https://sheets.googleapis.com/v4/spreadsheets/' + encodeURIComponent(id) + ':batchUpdate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requests: missing.map(table => ({ addSheet: { properties: { title: table.label } } })) })
+      })
+    },
+
+    sheetRange(title, cells) {
+      return "'" + String(title).replace(/'/g, "''") + "'!" + cells
+    },
+
+    async writeBackupTable(id, table, rows) {
+      const range = this.sheetRange(table.label, 'A1:ZZ')
+      const base = 'https://sheets.googleapis.com/v4/spreadsheets/' + encodeURIComponent(id) + '/values/' +
+        encodeURIComponent(range)
+      // Clears rows left over from an older, longer backup before writing.
+      await googleApi(base + ':clear', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}'
+      })
+      const values = [table.columns.slice()]
+      rows.forEach(row => {
+        values.push(table.columns.map(column => {
+          const value = row[column]
+          return value === undefined || value === null ? '' : value
+        }))
+      })
+      await googleJson(base + '?valueInputOption=RAW', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ range, majorDimension: 'ROWS', values })
+      })
+    },
+
+    async runBackup(silent) {
+      if (!this.backupReady) {
+        if (!silent) this.showToast('error', this.t('backup_not_configured'))
+        return false
+      }
+      if (backupRunLock) return false
+      backupRunLock = true
+      this.backup.running = true
+      this.backup.error = ''
+      this.backup.progress = ''
+      try {
+        await requestGoogleToken('')
+        this.backup.connected = true
+        const file = await this.ensureBackupSpreadsheet(this.backupName())
+        await this.ensureBackupTabs(file.id)
+        for (const table of BACKUP_TABLES) {
+          this.backup.progress = this.t('backup_progress').replace('{table}', table.label)
+          const rows = await this.selectAllRows(table)
+          await this.writeBackupTable(file.id, table, rows)
+        }
+        this.backup.fileId = file.id
+        this.backup.fileUrl = file.url
+        this.backup.lastAt = new Date().toISOString()
+        this.saveBackupMeta()
+        if (!silent) this.showToast('success', this.t('backup_done'))
+        return true
+      } catch (error) {
+        if (String((error && error.message) || '') === 'auth') this.backup.connected = false
+        this.backup.error = this.backupError(error)
+        if (!silent) this.showToast('error', this.backup.error)
+        return false
+      } finally {
+        this.backup.progress = ''
+        this.backup.running = false
+        backupRunLock = false
+      }
+    },
+
+    // Called after a save. Silent: it only runs while the Google session is
+    // still alive, because a background token request would need a popup.
+    maybeAutoBackup() {
+      if (!this.user || !this.backup.auto || !this.backupReady || backupRunLock) return
+      if (!hasGoogleToken()) return
+      clearTimeout(backupAutoTimer)
+      backupAutoTimer = setTimeout(() => {
+        if (hasGoogleToken() && !backupRunLock) this.runBackup(true)
+      }, 15000)
+    },
+
+    async readBackupSheet(id) {
+      const meta = await googleJson('https://sheets.googleapis.com/v4/spreadsheets/' +
+        encodeURIComponent(id) + '?fields=' + encodeURIComponent('sheets.properties(title)'))
+      const titles = new Set(((meta && meta.sheets) || []).map(sheet => String((sheet.properties || {}).title || '').trim()))
+      const tables = {}
+      for (const table of BACKUP_TABLES) {
+        const title = [table.label, table.key].find(name => titles.has(name))
+        if (!title) { tables[table.key] = []; continue }
+        const range = this.sheetRange(title, 'A1:ZZ')
+        const data = await googleJson('https://sheets.googleapis.com/v4/spreadsheets/' +
+          encodeURIComponent(id) + '/values/' + encodeURIComponent(range) +
+          '?majorDimension=ROWS&valueRenderOption=UNFORMATTED_VALUE&dateTimeRenderOption=ISO_8601')
+        tables[table.key] = this.rowsFromSheet(table, (data && data.values) || [])
+      }
+      const counts = {}
+      BACKUP_TABLES.forEach(table => { counts[table.key] = (tables[table.key] || []).length })
+      return { tables, counts }
+    },
+
+    rowsFromSheet(table, values) {
+      if (!values.length) return []
+      const header = (values[0] || []).map(cell => String(cell == null ? '' : cell).trim())
+      const index = {}
+      header.forEach((name, position) => { if (name) index[name] = position })
+      const matched = table.columns.filter(column => Object.prototype.hasOwnProperty.call(index, column))
+      const useHeader = matched.length >= Math.min(3, table.columns.length)
+      const keyColumn = table.key === 'settings' ? 'setting_key' : 'id'
+      const rows = []
+      for (let i = 1; i < values.length; i++) {
+        const line = values[i] || []
+        if (!line.some(cell => cell !== '' && cell !== null)) continue
+        const row = {}
+        table.columns.forEach((column, position) => {
+          const at = useHeader && index[column] != null ? index[column] : position
+          let value = line[at]
+          if (value === undefined || value === null || value === '') value = null
+          else if (typeof value === 'string') value = value.trim()
+          row[column] = value
+        })
+        if (!row[keyColumn]) continue
+        if (table.exclude && table.exclude.includes(row.setting_key)) continue
+        rows.push(row)
+      }
+      return rows
+    },
+
+    async previewRestore() {
+      if (!this.backupReady) {
+        this.showToast('error', this.t('backup_not_configured'))
+        return
+      }
+      const id = parseSheetId(this.backup.shareUrl)
+      if (!id) {
+        this.backup.preview = null
+        this.backup.restoreError = this.t('backup_restore_invalid')
+        return
+      }
+      this.backup.reading = true
+      this.backup.restoreError = ''
+      this.backup.preview = null
+      restorePayload = null
+      try {
+        await requestGoogleToken('')
+        this.backup.connected = true
+        const payload = await this.readBackupSheet(id)
+        const total = Object.keys(payload.counts).reduce((sum, key) => sum + payload.counts[key], 0)
+        if (!total) throw new Error('empty')
+        restorePayload = payload
+        this.backup.preview = payload.counts
+      } catch (error) {
+        this.backup.restoreError = this.backupError(error)
+      } finally {
+        this.backup.reading = false
+      }
+    },
+
+    cancelRestore() {
+      restorePayload = null
+      this.backup.preview = null
+      this.backup.restoreError = ''
+    },
+
+    async pushRestore(tables) {
+      const order = ['services', 'staff', 'appointments', 'expenses', 'settings']
+      for (const key of order) {
+        const rows = tables[key] || []
+        for (let start = 0; start < rows.length; start += BACKUP_CHUNK) {
+          const payload = {}
+          payload[key] = rows.slice(start, start + BACKUP_CHUNK)
+          const { error } = await sb.rpc('admin_restore_backup', { p_payload: payload })
+          if (!error) continue
+          const message = String((error && error.message) || '')
+          if (error.code === 'PGRST202' || /could not find the function|schema cache/i.test(message)) {
+            throw new Error('db_outdated')
+          }
+          if (/not_admin/i.test(message)) throw new Error('not_admin')
+          if (/invalid_payload/i.test(message)) throw new Error('not_admin')
+          throw new Error('restore_failed')
+        }
+      }
+    },
+
+    async confirmRestore() {
+      if (!restorePayload) return
+      const confirmed = await this.askConfirm(
+        this.t('backup_restore_confirm').replace('{summary}', this.backupCounts(restorePayload.counts)),
+        this.t('backup_restore_apply')
+      )
+      if (!confirmed) return
+      this.backup.restoring = true
+      this.backup.restoreError = ''
+      try {
+        await this.pushRestore(restorePayload.tables)
+        restorePayload = null
+        this.backup.preview = null
+        this.backup.shareUrl = ''
+        this.showToast('success', this.t('backup_restore_done'))
+        await this.refreshAfterAuth()
+      } catch (error) {
+        this.backup.restoreError = this.backupError(error)
+        this.showToast('error', this.backup.restoreError)
+      } finally {
+        this.backup.restoring = false
+      }
+    },
+
     async copySheetScript() {
       const code = this.sheetScript
       try {
@@ -1931,6 +2510,7 @@ function writeExpense_(ss, data) {
         return
       }
       this.showToast('success', this.t('expense_saved'))
+      this.maybeAutoBackup()
       this.expenseForm = {
         title: '', amount: '', method: f.method, notes: '', spent_at: f.spent_at,
         vendor_name: '', vendor_vat_no: '', invoice_no: '', vat_amount: ''
@@ -1947,6 +2527,7 @@ function writeExpense_(ss, data) {
         return
       }
       this.showToast('success', this.t('expense_deleted'))
+      this.maybeAutoBackup()
       await this.loadExpenses()
     },
 

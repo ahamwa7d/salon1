@@ -40,13 +40,15 @@ export function normalizeKey(value) {
   return ''
 }
 
-export function configSource({ url, anonKey, salonName }) {
+export function configSource({ url, anonKey, salonName, googleClientId }) {
   const name = String(salonName || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+  const google = String(googleClientId || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"')
   return '// Generated for THIS deployment by `npm run configure` — do not commit.\n' +
     'window.APP_CONFIG = {\n' +
     '  SUPABASE_URL: "' + url + '",\n' +
     '  SUPABASE_ANON_KEY: "' + anonKey + '",\n' +
-    '  SALON_NAME: "' + name + '"\n' +
+    '  SALON_NAME: "' + name + '",\n' +
+    '  GOOGLE_CLIENT_ID: "' + google + '"\n' +
     '};\n'
 }
 
@@ -54,6 +56,11 @@ function decodedName(source) {
   const match = String(source || '').match(/SALON_NAME:\s*"((?:\\\\.|[^"\\\\])*)"/)
   if (!match) return ''
   return match[1].replace(/\\\\/g, '\\').replace(/\\"/g, '"')
+}
+
+function decodedGoogleId(source) {
+  const match = String(source || '').match(/GOOGLE_CLIENT_ID:\s*"([^"]*)"/)
+  return match ? match[1] : ''
 }
 
 async function main() {
@@ -77,8 +84,9 @@ async function main() {
 
     const previous = await readFile(configPath, 'utf8').catch(() => '')
     const salonName = await ask('اسم الصالون (اختياري — Enter للإبقاء): ', decodedName(previous))
+    const googleClientId = await ask('Google OAuth Client ID للنسخ الاحتياطي (اختياري — Enter للإبقاء): ', decodedGoogleId(previous))
     const changed = !previous.includes('SUPABASE_URL: "' + url + '"') || !previous.includes('SUPABASE_ANON_KEY: "' + key + '"')
-    await writeFile(configPath, configSource({ url, anonKey: key, salonName }), 'utf8')
+    await writeFile(configPath, configSource({ url, anonKey: key, salonName, googleClientId }), 'utf8')
 
     console.log('\n✅ تم تحديث config.js')
     console.log('   ' + url)

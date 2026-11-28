@@ -100,9 +100,13 @@ clients/<slug>/
 window.APP_CONFIG = {
   SUPABASE_URL: 'https://<project-ref>.supabase.co',
   SUPABASE_ANON_KEY: '<publishable / anon key>',
-  SALON_NAME: '<اسم الصالون>'
+  SALON_NAME: '<اسم الصالون>',
+  GOOGLE_CLIENT_ID: '<oauth client id>.apps.googleusercontent.com'
 }
 ```
+
+`GOOGLE_CLIENT_ID` اختياري ويُفعّل النسخ الاحتياطي إلى Google Drive من لوحة الإدارة. هو معرّف عام
+(OAuth client ID) وليس سرًّا؛ اتركه فارغًا إن لم تُفعّل الميزة.
 
 لإنشائه تلقائيًا:
 
@@ -110,8 +114,8 @@ window.APP_CONFIG = {
 npm run configure
 ```
 
-يسألك عن **Project URL** (أو الـ ref فقط) و**publishable / anon key** واسم الصالون، يتحقق منها، ثم يكتب
-`config.js` في جذر المشروع. يرفض `service_role` لأنه يتجاوز كل سياسات RLS.
+يسألك عن **Project URL** (أو الـ ref فقط) و**publishable / anon key** واسم الصالون و**Google OAuth Client ID**
+(اختياري)، يتحقق منها، ثم يكتب `config.js` في جذر المشروع. يرفض `service_role` لأنه يتجاوز كل سياسات RLS.
 
 > لا حاجة لـ `git checkout` بعد الآن: `config.js` مستثنى في `.gitignore` ولم يعد هناك `js/config.js`.
 

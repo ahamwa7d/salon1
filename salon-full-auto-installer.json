@@ -101,6 +101,12 @@
               "name": "organization_id",
               "value": "",
               "type": "string"
+            },
+            {
+              "id": "14",
+              "name": "google_client_id",
+              "value": "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com",
+              "type": "string"
             }
           ]
         },
@@ -660,7 +666,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const raw = $items('8. Get Project API Keys').map((item) => item.json);\nconst list = Array.isArray(raw[0]) ? raw[0] : raw;\nconst findKey = (name) => {\n  const row = list.find((k) => k && k.name === name);\n  return row ? (row.api_key || row.apiKey || '') : '';\n};\nconst anonKey = findKey('anon') || findKey('publishable');\nconst serviceRoleKey = findKey('service_role') || findKey('secret');\nconst projectRef = $('6. Create Supabase Project').item.json.id;\nconst slug = $('Webhook Trigger').item.json.body.salon_slug;\nconst ghUser = $('2. Get GitHub Username').item.json.login;\nconst displayName = slug.split('-').filter(Boolean).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');\nconst siteUrl = `https://${ghUser}.github.io/${slug}/`;\nconst adminUrl = `${siteUrl}admin.html`;\nconst supabaseUrl = `https://${projectRef}.supabase.co`;\nconst configContent = `window.APP_CONFIG = {\\n  SUPABASE_URL: \"${supabaseUrl}\",\\n  SUPABASE_ANON_KEY: \"${anonKey}\",\\n  SALON_NAME: \"${displayName}\"\\n};\\n`;\nlet rawPhone = String($('Webhook Trigger').item.json.body.whatsapp || '').replace(/\\D/g, '');\nif (rawPhone.length === 8) rawPhone = '973' + rawPhone;\nif (!anonKey) {\n  throw new Error('The new Supabase project did not return an anon/publishable key');\n}\nreturn [{ json: { base64Config: Buffer.from(configContent).toString('base64'), projectRef, supabaseUrl, anonKey, serviceRoleKey, siteUrl, adminUrl, displayName, cleanPhone: rawPhone } }];"
+        "jsCode": "const raw = $items('8. Get Project API Keys').map((item) => item.json);\nconst list = Array.isArray(raw[0]) ? raw[0] : raw;\nconst findKey = (name) => {\n  const row = list.find((k) => k && k.name === name);\n  return row ? (row.api_key || row.apiKey || '') : '';\n};\nconst anonKey = findKey('anon') || findKey('publishable');\nconst serviceRoleKey = findKey('service_role') || findKey('secret');\nconst projectRef = $('6. Create Supabase Project').item.json.id;\nconst slug = $('Webhook Trigger').item.json.body.salon_slug;\nconst ghUser = $('2. Get GitHub Username').item.json.login;\nconst displayName = slug.split('-').filter(Boolean).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');\nconst siteUrl = `https://${ghUser}.github.io/${slug}/`;\nconst adminUrl = `${siteUrl}admin.html`;\nconst supabaseUrl = `https://${projectRef}.supabase.co`;\nconst googleClientId = String($('Config Variables').item.json.google_client_id || '').trim();\nconst configContent = `window.APP_CONFIG = {\\n  SUPABASE_URL: \"${supabaseUrl}\",\\n  SUPABASE_ANON_KEY: \"${anonKey}\",\\n  SALON_NAME: \"${displayName}\",\\n  GOOGLE_CLIENT_ID: \"${googleClientId}\"\\n};\\n`;\nlet rawPhone = String($('Webhook Trigger').item.json.body.whatsapp || '').replace(/\\D/g, '');\nif (rawPhone.length === 8) rawPhone = '973' + rawPhone;\nif (!anonKey) {\n  throw new Error('The new Supabase project did not return an anon/publishable key');\n}\nreturn [{ json: { base64Config: Buffer.from(configContent).toString('base64'), projectRef, supabaseUrl, anonKey, serviceRoleKey, siteUrl, adminUrl, displayName, cleanPhone: rawPhone, googleClientId } }];"
       },
       "id": "prepare-all",
       "name": "12. Prepare Config & Keys",
