@@ -93,6 +93,13 @@ async function main() {
 
     const siteUrl = await ask('\nرابط موقع العميل (اتركه فارغًا الآن إن لم يكن جاهزًا): ', '')
 
+    // Optional: enables the browser-side Drive backup in Admin → Backup.
+    // This is a public OAuth client ID, never a secret.
+    const googleClientId = await ask(
+      '\nGoogle OAuth Client ID للنسخ الاحتياطي (اختياري — Enter للتخطي): ',
+      process.env.GOOGLE_CLIENT_ID || ''
+    )
+
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'client'
     console.log('\n--- ملخص ---')
     line('المنظمة', organization.name || organization.slug || organization.id)
@@ -117,6 +124,7 @@ async function main() {
       adminEmail,
       adminPassword,
       siteUrl,
+      googleClientId,
       root,
       clientsDir,
       sql,
